@@ -1,5 +1,5 @@
 /**
- * OSINT A-Grade Platform - Complete JavaScript
+ * EASINT - Complete JavaScript
  * All 18 tools with proper handlers
  */
 

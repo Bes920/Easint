@@ -1,5 +1,5 @@
 """
-OSINT A-Grade Platform - Professional Intelligence Toolkit
+EASINT - Professional Intelligence Toolkit
 Enhanced with file uploads, ExifTool, Google Dorking, and advanced features
 """
 
@@ -45,7 +45,7 @@ VIRUSTOTAL_API_KEY = os.getenv('VIRUSTOTAL_API_KEY', 'YOUR_API_KEY_HERE')
 ABUSEIPDB_API_KEY = os.getenv('ABUSEIPDB_API_KEY', 'YOUR_API_KEY_HERE')
 HIBP_API_KEY = os.getenv('HIBP_API_KEY', 'YOUR_API_KEY_HERE')
 
-# Optional APIs for A-grade features
+# Optional APIs for advanced features
 SHODAN_API_KEY = os.getenv('SHODAN_API_KEY', 'YOUR_API_KEY_HERE')
 HUNTER_API_KEY = os.getenv('HUNTER_API_KEY', 'YOUR_API_KEY_HERE')
 BLOCKCHAIN_API_KEY = os.getenv('BLOCKCHAIN_API_KEY', 'YOUR_API_KEY_HERE')
@@ -216,7 +216,7 @@ def google_dork():
 
 
 # =============================================================================
-# NEW A-GRADE TOOLS
+# ADVANCED TOOLS
 # =============================================================================
 
 @app.route('/shodan-search', methods=['POST'])
