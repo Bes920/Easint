@@ -1,53 +1,33 @@
-# 🎓 OSINT A-GRADE PLATFORM - Defense-Ready Intelligence Toolkit
+# 🔍 **EASINT** - Professional OSINT Intelligence Platform
 
-## 🏆 **Built for Academic Defense Excellence**
+> **18+ Investigation Tools | Production-Ready | Built for Security Researchers & Academic Defense**
 
-This is a **professional-grade OSINT platform** with **18+ investigation tools**, designed to impress defense committees with real-world capabilities, security features, and professional implementation.
+A **professional-grade Open Source Intelligence (OSINT) platform** with advanced investigation tools. Designed for cybersecurity professionals, researchers, and students who need to gather intelligence quickly and efficiently.
 
 ---
 
-## ✨ **What Makes This A-Grade**
+## ✨ **Key Features**
 
-### **📤 File Upload & Analysis**
-- Upload ANY file (up to 32MB)
-- Automatic MD5 & SHA256 hash calculation
-- Instant VirusTotal malware scanning
-- No manual hash copy/paste needed
+| Feature | Description |
+|---------|-------------|
+| 📤 **File Upload & Scanning** | Upload files (up to 32MB) → Auto MD5/SHA256 → VirusTotal malware check |
+| 📸 **Metadata Extraction** | Extract EXIF from images, PDFs, documents (GPS, camera info, etc.) |
+| 🔎 **Google Dorking** | Auto-generate advanced Google search queries in 4 categories |
+| 🌐 **IP Intelligence** | Check IP reputation via AbuseIPDB + VirusTotal (dual verification) |
+| 🗺️ **Geolocation** | Pinpoint IP location, ISP, country information |
+| 🔄 **Reverse IP** | Find all domains hosted on a specific IP address |
+| 📧 **Email OSINT** | Validate emails, check MX records, breaches |
+| 🏢 **Domain Info** | WHOIS lookup, DNS records, SSL certificates |
+| 🔍 **Subdomain Finder** | Enumerate subdomains of target domain |
+| 📸 **Wayback Machine** | Check historical website snapshots |
+| 👤 **Username Search** | Find social media accounts across 10+ platforms |
+| 🖥️ **Mac Lookup** | Identify device vendors by MAC address |
+| 💾 **Export Results** | Download findings as JSON for reports |
+| 🧹 **Clean Interface** | Professional dark theme, easy navigation |
 
-### **📸 ExifTool Integration**
-- Extract metadata from images, PDFs, documents
-- GPS coordinates from photos
-- Camera model, timestamps, software used
-- Full EXIF data extraction
+---
 
-### **🔎 Google Dorking Generator**
-- Automated advanced Google search queries
-- 4 categories: General, Sensitive, Social, Documents
-- One-click Google search links
-- Professional OSINT reconnaissance
 
-### **🔄 Multi-Source Verification**
-- IP checked through BOTH AbuseIPDB AND VirusTotal
-- Dual-source validation for accuracy
-- Compare results from multiple databases
-
-### **🌐 Advanced Network Tools**
-- **Reverse IP Lookup** - Find all domains on an IP
-- **MAC Address Lookup** - Identify device vendors
-- **Wayback Machine** - Historical website snapshots
-- **Email OSINT** - Comprehensive email validation
-
-### **₿ Cryptocurrency Tracking**
-- Bitcoin/Ethereum wallet lookup (template ready)
-- Transaction tracking capability
-- Blockchain intelligence
-
-### **💾 Results Export**
-- Export all findings to JSON
-- Professional investigation reports
-- Easy data preservation
-
-### **🧹 Clean UX**
 - Results clear when switching tools
 - No confusing leftover data
 - Professional investigation workflow
@@ -86,33 +66,178 @@ This is a **professional-grade OSINT platform** with **18+ investigation tools**
 
 ---
 
-## 🚀 **Quick Start**
+## 🚀 **Quick Start (5 Minutes)**
 
-### **Installation:**
+### **📋 Prerequisites**
+- Python 3.8+
+- Git
+- pip (Python package manager)
+- Optional: ExifTool for metadata extraction
+
+### **⬇️ Step 1: Clone & Setup**
 
 ```bash
-# 1. Install dependencies
+# Clone the repository
+git clone git@github.com:Bes920/Easint.git
+cd Easint
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# On Linux/macOS:
+source venv/bin/activate
+# On Windows:
+venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
-
-# 2. (Optional) Install ExifTool for full metadata extraction
-# macOS: brew install exiftool
-# Linux: sudo apt-get install exiftool  
-# Windows: Download from exiftool.org
-
-# 3. Run the application
-python app.py
-
-# 4. Open browser
-# http://localhost:5000
 ```
 
-### **API Keys (3 Required for Full Functionality):**
+### **🔑 Step 2: Configure API Keys**
 
-1. **VirusTotal** - https://www.virustotal.com/gui/join-us
-2. **AbuseIPDB** - https://www.abuseipdb.com/register
-3. **HIBP** - https://haveibeenpwned.com/API/Key
+1. **Copy the example configuration:**
+```bash
+cp .env.example .env
+```
 
-Add keys to `app.py` lines 35-45.
+2. **Edit `.env` file and add your API keys:**
+```
+VIRUSTOTAL_API_KEY=your_key_here
+ABUSEIPDB_API_KEY=your_key_here
+HIBP_API_KEY=your_key_here
+SHODAN_API_KEY=your_key_here
+```
+
+**Get Free API Keys:**
+- 🔴 **VirusTotal** → https://www.virustotal.com/gui/join-us (free tier)
+- 🟡 **AbuseIPDB** → https://www.abuseipdb.com/register (free tier)
+- 🔵 **HIBP** → https://haveibeenpwned.com/API/Key (free tier)
+- 🟠 **Shodan** → https://account.shodan.io/ (optional)
+
+### **📸 Step 3: (Optional) Install ExifTool**
+
+For full metadata extraction from files:
+
+```bash
+# macOS
+brew install exiftool
+
+# Linux (Debian/Ubuntu)
+sudo apt-get install exiftool
+
+# Linux (Fedora)
+sudo dnf install perl-Image-ExifTool
+
+# Windows
+# Download from: https://exiftool.org/
+```
+
+### **▶️ Step 4: Run the Application**
+
+```bash
+# Make sure your virtual environment is activated
+source venv/bin/activate  # Linux/macOS
+# or
+venv\Scripts\activate     # Windows
+
+# Start the application
+python app.py
+```
+
+**Output:**
+```
+ * Running on http://127.0.0.1:5000
+ * Press CTRL+C to quit
+```
+
+### **🌐 Step 5: Open in Browser**
+
+Visit: **http://localhost:5000** 🎉
+
+---
+
+## 📖 **How It Works**
+
+### **What is OSINT?**
+Open Source Intelligence (OSINT) is gathering information from publicly available sources. This platform automates 18+ common investigation techniques:
+
+### **Investigation Workflow:**
+```
+1. Input (Domain/IP/Email/File)
+   ↓
+2. Intelligence Gathering (Query APIs, DNS, etc.)
+   ↓
+3. Analysis (Check reputation, find links, extract data)
+   ↓
+4. Results (Display findings, export to JSON)
+```
+
+### **Example: Domain Investigation**
+```
+You search: example.com
+↓
+Platform performs:
+  • WHOIS lookup (owner info)
+  • DNS records (mail servers, nameservers)
+  • SSL certificate analysis
+  • Subdomain enumeration
+  • Wayback Machine snapshots
+  • Reverse IP lookup
+↓
+View all connections & export report
+```
+
+---
+
+## ⚙️ **Troubleshooting**
+
+### **Issue: "ModuleNotFoundError: No module named 'flask'"**
+```bash
+# Make sure virtual environment is activated
+source venv/bin/activate  # Linux/macOS
+venv\Scripts\activate     # Windows
+
+# Then install dependencies
+pip install -r requirements.txt
+```
+
+### **Issue: "API Key Error" or "Demo Mode"**
+- ✅ Verify `.env` file exists in project root
+- ✅ Check API key format is correct (no spaces)
+- ✅ Restart the application after adding keys
+- ✅ Verify the app is loading from `.env` (check terminal output)
+
+### **Issue: ExifTool Not Found**
+```bash
+# Install ExifTool (optional but recommended)
+# macOS:
+brew install exiftool
+
+# Linux:
+sudo apt-get install exiftool
+
+# Windows:
+# Download: https://exiftool.org/
+```
+
+### **Issue: Port 5000 Already In Use**
+```bash
+# Change port in app.py or run on different port:
+python -c "import app; app.app.run(port=5001)"
+```
+
+### **Issue: Database/File Upload Errors**
+- ✅ Ensure `uploads/` folder exists
+- ✅ Check folder permissions: `chmod 755 uploads/`
+- ✅ Verify disk space available
+- ✅ Check file size doesn't exceed 32MB limit
+
+### **Issue: DNS/Network Errors**
+- ✅ Check internet connectivity: `ping google.com`
+- ✅ Verify API endpoints are accessible
+- ✅ Check firewall/proxy settings
+- ✅ Try again later (API temporary outage)
 
 ---
 
@@ -343,5 +468,4 @@ A: Generates advanced search operators (site:, filetype:, inurl:) for targeted r
 
 **Built with dedication for academic excellence! 🎓🔍**
 
-**Go get that A! 🏆**
-# Easint
+**Ready to investigate? Visit http://localhost:5000** 🚀
