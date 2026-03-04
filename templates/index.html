@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSINT A-Grade Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍Easint</h1>
+            <p class="subtitle">Professional Intelligence & Investigation Toolkit</p>
+        </header>
+
+        <div class="disclaimer">
+            ⚠️ <strong>Legal:</strong> Authorized security research and educational purposes only.
+        </div>
+
+        <div class="main-layout">
+            <aside class="sidebar">
+    
+            <a href="/opsec" class="opsec-academy-btn">
+        <span class="btn-icon">🛡️</span>
+        <span class="btn-text">OPSEC </span>
+        <span class="btn-arrow">→</span>
+    </a>
+    
+    <h3>🧭 Tools</h3>
+                <nav class="tool-menu">
+
+                    <div class="menu-section">
+                        <h4>File Analysis</h4>
+                        <button class="menu-item active" data-tool="file-upload"><span class="icon">📤</span> File Upload</button>
+                        <button class="menu-item" data-tool="hash-checker"><span class="icon">🔐</span> Hash Check</button>
+                        <button class="menu-item" data-tool="exif-tool"><span class="icon">📸</span> ExifTool</button>
+                    </div>
+                    <div class="menu-section">
+                        <h4>Network</h4>
+                        <button class="menu-item" data-tool="ip-checker"><span class="icon">📍</span> IP Reputation</button>
+                        <button class="menu-item" data-tool="geo-lookup"><span class="icon">🌍</span> Geolocation</button>
+                        <button class="menu-item" data-tool="reverse-ip"><span class="icon">🔄</span> Reverse IP</button>
+                        <button class="menu-item" data-tool="mac-lookup"><span class="icon">💳</span> MAC Lookup</button>
+                    </div>
+                    <div class="menu-section">
+                        <h4>Domain</h4>
+                        <button class="menu-item" data-tool="whois-lookup"><span class="icon">📋</span> WHOIS</button>
+                        <button class="menu-item" data-tool="dns-lookup"><span class="icon">🌐</span> DNS</button>
+                        <button class="menu-item" data-tool="subdomain-enum"><span class="icon">🔗</span> Subdomains</button>
+                        <button class="menu-item" data-tool="ssl-info"><span class="icon">🔒</span> SSL</button>
+                        <button class="menu-item" data-tool="wayback-machine"><span class="icon">⏰</span> Wayback</button>
+                    </div>
+                    <div class="menu-section">
+                        <h4>People</h4>
+                        <button class="menu-item" data-tool="email-osint"><span class="icon">📧</span> Email OSINT</button>
+                        <button class="menu-item" data-tool="email-breach"><span class="icon">🚨</span> Breach Check</button>
+                        <button class="menu-item" data-tool="username-search"><span class="icon">👤</span> Username</button>
+                    </div>
+                    <div class="menu-section">
+                        <h4>Advanced</h4>
+                        <button class="menu-item" data-tool="google-dork"><span class="icon">🔎</span> Google Dork</button>
+                        <button class="menu-item" data-tool="crypto-tracker"><span class="icon">₿</span> Crypto</button>
+                    </div>
+                </nav>
+            </aside>
+
+            <main class="content-area">
+                <!-- File Upload Tool -->
+                <div id="file-upload" class="tool-panel active">
+                    <div class="tool-header">
+                        <h2>📤 File Upload & Hash Analysis</h2>
+                        <p>Upload a file to calculate hashes and check with VirusTotal</p>
+                    </div>
+                    <form class="tool-form" id="fileUploadForm" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="fileInput">Select File:</label>
+                            <input type="file" id="fileInput" required>
+                            <small>Max size: 32MB | All file types supported</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Upload & Analyze
+                        </button>
+                    </form>
+                    <div id="fileUploadResults" class="results hidden"></div>
+                </div>
+
+                <!-- Hash Checker -->
+                <div id="hash-checker" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>🔐 File Hash Lookup</h2>
+                        <p>Check a file hash against VirusTotal database</p>
+                    </div>
+                    <form class="tool-form" id="hashForm">
+                        <div class="form-group">
+                            <label for="hashInput">File Hash (MD5, SHA1, SHA256):</label>
+                            <input type="text" id="hashInput" placeholder="44d88612fea8a8f36de82e1278abb02f" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Check Hash
+                        </button>
+                    </form>
+                    <div id="hashResults" class="results hidden"></div>
+                </div>
+
+                <!-- ExifTool -->
+                <div id="exif-tool" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>📸 ExifTool - Metadata Extraction</h2>
+                        <p>Extract metadata from images and files</p>
+                    </div>
+                    <form class="tool-form" id="exifForm" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="exifFileInput">Select File:</label>
+                            <input type="file" id="exifFileInput" accept="image/*,.pdf,.doc,.docx" required>
+                            <small>Supported: Images, PDF, Documents</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Extract Metadata
+                        </button>
+                    </form>
+                    <div id="exifResults" class="results hidden"></div>
+                </div>
+
+                <!-- IP Checker (Enhanced with VirusTotal) -->
+                <div id="ip-checker" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>📍 IP Reputation Checker (Multi-Source)</h2>
+                        <p>Check IP with AbuseIPDB AND VirusTotal</p>
+                    </div>
+                    <form class="tool-form" id="ipForm">
+                        <div class="form-group">
+                            <label for="ipInput">IP Address:</label>
+                            <input type="text" id="ipInput" placeholder="8.8.8.8" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Check IP
+                        </button>
+                    </form>
+                    <div id="ipResults" class="results hidden"></div>
+                </div>
+
+                <!-- Google Dorking -->
+                <div id="google-dork" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>🔎 Google Dorking Generator</h2>
+                        <p>Generate advanced Google search queries for OSINT</p>
+                    </div>
+                    <form class="tool-form" id="dorkForm">
+                        <div class="form-group">
+                            <label for="dorkTarget">Target (Domain/Name):</label>
+                            <input type="text" id="dorkTarget" placeholder="example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dorkType">Dork Category:</label>
+                            <select id="dorkType" class="form-select">
+                                <option value="general">General</option>
+                                <option value="sensitive">Sensitive Files</option>
+                                <option value="social">Social Media</option>
+                                <option value="documents">Documents</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Generate Dorks
+                        </button>
+                    </form>
+                    <div id="dorkResults" class="results hidden"></div>
+                </div>
+
+                <!-- Reverse IP -->
+                <div id="reverse-ip" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>🔄 Reverse IP Lookup</h2>
+                        <p>Find all domains hosted on an IP address</p>
+                    </div>
+                    <form class="tool-form" id="reverseIpForm">
+                        <div class="form-group">
+                            <label for="reverseIpInput">IP Address:</label>
+                            <input type="text" id="reverseIpInput" placeholder="8.8.8.8" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Find Domains
+                        </button>
+                    </form>
+                    <div id="reverseIpResults" class="results hidden"></div>
+                </div>
+
+                <!-- Email OSINT -->
+                <div id="email-osint" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>📧 Email OSINT</h2>
+                        <p>Comprehensive email investigation and validation</p>
+                    </div>
+                    <form class="tool-form" id="emailOsintForm">
+                        <div class="form-group">
+                            <label for="emailOsintInput">Email Address:</label>
+                            <input type="email" id="emailOsintInput" placeholder="user@example.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Investigate Email
+                        </button>
+                    </form>
+                    <div id="emailOsintResults" class="results hidden"></div>
+                </div>
+
+                <!-- Wayback Machine -->
+                <div id="wayback-machine" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>⏰ Wayback Machine</h2>
+                        <p>Find historical snapshots of websites</p>
+                    </div>
+                    <form class="tool-form" id="waybackForm">
+                        <div class="form-group">
+                            <label for="waybackInput">URL:</label>
+                            <input type="text" id="waybackInput" placeholder="https://example.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Check Archives
+                        </button>
+                    </form>
+                    <div id="waybackResults" class="results hidden"></div>
+                </div>
+
+                <!-- MAC Lookup -->
+                <div id="mac-lookup" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>💳 MAC Address Lookup</h2>
+                        <p>Identify device vendor from MAC address</p>
+                    </div>
+                    <form class="tool-form" id="macForm">
+                        <div class="form-group">
+                            <label for="macInput">MAC Address:</label>
+                            <input type="text" id="macInput" placeholder="00:1A:2B:3C:4D:5E" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Lookup Vendor
+                        </button>
+                    </form>
+                    <div id="macResults" class="results hidden"></div>
+                </div>
+
+                <!-- Crypto Tracker -->
+                <div id="crypto-tracker" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>₿ Cryptocurrency Tracker</h2>
+                        <p>Track Bitcoin/Ethereum wallet addresses</p>
+                    </div>
+                    <form class="tool-form" id="cryptoForm">
+                        <div class="form-group">
+                            <label for="cryptoInput">Wallet Address:</label>
+                            <input type="text" id="cryptoInput" placeholder="1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cryptoType">Cryptocurrency:</label>
+                            <select id="cryptoType" class="form-select">
+                                <option value="btc">Bitcoin (BTC)</option>
+                                <option value="eth">Ethereum (ETH)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Track Wallet
+                        </button>
+                    </form>
+                    <div id="cryptoResults" class="results hidden"></div>
+                </div>
+
+                <!-- EXISTING TOOLS FROM PREVIOUS VERSION -->
+                <div id="geo-lookup" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>🌍 IP Geolocation</h2>
+                        <p>Get geographic location of IP address</p>
+                    </div>
+                    <form class="tool-form" id="geoForm">
+                        <div class="form-group">
+                            <label for="geoInput">IP Address:</label>
+                            <input type="text" id="geoInput" placeholder="8.8.8.8" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Geolocate
+                        </button>
+                    </form>
+                    <div id="geoResults" class="results hidden"></div>
+                </div>
+
+                <div id="whois-lookup" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>📋 WHOIS Lookup</h2>
+                        <p>Domain registration information</p>
+                    </div>
+                    <form class="tool-form" id="whoisForm">
+                        <div class="form-group">
+                            <label for="whoisInput">Domain:</label>
+                            <input type="text" id="whoisInput" placeholder="example.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Lookup
+                        </button>
+                    </form>
+                    <div id="whoisResults" class="results hidden"></div>
+                </div>
+
+                <div id="email-breach" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>🚨 Email Breach Check</h2>
+                        <p>Check if email in data breaches</p>
+                    </div>
+                    <form class="tool-form" id="emailForm">
+                        <div class="form-group">
+                            <label for="emailInput">Email:</label>
+                            <input type="email" id="emailInput" placeholder="user@example.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Check
+                        </button>
+                    </form>
+                    <div id="emailResults" class="results hidden"></div>
+                </div>
+
+                <div id="username-search" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>👤 Username Search</h2>
+                        <p>Find accounts across platforms</p>
+                    </div>
+                    <form class="tool-form" id="usernameForm">
+                        <div class="form-group">
+                            <label for="usernameInput">Username:</label>
+                            <input type="text" id="usernameInput" placeholder="johndoe" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Search
+                        </button>
+                    </form>
+                    <div id="usernameResults" class="results hidden"></div>
+                </div>
+
+                <div id="subdomain-enum" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>🔗 Subdomain Finder</h2>
+                        <p>Discover subdomains</p>
+                    </div>
+                    <form class="tool-form" id="subdomainForm">
+                        <div class="form-group">
+                            <label for="subdomainInput">Domain:</label>
+                            <input type="text" id="subdomainInput" placeholder="example.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Find
+                        </button>
+                    </form>
+                    <div id="subdomainResults" class="results hidden"></div>
+                </div>
+
+                <div id="dns-lookup" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>🌐 DNS Records</h2>
+                        <p>All DNS record types</p>
+                    </div>
+                    <form class="tool-form" id="dnsForm">
+                        <div class="form-group">
+                            <label for="dnsInput">Domain:</label>
+                            <input type="text" id="dnsInput" placeholder="example.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Lookup
+                        </button>
+                    </form>
+                    <div id="dnsResults" class="results hidden"></div>
+                </div>
+
+                <div id="ssl-info" class="tool-panel">
+                    <div class="tool-header">
+                        <h2>🔒 SSL Certificate</h2>
+                        <p>Certificate information</p>
+                    </div>
+                    <form class="tool-form" id="sslForm">
+                        <div class="form-group">
+                            <label for="sslInput">Domain:</label>
+                            <input type="text" id="sslInput" placeholder="example.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">🔍</span> Check
+                        </button>
+                    </form>
+                    <div id="sslResults" class="results hidden"></div>
+                </div>
+
+            </main>
+        </div>
+
+        <footer>
+            <p>OSINT A-Grade Platform | Professional Intelligence Toolkit | Use Responsibly & Ethically</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

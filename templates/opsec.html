@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easint — OSINT</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/opsec.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER - Changed to just "OSINT" -->
+        <header>
+            <h1>⬡ Easint — OSINT</h1>
+            <p class="subtitle">Operational Security · Digital Privacy · Threat Awareness</p>
+        </header>
+
+        <!-- Back to tools navigation -->
+        <div class="breadcrumb-nav">
+            <a href="/" class="back-link">← Back to Tools</a>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="opsec-progress">
+            <div class="progress-stats">
+                <div class="stat-card">
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">Modules</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Techniques</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">30+</div>
+                    <div class="stat-label">Resources</div>
+                </div>
+            </div>
+            <div class="progress-container">
+                <span class="progress-text">Your Progress:</span>
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="progressBar"></div>
+                </div>
+                <span class="progress-percent" id="progressPercent">0%</span>
+            </div>
+        </div>
+
+        <!-- Main Layout: Sidebar + Content -->
+        <div class="main-layout">
+            <!-- Sidebar TOC -->
+            <aside class="sidebar">
+                <h3>📚 Modules</h3>
+                <nav class="opsec-toc">
+                    <a href="#module1" class="toc-item" onclick="scrollToModule('module1')">
+                        <span class="toc-num">01</span> Types of Leakage
+                    </a>
+                    <a href="#module2" class="toc-item" onclick="scrollToModule('module2')">
+                        <span class="toc-num">02</span> Hardened Security
+                    </a>
+                    <a href="#module3" class="toc-item" onclick="scrollToModule('module3')">
+                        <span class="toc-num">03</span> Anonymizers
+                    </a>
+                    <a href="#module4" class="toc-item" onclick="scrollToModule('module4')">
+                        <span class="toc-num">04</span> Browser OPSEC
+                    </a>
+                    <a href="#module5" class="toc-item" onclick="scrollToModule('module5')">
+                        <span class="toc-num">05</span> Burners & Aliases
+                    </a>
+                    <a href="#module6" class="toc-item" onclick="scrollToModule('module6')">
+                        <span class="toc-num">06</span> Sock Puppets
+                    </a>
+                    <a href="#module7" class="toc-item" onclick="scrollToModule('module7')">
+                        <span class="toc-num">07</span> Metadata
+                    </a>
+                    <a href="#module8" class="toc-item" onclick="scrollToModule('module8')">
+                        <span class="toc-num">08</span> Physical OPSEC
+                    </a>
+                </nav>
+
+                <div class="sidebar-section">
+                    <h4>🔗 Leak Tests</h4>
+                    <a href="https://browserleaks.com/" target="_blank" class="resource-link">BrowserLeaks</a>
+                    <a href="https://coveryourtracks.eff.org/" target="_blank" class="resource-link">Cover Your Tracks</a>
+                    <a href="https://www.dnsleaktest.com" target="_blank" class="resource-link">DNS Leak Test</a>
+                    <a href="https://ipleak.net/" target="_blank" class="resource-link">IP Leak</a>
+                    <a href="https://amiunique.org/" target="_blank" class="resource-link">Am I Unique?</a>
+                    <a href="https://whoer.net/" target="_blank" class="resource-link">Whoer.net</a>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="content-area">
+
+                <!-- MODULE 1: Types of Leakage -->
+                <div class="opsec-module open" id="module1">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-title-wrap">
+                            <span class="module-number">01</span>
+                            <h2 class="module-title">Types of Leakage</h2>
+                            <span class="module-badge badge-awareness">AWARENESS</span>
+                        </div>
+                        <div class="module-meta">
+                            <span>8 vectors</span>
+                            <span class="chevron-icon">▼</span>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <p class="module-intro">Understanding how data leaks is the first step to preventing it. Analyze the digital breadcrumbs you leave behind.</p>
+                        
+                        <div class="leak-types-grid">
+                            <div class="leak-type-card">
+                                <div class="leak-icon">⚙️</div>
+                                <div class="leak-title">Technical</div>
+                                <div class="leak-description">IP addresses, metadata, browser fingerprints, DNS queries</div>
+                            </div>
+                            <div class="leak-type-card">
+                                <div class="leak-icon">🎭</div>
+                                <div class="leak-title">Social Engineering</div>
+                                <div class="leak-description">Manipulated into revealing information unknowingly</div>
+                            </div>
+                            <div class="leak-type-card">
+                                <div class="leak-icon">📍</div>
+                                <div class="leak-title">Geo-Located Photos</div>
+                                <div class="leak-description">EXIF GPS data embedded in images you share online</div>
+                            </div>
+                            <div class="leak-type-card">
+                                <div class="leak-icon">📄</div>
+                                <div class="leak-title">File Metadata</div>
+                                <div class="leak-description">Author names, edit history, software in documents</div>
+                            </div>
+                            <div class="leak-type-card">
+                                <div class="leak-icon">🐦</div>
+                                <div class="leak-title">Canary Tokens</div>
+                                <div class="leak-description">Tripwires that reveal your IP when triggered</div>
+                            </div>
+                            <div class="leak-type-card">
+                                <div class="leak-icon">💻</div>
+                                <div class="leak-title">Code Clues</div>
+                                <div class="leak-description">Variable names, comments, usernames in repos</div>
+                            </div>
+                            <div class="leak-type-card">
+                                <div class="leak-icon">✍️</div>
+                                <div class="leak-title">Writing Style</div>
+                                <div class="leak-description">Stylometric analysis can de-anonymize authors</div>
+                            </div>
+                            <div class="leak-type-card">
+                                <div class="leak-icon">👻</div>
+                                <div class="leak-title">Old Accounts</div>
+                                <div class="leak-description">Forgotten accounts containing personal information</div>
+                            </div>
+                        </div>
+
+                        <!-- VIDEO LINK - Edit href below to add your video -->
+                        <div class="video-section">
+                            <h4 class="section-header">📹 Video Resource</h4>
+                            <a href="https://www.youtube.com/watch?v=-QzLxgJzJ9c" target="_blank" class="video-link-btn">
+                                <span class="video-icon">▶</span>
+                                <span>Watch: Types of Leakage</span>
+                            </a>
+                            <!-- TO ADD VIDEO: Replace href="#" with href="https://youtube.com/watch?v=YOUR_VIDEO_ID" -->
+                        </div>
+
+                        <div class="checklist-section">
+                            <h4 class="section-header">✓ Self-Assessment</h4>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>I understand the different types of data leakage</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>I have tested my browser at browserleaks.com</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>I am aware of metadata in files I share</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODULE 2: Hardened Security -->
+                <div class="opsec-module" id="module2">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-title-wrap">
+                            <span class="module-number">02</span>
+                            <h2 class="module-title">Hardened Security</h2>
+                            <span class="module-badge badge-essential">ESSENTIAL</span>
+                        </div>
+                        <div class="module-meta">
+                            <span>6 topics</span>
+                            <span class="chevron-icon">▼</span>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <p class="module-intro">Privacy and Security go hand in hand. Establish a secure baseline before conducting any investigation.</p>
+                        
+                        <div class="topic-block">
+                            <div class="topic-header">🔐 Password Manager</div>
+                            <div class="topic-body">
+                                <p>Use a password manager to generate unique, complex credentials for every account. Also use to store TOTP codes and notes.</p>
+                                <div class="tool-links">
+                                    <a href="https://bitwarden.com" target="_blank" class="tool-badge">Bitwarden</a>
+                                    <a href="https://keepassxc.org" target="_blank" class="tool-badge">KeePassXC</a>
+                                </div>
+                                <div class="info-tip">
+                                    💡 Don't keep all eggs in one basket — use a separate app for TOTP codes for better security
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="topic-block">
+                            <div class="topic-header">📱 MFA — Authenticator App</div>
+                            <div class="topic-body">
+                                <p>Multi-Factor Authentication is non-negotiable for account security.</p>
+                                <div class="tool-links">
+                                    <a href="https://bitwarden.com/products/authenticator/" target="_blank" class="tool-badge">Bitwarden Authenticator</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="topic-block">
+                            <div class="topic-header">🔑 MFA — Hardware Keys</div>
+                            <div class="topic-body">
+                                <p>Physical hardware keys provide the strongest MFA protection available.</p>
+                                <div class="tool-links">
+                                    <a href="https://www.yubico.com" target="_blank" class="tool-badge">YubiKey</a>
+                                    <a href="https://webauthn.io" target="_blank" class="tool-badge">WebAuthn Test</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="topic-block">
+                            <div class="topic-header">🖥️ OS Hardening</div>
+                            <div class="topic-body">
+                                <div class="tool-links">
+                                    <a href="https://privacy.sexy" target="_blank" class="tool-badge">Privacy.sexy</a>
+                                    <a href="https://www.oo-software.com/en/shutup10" target="_blank" class="tool-badge">O&O ShutUp10 (Win)</a>
+                                    <a href="https://www.bleachbit.org" target="_blank" class="tool-badge">BleachBit</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="topic-block">
+                            <div class="topic-header">🌐 DNS Privacy</div>
+                            <div class="topic-body">
+                                <p>Encrypted DNS prevents ISP tracking and DNS leaks.</p>
+                                <div class="tool-links">
+                                    <a href="https://nextdns.io" target="_blank" class="tool-badge">NextDNS</a>
+                                    <a href="https://1.1.1.1" target="_blank" class="tool-badge">Cloudflare 1.1.1.1</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="topic-block">
+                            <div class="topic-header">💾 Full Disk Encryption</div>
+                            <div class="topic-body">
+                                <p>Enable FDE to prevent physical access to your data if device is stolen.</p>
+                                <div class="os-guide-table">
+                                    <div class="os-row">
+                                        <span class="os-name">🍎 macOS</span>
+                                        <span class="os-instruction">System Preferences → Security & Privacy → FileVault → Turn On</span>
+                                    </div>
+                                    <div class="os-row">
+                                        <span class="os-name">🪟 Windows</span>
+                                        <span class="os-instruction">Control Panel → System & Security → BitLocker</span>
+                                    </div>
+                                    <div class="os-row">
+                                        <span class="os-name">🐧 Linux</span>
+                                        <span class="os-instruction">VeraCrypt or LUKS</span>
+                                    </div>
+                                    <div class="os-row">
+                                        <span class="os-name">💿 External</span>
+                                        <span class="os-instruction">VeraCrypt for all external drives</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- VIDEO LINK -->
+                        <div class="video-section">
+                            <h4 class="section-header">📹 Video Resource</h4>
+                            <a href="#" target="_blank" class="video-link-btn">
+                                <span class="video-icon">▶</span>
+                                <span>Watch: Hardened Security</span>
+                            </a>
+                        </div>
+
+                        <div class="checklist-section">
+                            <h4 class="section-header">✓ Checklist</h4>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>Password manager installed and in use</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>MFA enabled on all critical accounts</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>OS hardening scripts applied</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>DNS over HTTPS configured</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>Full disk encryption enabled</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODULE 3: Anonymizers -->
+                <div class="opsec-module" id="module3">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-title-wrap">
+                            <span class="module-number">03</span>
+                            <h2 class="module-title">Anonymizers</h2>
+                            <span class="module-badge badge-advanced">ADVANCED</span>
+                        </div>
+                        <div class="module-meta">
+                            <span>5 techniques</span>
+                            <span class="chevron-icon">▼</span>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <p class="module-intro">Mask your real identity and location when conducting online investigations.</p>
+                        
+                        <div class="anon-grid">
+                            <div class="anon-card">
+                                <div class="anon-title">🛡️ VPN</div>
+                                <p>Use zero-knowledge VPN providers only.</p>
+                                <div class="tool-links">
+                                    <a href="https://protonvpn.com" target="_blank" class="tool-badge">ProtonVPN</a>
+                                    <a href="https://ThatOnePrivacySite.xyz" target="_blank" class="tool-badge">Compare VPNs</a>
+                                </div>
+                                <div class="warning-tip">
+                                    ⚠️ Not all VPNs are equal. Look for zero-knowledge providers.
+                                </div>
+                            </div>
+                            <div class="anon-card">
+                                <div class="anon-title">🔀 Proxies</div>
+                                <p>Route traffic through intermediary servers.</p>
+                                <div class="tool-links">
+                                    <a href="https://1.1.1.1" target="_blank" class="tool-badge">Cloudflare WARP</a>
+                                    <a href="https://startpage.com" target="_blank" class="tool-badge">Startpage</a>
+                                </div>
+                            </div>
+                            <div class="anon-card">
+                                <div class="anon-title">🧅 TOR</div>
+                                <p>Layered encryption for maximum anonymity.</p>
+                                <div class="tool-links">
+                                    <a href="https://www.torproject.org/download/" target="_blank" class="tool-badge">TOR Browser</a>
+                                </div>
+                                <div class="warning-tip">
+                                    ⚠️ TOR is slow. Use only for high-anonymity tasks.
+                                </div>
+                            </div>
+                            <div class="anon-card">
+                                <div class="anon-title">📱 Mobile Networks</div>
+                                <ul class="simple-list">
+                                    <li>LTE/5G tethering — residential IP, harder to block</li>
+                                    <li>Dedicated mobile hotspot with SIM card</li>
+                                </ul>
+                            </div>
+                            <div class="anon-card">
+                                <div class="anon-title">🔧 Self-Hosted VPN</div>
+                                <p>Run WireGuard on your own VPS for full control.</p>
+                                <div class="tool-links">
+                                    <a href="https://www.wireguard.com/install/" target="_blank" class="tool-badge">WireGuard</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- VIDEO LINK -->
+                        <div class="video-section">
+                            <h4 class="section-header">📹 Video Resource</h4>
+                            <a href="#" target="_blank" class="video-link-btn">
+                                <span class="video-icon">▶</span>
+                                <span>Watch: Anonymizers</span>
+                            </a>
+                        </div>
+
+                        <div class="checklist-section">
+                            <h4 class="section-header">✓ Checklist</h4>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>VPN selected and configured</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>TOR Browser installed</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>IP tested at ipleak.net — no leaks</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODULE 4: Browser OPSEC -->
+                <div class="opsec-module" id="module4">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-title-wrap">
+                            <span class="module-number">04</span>
+                            <h2 class="module-title">Browser OPSEC</h2>
+                            <span class="module-badge badge-essential">ESSENTIAL</span>
+                        </div>
+                        <div class="module-meta">
+                            <span>4 browsers + plugins</span>
+                            <span class="chevron-icon">▼</span>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <p class="module-intro">Your browser is your investigation tool. Configure it properly for security and privacy.</p>
+                        
+                        <div class="browser-ranking">
+                            <div class="browser-card rank-1">
+                                <div class="browser-number">1</div>
+                                <div class="browser-name">Firefox</div>
+                                <div class="browser-desc">Primary — customized, bookmarks, secure</div>
+                                <a href="https://www.mozilla.org/en-US/firefox/" target="_blank" class="tool-badge">Download</a>
+                            </div>
+                            <div class="browser-card rank-2">
+                                <div class="browser-number">2</div>
+                                <div class="browser-name">Chrome</div>
+                                <div class="browser-desc">Default — common fingerprint, video conf</div>
+                            </div>
+                            <div class="browser-card rank-3">
+                                <div class="browser-number">3</div>
+                                <div class="browser-name">Brave</div>
+                                <div class="browser-desc">Lightweight — private by default</div>
+                                <a href="https://brave.com" target="_blank" class="tool-badge">Download</a>
+                            </div>
+                            <div class="browser-card rank-4">
+                                <div class="browser-number">4</div>
+                                <div class="browser-name">TOR Browser</div>
+                                <div class="browser-desc">Anonymity — maximum privacy</div>
+                                <a href="https://www.torproject.org/download/" target="_blank" class="tool-badge">Download</a>
+                            </div>
+                        </div>
+
+                        <div class="topic-block">
+                            <div class="topic-header">🔧 Firefox Hardening</div>
+                            <div class="topic-body">
+                                <p>Go to <strong>Preferences → Privacy and Security</strong></p>
+                                <div class="hardening-list">
+                                    <div class="hardening-item">✅ Tell websites not to sell or share my data</div>
+                                    <div class="hardening-item">✅ Send websites a "Do Not Track" request</div>
+                                    <div class="hardening-item">✅ Block dangerous and deceptive content</div>
+                                    <div class="hardening-item">✅ Enable DNS over HTTPS (use NextDNS)</div>
+                                    <div class="hardening-item">✅ Create alias account to sync bookmarks</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="topic-block">
+                            <div class="topic-header">🧩 Essential Browser Plugins</div>
+                            <div class="topic-body">
+                                <div class="plugin-grid">
+                                    <div class="plugin-item">
+                                        <div class="plugin-name">Firefox Multi-Account Containers</div>
+                                        <div class="plugin-desc">Isolate sites in separate containers</div>
+                                    </div>
+                                    <div class="plugin-item">
+                                        <div class="plugin-name">uBlock Origin</div>
+                                        <div class="plugin-desc">Advanced ad & tracker blocking</div>
+                                    </div>
+                                    <div class="plugin-item">
+                                        <div class="plugin-name">Bitwarden</div>
+                                        <div class="plugin-desc">Password manager integration</div>
+                                    </div>
+                                    <div class="plugin-item">
+                                        <div class="plugin-name">User-Agent Switcher</div>
+                                        <div class="plugin-desc">Change browser fingerprint on demand</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="topic-block">
+                            <div class="topic-header">🏠 Browser Isolation</div>
+                            <div class="topic-body">
+                                <div class="tool-links">
+                                    <a href="https://app.any.run/" target="_blank" class="tool-badge">Any.Run (Browser-in-browser)</a>
+                                    <a href="https://www.browserling.com/" target="_blank" class="tool-badge">Browserling</a>
+                                    <a href="https://addons.mozilla.org/en-US/firefox/addon/multi-account-containers/" target="_blank" class="tool-badge">FF Containers</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- VIDEO LINK -->
+                        <div class="video-section">
+                            <h4 class="section-header">📹 Video Resource</h4>
+                            <a href="#" target="_blank" class="video-link-btn">
+                                <span class="video-icon">▶</span>
+                                <span>Watch: Browser OPSEC</span>
+                            </a>
+                        </div>
+
+                        <div class="checklist-section">
+                            <h4 class="section-header">✓ Checklist</h4>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>Firefox hardening settings configured</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>uBlock Origin installed and active</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>Multi-Account Containers set up</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>User-Agent Switcher installed</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODULE 5: Burners & Aliases -->
+                <div class="opsec-module" id="module5">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-title-wrap">
+                            <span class="module-number">05</span>
+                            <h2 class="module-title">Burners & Aliases</h2>
+                            <span class="module-badge badge-advanced">ADVANCED</span>
+                        </div>
+                        <div class="module-meta">
+                            <span>4 categories</span>
+                            <span class="chevron-icon">▼</span>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <p class="module-intro">Create disposable identities for investigations without exposing your real information.</p>
+                        
+                        <div class="burner-grid">
+                            <div class="burner-card">
+                                <div class="burner-icon">📧</div>
+                                <div class="burner-title">Email Aliases</div>
+                                <div class="tool-links">
+                                    <a href="https://duckduckgo.com/email" target="_blank" class="tool-badge">DuckDuckGo Email</a>
+                                    <a href="https://simplelogin.io/" target="_blank" class="tool-badge">SimpleLogin</a>
+                                    <a href="https://www.namecheap.com/" target="_blank" class="tool-badge">Custom Domain</a>
+                                </div>
+                            </div>
+                            <div class="burner-card">
+                                <div class="burner-icon">💳</div>
+                                <div class="burner-title">Virtual Cards</div>
+                                <div class="tool-links">
+                                    <a href="https://privacy.com" target="_blank" class="tool-badge">Privacy.com</a>
+                                    <a href="https://www.cardbenefits.citi.com/Products/Virtual-Account-Numbers" target="_blank" class="tool-badge">Citi Virtual</a>
+                                </div>
+                                <div class="info-tip">💡 Many banks offer virtual card numbers in their apps</div>
+                            </div>
+                            <div class="burner-card">
+                                <div class="burner-icon">📞</div>
+                                <div class="burner-title">VoIP Numbers</div>
+                                <div class="tool-links">
+                                    <a href="https://voice.google.com" target="_blank" class="tool-badge">Google Voice</a>
+                                    <a href="https://www.textnow.com/" target="_blank" class="tool-badge">TextNow</a>
+                                    <a href="https://www.cloaked.com" target="_blank" class="tool-badge">Cloaked.com</a>
+                                </div>
+                            </div>
+                            <div class="burner-card">
+                                <div class="burner-icon">🏠</div>
+                                <div class="burner-title">Physical Addresses</div>
+                                <div class="address-tips">
+                                    <p><strong>Method 1:</strong> Apartment complex — pick floor above highest</p>
+                                    <p><strong>Method 2:</strong> Empty lot in distant location</p>
+                                    <p><strong>Method 3:</strong> USPS PO Box — use higher number</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- VIDEO LINK -->
+                        <div class="video-section">
+                            <h4 class="section-header">📹 Video Resource</h4>
+                            <a href="#" target="_blank" class="video-link-btn">
+                                <span class="video-icon">▶</span>
+                                <span>Watch: Burners & Aliases</span>
+                            </a>
+                        </div>
+
+                        <div class="checklist-section">
+                            <h4 class="section-header">✓ Checklist</h4>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>Email alias service configured</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>Virtual card set up</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>VoIP number obtained</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODULE 6: Sock Puppets -->
+                <div class="opsec-module" id="module6">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-title-wrap">
+                            <span class="module-number">06</span>
+                            <h2 class="module-title">Sock Puppets</h2>
+                            <span class="module-badge badge-expert">EXPERT</span>
+                        </div>
+                        <div class="module-meta">
+                            <span>Account creation</span>
+                            <span class="chevron-icon">▼</span>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <p class="module-intro">Sock puppet accounts are fake personas for undercover OSINT. Building them convincingly requires careful preparation.</p>
+                        
+                        <div class="topic-block">
+                            <div class="topic-header">✅ Prerequisites Before Creating Accounts</div>
+                            <div class="topic-body">
+                                <div class="checklist-section">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <span>Consistent persona theme decided</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <span>Fake address created</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <span>Randomized name generated via password manager</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <span>AI-generated biography written</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <span>AI profile images generated</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <span>VoIP or real SIM number ready</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <span>Email alias created (NOT duck.com)</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox">
+                                        <span>Using 5G/LTE or public WiFi (NOT VPN)</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="topic-block">
+                            <div class="topic-header">🎨 AI Image Generation Tools</div>
+                            <div class="topic-body">
+                                <div class="tool-links">
+                                    <a href="https://thispersondoesnotexist.com/" target="_blank" class="tool-badge">This Person Doesn't Exist</a>
+                                    <a href="https://randomuser.me/" target="_blank" class="tool-badge">Random User</a>
+                                    <a href="https://generated.photos/" target="_blank" class="tool-badge">Generated Photos</a>
+                                    <a href="https://app.leonardo.ai/" target="_blank" class="tool-badge">Leonardo AI</a>
+                                    <a href="https://unsplash.com/" target="_blank" class="tool-badge">Unsplash</a>
+                                    <a href="https://ailogomaker.io/" target="_blank" class="tool-badge">AI Logo Maker</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="topic-block">
+                            <div class="topic-header">⚠️ Randomization is CRITICAL</div>
+                            <div class="topic-body">
+                                <div class="warning-tip">
+                                    ❌ Reusing usernames — tools like <strong>whatsmyname.app</strong> scan 100s of websites to detect reuse. This WILL expose you.
+                                </div>
+                                <ul class="simple-list">
+                                    <li>Usernames → Generate via password manager</li>
+                                    <li>Passwords → Generate via password manager</li>
+                                    <li>Biography/Images → Use AI tools</li>
+                                    <li>Remove phone numbers or use VoIP only</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="topic-block">
+                            <div class="topic-header">📘 Facebook — Lessons Learned</div>
+                            <div class="topic-body">
+                                <div class="warning-tip">
+                                    ❌ Account flagged within 5 minutes because:<br>
+                                    1. Used well-known VPN → Use 5G/LTE or public WiFi<br>
+                                    2. Used @duck.com email → Use Gmail, Outlook, or custom domain<br>
+                                    3. No phone number → Provide real SIM, enable MFA, then remove
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="topic-block">
+                            <div class="topic-header">💡 Universal Tips for All Platforms</div>
+                            <div class="topic-body">
+                                <div class="info-tip">
+                                    ✅ Use 5G/LTE or hotel/coffee WiFi — never VPN during creation<br>
+                                    ✅ Use Gmail/Outlook/custom domain — not SimpleLogin or Duck<br>
+                                    ✅ Real SIM → enable MFA with app/Yubikey → delete phone from account
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- VIDEO LINK -->
+                        <div class="video-section">
+                            <h4 class="section-header">📹 Video Resource</h4>
+                            <a href="#" target="_blank" class="video-link-btn">
+                                <span class="video-icon">▶</span>
+                                <span>Watch: Sock Puppets</span>
+                            </a>
+                        </div>
+
+                        <div class="checklist-section">
+                            <h4 class="section-header">✓ Checklist</h4>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>Full persona developed before creating accounts</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>All randomization applied</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>Not using known VPN during account creation</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODULE 7: Metadata -->
+                <div class="opsec-module" id="module7">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-title-wrap">
+                            <span class="module-number">07</span>
+                            <h2 class="module-title">Metadata Management</h2>
+                            <span class="module-badge badge-essential">ESSENTIAL</span>
+                        </div>
+                        <div class="module-meta">
+                            <span>Removal & Insertion</span>
+                            <span class="chevron-icon">▼</span>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <p class="module-intro">Metadata reveals hidden information in files. Learn to remove it for privacy and insert false data for disinformation.</p>
+                        
+                        <div class="metadata-split">
+                            <div class="meta-section removal">
+                                <h4 class="meta-heading">🗑️ Metadata Removal</h4>
+                                <p>Most social media strips metadata — but not all. Remove before sharing:</p>
+                                <ul class="simple-list">
+                                    <li>Screenshot the image (strips EXIF)</li>
+                                    <li>Use offline tools (recommended)</li>
+                                </ul>
+                                <div class="tool-links">
+                                    <a href="https://exifcleaner.com/" target="_blank" class="tool-badge">ExifCleaner</a>
+                                </div>
+                                <div class="info-tip">💡 ExifCleaner works on PDF and Word files too</div>
+                            </div>
+                            <div class="meta-section insertion">
+                                <h4 class="meta-heading">✏️ Metadata Insertion</h4>
+                                <p>Insert false metadata for disinformation or canary traps:</p>
+                                <div class="tool-links">
+                                    <a href="https://thexifer.net" target="_blank" class="tool-badge">theXifer.net</a>
+                                </div>
+                                <div class="info-tip">💡 Can also modify metadata in Word/Excel document properties</div>
+                            </div>
+                        </div>
+
+                        <div class="info-tip" style="margin-top: 20px;">
+                            🔗 Use the <strong>ExifTool</strong> in the main <a href="/" style="color: #00d9ff;">Easint Tools</a> to instantly analyze file metadata
+                        </div>
+
+                        <!-- VIDEO LINK -->
+                        <div class="video-section">
+                            <h4 class="section-header">📹 Video Resource</h4>
+                            <a href="#" target="_blank" class="video-link-btn">
+                                <span class="video-icon">▶</span>
+                                <span>Watch: Metadata Management</span>
+                            </a>
+                        </div>
+
+                        <div class="checklist-section">
+                            <h4 class="section-header">✓ Checklist</h4>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>I strip metadata from files before sharing</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>ExifCleaner installed and in use</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODULE 8: Physical OPSEC -->
+                <div class="opsec-module" id="module8">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-title-wrap">
+                            <span class="module-number">08</span>
+                            <h2 class="module-title">Physical OPSEC</h2>
+                            <span class="module-badge badge-expert">EXPERT</span>
+                        </div>
+                        <div class="module-meta">
+                            <span>8 topics</span>
+                            <span class="chevron-icon">▼</span>
+                        </div>
+                    </div>
+                    <div class="module-content">
+                        <p class="module-intro">Digital OPSEC is only half the battle. Your physical environment can betray your identity just as easily.</p>
+                        
+                        <div class="physical-grid">
+                            <div class="physical-card">
+                                <div class="phys-icon">📄</div>
+                                <div class="phys-title">Paper Shredder</div>
+                                <div class="phys-desc">Destroy all documents with sensitive information before disposal</div>
+                            </div>
+                            <div class="physical-card">
+                                <div class="phys-icon">📹</div>
+                                <div class="phys-title">Surveillance Cameras</div>
+                                <div class="phys-desc">Be aware of your environment when conducting sensitive work</div>
+                            </div>
+                            <div class="physical-card">
+                                <div class="phys-icon">🎬</div>
+                                <div class="phys-title">Video Backgrounds</div>
+                                <div class="phys-desc">Objects, art visible in video calls can reveal location</div>
+                            </div>
+                            <div class="physical-card">
+                                <div class="phys-icon">👕</div>
+                                <div class="phys-title">Attire</div>
+                                <div class="phys-desc">Logos, sports teams, school names identify you</div>
+                            </div>
+                            <div class="physical-card">
+                                <div class="phys-icon">🚗</div>
+                                <div class="phys-title">Vehicle Markings</div>
+                                <div class="phys-desc">License plates, stickers visible in photos</div>
+                            </div>
+                            <div class="physical-card">
+                                <div class="phys-icon">🏠</div>
+                                <div class="phys-title">Home Privacy</div>
+                                <div class="phys-desc">Check Street View · Monitor WiFi at <a href="https://wigle.net" target="_blank" style="color: #00d9ff;">Wigle.net</a></div>
+                            </div>
+                            <div class="physical-card">
+                                <div class="phys-icon">🐦</div>
+                                <div class="phys-title">Canary Tokens</div>
+                                <div class="phys-desc">Plant tripwires to detect unauthorized file access</div>
+                                <a href="https://canarytokens.org/" target="_blank" class="tool-badge" style="margin-top: 8px;">canarytokens.org</a>
+                            </div>
+                            <div class="physical-card">
+                                <div class="phys-icon">💾</div>
+                                <div class="phys-title">Off-Site Backups</div>
+                                <div class="phys-desc">Encrypted backups in physically separate location</div>
+                            </div>
+                        </div>
+
+                        <div class="topic-block">
+                            <div class="topic-header">🔒 Secure File Sharing</div>
+                            <div class="topic-body">
+                                <p>Use encrypted zero-knowledge services. Never email sensitive files.</p>
+                                <div class="tool-links">
+                                    <a href="https://send.tresorit.com" target="_blank" class="tool-badge">Tresorit Send (5GB / 7 days)</a>
+                                    <a href="https://proton.me/drive" target="_blank" class="tool-badge">Proton Drive</a>
+                                </div>
+                                <div class="info-tip">💡 Proton Drive: Set expiry dates, password-protect links, revoke access anytime</div>
+                            </div>
+                        </div>
+
+                        <div class="topic-block">
+                            <div class="topic-header">🎯 Disinformation Techniques</div>
+                            <div class="topic-body">
+                                <ul class="simple-list">
+                                    <li>Social media — post misleading info to specific audiences</li>
+                                    <li>Files — insert false metadata or unique watermarks</li>
+                                    <li>GitHub — plant fake repos with canary tokens</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="topic-block">
+                            <div class="topic-header">📚 Best Practices Dashboard</div>
+                            <div class="topic-body">
+                                <a href="https://www.OperationPrivacy.com" target="_blank" class="resource-link-big">
+                                    🌐 OperationPrivacy.com — DIY dashboard to manage your digital footprint
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- VIDEO LINK -->
+                        <div class="video-section">
+                            <h4 class="section-header">📹 Video Resource</h4>
+                            <a href="#" target="_blank" class="video-link-btn">
+                                <span class="video-icon">▶</span>
+                                <span>Watch: Physical OPSEC</span>
+                            </a>
+                        </div>
+
+                        <div class="checklist-section">
+                            <h4 class="section-header">✓ Checklist</h4>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>Paper shredder obtained</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>Home/workplace checked on Street View</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>Canary tokens deployed on sensitive files</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" onchange="updateProgress()">
+                                <span>Secure file sharing service configured</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>Easint OSINT Academy | Educational Purposes Only | Use Responsibly & Ethically</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/opsec.js') }}"></script>
+</body>
+</html>
