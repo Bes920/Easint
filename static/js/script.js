@@ -588,7 +588,11 @@ document.addEventListener('DOMContentLoaded', function() {
         html += '<div class="platform-grid">';
         data.results.forEach(r => {
             const cls = r.exists ? 'found' : 'not-found';
-            html += `<div class="platform-item ${cls}"><strong>${r.platform}</strong><br>${r.exists ? '✓' : '✗'}</div>`;
+            if (r.exists) {
+                html += `<a href="${r.url}" target="_blank" class="platform-item ${cls}"><strong>${r.platform}</strong><br><span class="status">✓ Profile Found</span></a>`;
+            } else {
+                html += `<div class="platform-item ${cls}"><strong>${r.platform}</strong><br><span class="status">✗ Not Found</span></div>`;
+            }
         });
         html += '</div>';
         container.innerHTML = html;

@@ -321,6 +321,7 @@ input[type="email"]::placeholder {
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
+    transition: all 0.3s ease;
 }
 
 .platform-item.found {
@@ -331,6 +332,32 @@ input[type="email"]::placeholder {
 .platform-item.not-found {
     border-color: #ff4444;
     background: rgba(255, 68, 68, 0.05);
+}
+
+/* Clickable platform links */
+a.platform-item {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+a.platform-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 255, 100, 0.3);
+    border-color: #00ff64;
+    background: rgba(0, 255, 100, 0.1);
+}
+
+a.platform-item:hover strong {
+    color: #00ff64;
+}
+
+.platform-item .status {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.9em;
+    opacity: 0.8;
 }
 
 /* Subdomain List */
