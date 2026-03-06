@@ -5,12 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EASINT - Professional OSINT Platform</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🔍Easint</h1>
-            <p class="subtitle">Professional Intelligence & Investigation Toolkit</p>
+            <div class="header-top">
+                <div class="header-left">
+                    <h1>🔍Easint</h1>
+                    <p class="subtitle">Professional Intelligence & Investigation Toolkit</p>
+                </div>
+                <div class="header-right">
+                    <div class="theme-switcher">
+                        <button class="theme-btn" id="themeToggle" title="Switch theme">
+                            <span class="theme-icon">🌙</span>
+                            <span class="theme-label">Theme</span>
+                        </button>
+                        <div class="theme-menu" id="themeMenu">
+                            <button class="theme-option" data-theme="system">🖥️ System</button>
+                            <button class="theme-option" data-theme="dark">🌙 Dark</button>
+                            <button class="theme-option" data-theme="light">☀️ Light</button>
+                            <button class="theme-option" data-theme="neon">⚡ Neon</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </header>
 
         <div class="disclaimer">
