@@ -28,9 +28,9 @@ A **professional-grade Open Source Intelligence (OSINT) platform** that replaces
 ---
 
 
-- Results clear when switching tools
-- No confusing leftover data
-- Professional investigation workflow
+- Results clear when switching tools.
+- No confusing leftover data.
+- Professional investigation workflow.
 
 ---
 
@@ -421,3 +421,4 @@ EASINT can be used to understand:
 **Making OSINT fast, accessible, and efficient.** 🚀
 
 Ready to streamline your investigations?
+Great.
