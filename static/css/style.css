@@ -40,12 +40,12 @@ html[data-theme="light"] {
     --bg-light: rgba(0, 0, 0, 0.02);
     --bg-lighter: rgba(0, 0, 0, 0.05);
     
-    --text-primary: #333333;
-    --text-secondary: #666666;
-    --text-muted: #999999;
+    --text-primary: #1a1a1a;
+    --text-secondary: #3a3a3a;
+    --text-muted: #666666;
     
-    --border-color: rgba(0, 0, 0, 0.1);
-    --border-primary: rgba(0, 102, 204, 0.2);
+    --border-color: rgba(0, 0, 0, 0.15);
+    --border-primary: rgba(0, 102, 204, 0.3);
     
     --shadow-glow: rgba(0, 102, 204, 0.1);
     --shadow-glow-strong: rgba(0, 102, 204, 0.3);
