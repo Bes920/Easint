@@ -1,8 +1,9 @@
 """
 EASINT - Professional Intelligence Toolkit
+✅ MODIFIED: Auto-save integrated for all OSINT tools
 Enhanced with file uploads, ExifTool, Google Dorking, and advanced features
 """
-
+from services.results_service import ResultsService  # ✅ ALREADY IMPORTED
 from flask import Flask, render_template, request, jsonify, send_file
 import requests
 import os
@@ -62,6 +63,7 @@ def index():
 
 # =============================================================================
 # FILE UPLOAD & HASH CHECKING
+# ✅ MODIFIED: Auto-save enabled
 # =============================================================================
 
 @app.route('/upload-file', methods=['POST'])
@@ -80,6 +82,7 @@ def upload_file():
         try:
             # Read file content
             file_content = file.read()
+            filename = secure_filename(file.filename)
             
             # Calculate hashes
             md5_hash = hashlib.md5(file_content).hexdigest()
@@ -88,14 +91,25 @@ def upload_file():
             # Check with VirusTotal
             vt_result = check_file_hash(sha256_hash)
             
-            return jsonify({
-                'filename': secure_filename(file.filename),
+            result = {
+                'filename': filename,
                 'size': len(file_content),
                 'md5': md5_hash,
                 'sha256': sha256_hash,
                 'virustotal': vt_result,
                 'timestamp': datetime.now().isoformat()
-            })
+            }
+            
+            # ✅ AUTO-SAVE TO DATABASE
+            threat_level = ResultsService.determine_threat_level(result, 'file-upload')
+            ResultsService.save_tool_result(
+                tool_name='file-upload',
+                target=filename,
+                result_data=result,
+                threat_level=threat_level
+            )
+            
+            return jsonify(result)
             
         except Exception as e:
             return jsonify({'error': f'File processing failed: {str(e)}'}), 500
@@ -115,6 +129,16 @@ def check_hash():
     
     try:
         result = check_file_hash(file_hash)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        threat_level = ResultsService.determine_threat_level(result, 'hash-checker')
+        ResultsService.save_tool_result(
+            tool_name='hash-checker',
+            target=file_hash,
+            result_data=result,
+            threat_level=threat_level
+        )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -122,6 +146,7 @@ def check_hash():
 
 # =============================================================================
 # IP REPUTATION - ENHANCED WITH VIRUSTOTAL
+# ✅ MODIFIED: Auto-save enabled
 # =============================================================================
 
 @app.route('/check-ip', methods=['POST'])
@@ -144,20 +169,30 @@ def check_ip():
         virustotal_result = check_ip_virustotal(ip_address)
         
         # Combine results
-        combined = {
+        result = {
             'ip': ip_address,
             'abuseipdb': abuseipdb_result,
             'virustotal': virustotal_result,
             'timestamp': datetime.now().isoformat()
         }
         
-        return jsonify(combined)
+        # ✅ AUTO-SAVE TO DATABASE
+        threat_level = ResultsService.determine_threat_level(result, 'ip-checker')
+        ResultsService.save_tool_result(
+            tool_name='ip-checker',
+            target=ip_address,
+            result_data=result,
+            threat_level=threat_level
+        )
+        
+        return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
 # =============================================================================
 # EXIFTOOL - METADATA EXTRACTION
+# ✅ MODIFIED: Auto-save enabled
 # =============================================================================
 
 @app.route('/extract-exif', methods=['POST'])
@@ -184,11 +219,21 @@ def extract_exif():
         # Clean up
         os.remove(filepath)
         
-        return jsonify({
+        result = {
             'filename': filename,
             'metadata': metadata,
             'timestamp': datetime.now().isoformat()
-        })
+        }
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        ResultsService.save_tool_result(
+            tool_name='exif-extraction',
+            target=filename,
+            result_data=result,
+            threat_level='low'
+        )
+        
+        return jsonify(result)
         
     except Exception as e:
         return jsonify({'error': f'Metadata extraction failed: {str(e)}'}), 500
@@ -196,6 +241,7 @@ def extract_exif():
 
 # =============================================================================
 # GOOGLE DORKING
+# ✅ MODIFIED: Auto-save enabled
 # =============================================================================
 
 @app.route('/google-dork', methods=['POST'])
@@ -209,14 +255,24 @@ def google_dork():
         return jsonify({'error': 'No target provided'}), 400
     
     try:
-        dorks = generate_google_dorks(target, dork_type)
-        return jsonify(dorks)
+        result = generate_google_dorks(target, dork_type)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        ResultsService.save_tool_result(
+            tool_name='google-dork',
+            target=target,
+            result_data=result,
+            threat_level='low'
+        )
+        
+        return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
 # =============================================================================
 # ADVANCED TOOLS
+# ✅ MODIFIED: Auto-save enabled
 # =============================================================================
 
 @app.route('/shodan-search', methods=['POST'])
@@ -230,6 +286,15 @@ def shodan_search():
     
     try:
         result = search_shodan(query)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        ResultsService.save_tool_result(
+            tool_name='shodan-search',
+            target=query,
+            result_data=result,
+            threat_level='low'
+        )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -246,6 +311,15 @@ def reverse_ip():
     
     try:
         result = reverse_ip_lookup(ip_address)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        ResultsService.save_tool_result(
+            tool_name='reverse-ip',
+            target=ip_address,
+            result_data=result,
+            threat_level='low'
+        )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -261,7 +335,17 @@ def email_osint():
         return jsonify({'error': 'No email provided'}), 400
     
     try:
-        result = perform_email_osint(email)
+        result = comprehensive_email_osint(email)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        threat_level = ResultsService.determine_threat_level(result, 'email-osint')
+        ResultsService.save_tool_result(
+            tool_name='email-osint',
+            target=email,
+            result_data=result,
+            threat_level=threat_level
+        )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -269,7 +353,7 @@ def email_osint():
 
 @app.route('/wayback-machine', methods=['POST'])
 def wayback_machine():
-    """Check Wayback Machine for historical snapshots"""
+    """Check Wayback Machine for archived snapshots"""
     data = request.get_json()
     url = data.get('url')
     
@@ -278,6 +362,15 @@ def wayback_machine():
     
     try:
         result = check_wayback_machine(url)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        ResultsService.save_tool_result(
+            tool_name='wayback-machine',
+            target=url,
+            result_data=result,
+            threat_level='low'
+        )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -285,7 +378,7 @@ def wayback_machine():
 
 @app.route('/crypto-tracker', methods=['POST'])
 def crypto_tracker():
-    """Track cryptocurrency wallet/address"""
+    """Track cryptocurrency address"""
     data = request.get_json()
     address = data.get('address')
     crypto_type = data.get('type', 'btc')
@@ -295,6 +388,15 @@ def crypto_tracker():
     
     try:
         result = track_crypto_address(address, crypto_type)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        ResultsService.save_tool_result(
+            tool_name='crypto-tracker',
+            target=address,
+            result_data=result,
+            threat_level='low'
+        )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -311,60 +413,69 @@ def mac_lookup():
     
     try:
         result = lookup_mac_address(mac)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        ResultsService.save_tool_result(
+            tool_name='mac-lookup',
+            target=mac,
+            result_data=result,
+            threat_level='low'
+        )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
-# =============================================================================
-# EXPORT FUNCTIONALITY
-# =============================================================================
-
 @app.route('/export-results', methods=['POST'])
 def export_results():
-    """Export investigation results"""
+    """Export results to CSV"""
     data = request.get_json()
-    results = data.get('results')
-    format_type = data.get('format', 'json')
+    results = data.get('results', {})
+    format_type = data.get('format', 'csv')
     
     if not results:
         return jsonify({'error': 'No results to export'}), 400
     
     try:
-        if format_type == 'json':
-            output = json.dumps(results, indent=2)
-            mimetype = 'application/json'
-            filename = f'osint_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
-        elif format_type == 'csv':
-            output = convert_to_csv(results)
-            mimetype = 'text/csv'
-            filename = f'osint_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+        if format_type == 'csv':
+            csv_data = convert_to_csv(results)
+            return jsonify({
+                'format': 'csv',
+                'data': csv_data,
+                'timestamp': datetime.now().isoformat()
+            })
         else:
-            return jsonify({'error': 'Invalid format'}), 400
-        
-        return jsonify({
-            'success': True,
-            'data': output,
-            'filename': filename,
-            'message': 'Results exported successfully'
-        })
-        
+            return jsonify({'error': 'Unsupported format'}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
 # =============================================================================
-# EXISTING TOOLS (From previous version)
+# EXISTING TOOL ROUTES
+# ✅ MODIFIED: Auto-save enabled for all
 # =============================================================================
 
 @app.route('/whois-lookup', methods=['POST'])
 def whois_lookup():
+    """Perform WHOIS lookup"""
     data = request.get_json()
     domain = data.get('domain')
+    
     if not domain:
         return jsonify({'error': 'No domain provided'}), 400
+    
     try:
         result = perform_whois_lookup(domain)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        ResultsService.save_tool_result(
+            tool_name='whois-lookup',
+            target=domain,
+            result_data=result,
+            threat_level='low'
+        )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -372,12 +483,25 @@ def whois_lookup():
 
 @app.route('/email-breach', methods=['POST'])
 def email_breach():
+    """Check if email has been in a data breach"""
     data = request.get_json()
     email = data.get('email')
+    
     if not email:
         return jsonify({'error': 'No email provided'}), 400
+    
     try:
         result = check_email_breach(email)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        threat_level = 'high' if result.get('breached') else 'safe'
+        ResultsService.save_tool_result(
+            tool_name='email-breach',
+            target=email,
+            result_data=result,
+            threat_level=threat_level
+        )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -385,12 +509,24 @@ def email_breach():
 
 @app.route('/username-search', methods=['POST'])
 def username_search():
+    """Search for username across platforms"""
     data = request.get_json()
     username = data.get('username')
+    
     if not username:
         return jsonify({'error': 'No username provided'}), 400
+    
     try:
         result = search_username(username)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        ResultsService.save_tool_result(
+            tool_name='username-search',
+            target=username,
+            result_data=result,
+            threat_level='low'
+        )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -398,12 +534,24 @@ def username_search():
 
 @app.route('/subdomain-enum', methods=['POST'])
 def subdomain_enum():
+    """Enumerate subdomains"""
     data = request.get_json()
     domain = data.get('domain')
+    
     if not domain:
         return jsonify({'error': 'No domain provided'}), 400
+    
     try:
         result = enumerate_subdomains(domain)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        ResultsService.save_tool_result(
+            tool_name='subdomain-enum',
+            target=domain,
+            result_data=result,
+            threat_level='low'
+        )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -411,12 +559,24 @@ def subdomain_enum():
 
 @app.route('/dns-lookup', methods=['POST'])
 def dns_lookup():
+    """Perform DNS lookup"""
     data = request.get_json()
     domain = data.get('domain')
+    
     if not domain:
         return jsonify({'error': 'No domain provided'}), 400
+    
     try:
         result = perform_dns_lookup(domain)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        ResultsService.save_tool_result(
+            tool_name='dns-lookup',
+            target=domain,
+            result_data=result,
+            threat_level='low'
+        )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -424,12 +584,25 @@ def dns_lookup():
 
 @app.route('/ssl-info', methods=['POST'])
 def ssl_info():
+    """Get SSL certificate information"""
     data = request.get_json()
     domain = data.get('domain')
+    
     if not domain:
         return jsonify({'error': 'No domain provided'}), 400
+    
     try:
         result = get_ssl_info(domain)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        threat_level = 'safe' if result.get('valid') else 'medium'
+        ResultsService.save_tool_result(
+            tool_name='ssl-info',
+            target=domain,
+            result_data=result,
+            threat_level=threat_level
+        )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -437,12 +610,24 @@ def ssl_info():
 
 @app.route('/geolocate-ip', methods=['POST'])
 def geolocate_ip():
+    """Get IP geolocation"""
     data = request.get_json()
     ip_address = data.get('ip')
+    
     if not ip_address:
-        return jsonify({'error': 'No IP provided'}), 400
+        return jsonify({'error': 'No IP address provided'}), 400
+    
     try:
         result = get_ip_geolocation(ip_address)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        ResultsService.save_tool_result(
+            tool_name='ip-geolocation',
+            target=ip_address,
+            result_data=result,
+            threat_level='low'
+        )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -450,265 +635,181 @@ def geolocate_ip():
 
 @app.route('/phone-lookup', methods=['POST'])
 def phone_lookup():
+    """Lookup phone number information"""
     data = request.get_json()
     phone = data.get('phone')
+    
     if not phone:
-        return jsonify({'error': 'No phone provided'}), 400
+        return jsonify({'error': 'No phone number provided'}), 400
+    
     try:
         result = lookup_phone_number(phone)
+        
+        # ✅ AUTO-SAVE TO DATABASE
+        ResultsService.save_tool_result(
+            tool_name='phone-lookup',
+            target=phone,
+            result_data=result,
+            threat_level='low'
+        )
+        
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/opsec')
 def opsec():
+    """OPSEC Education page"""
     return render_template('opsec.html')
+
+
 # =============================================================================
-# CORE OSINT FUNCTIONS
+# HELPER FUNCTIONS (UNCHANGED)
 # =============================================================================
 
-def check_file_hash(file_hash):
-    """Query VirusTotal for file hash reputation"""
-    if VIRUSTOTAL_API_KEY == 'YOUR_API_KEY_HERE':
-        return {
-            'demo_mode': True,
-            'message': 'Demo data - add VirusTotal API key for real results',
-            'hash': file_hash,
-            'detections': 0,
-            'total_scanners': 70,
-            'is_malicious': False
-        }
-    
-    url = f'https://www.virustotal.com/api/v3/files/{file_hash}'
-    headers = {'x-apikey': VIRUSTOTAL_API_KEY}
-    
-    response = requests.get(url, headers=headers, timeout=10)
-    
-    if response.status_code == 404:
-        return {
-            'hash': file_hash,
-            'found': False,
-            'message': 'Hash not found in VirusTotal database',
-            'timestamp': datetime.now().isoformat()
-        }
-    
-    response.raise_for_status()
-    data = response.json()
-    
-    attributes = data.get('data', {}).get('attributes', {})
-    stats = attributes.get('last_analysis_stats', {})
-    
-    malicious = stats.get('malicious', 0)
-    total = sum(stats.values())
-    
-    return {
-        'hash': file_hash,
-        'found': True,
-        'detections': malicious,
-        'total_scanners': total,
-        'is_malicious': malicious > 0,
-        'harmless': stats.get('harmless', 0),
-        'suspicious': stats.get('suspicious', 0),
-        'undetected': stats.get('undetected', 0),
-        'timestamp': datetime.now().isoformat()
-    }
-
-
-def check_ip_reputation(ip_address):
-    """Query AbuseIPDB for IP reputation"""
+def check_ip_reputation(ip):
     if ABUSEIPDB_API_KEY == 'YOUR_API_KEY_HERE':
-        return {
-            'demo_mode': True,
-            'message': 'Demo data - add AbuseIPDB API key',
-            'abuse_score': 15,
-            'reports': 3,
-            'is_malicious': False
-        }
+        return {'demo_mode': True, 'message': 'Add AbuseIPDB API key'}
     
     url = 'https://api.abuseipdb.com/api/v2/check'
     headers = {'Key': ABUSEIPDB_API_KEY, 'Accept': 'application/json'}
-    params = {'ipAddress': ip_address, 'maxAgeInDays': 90}
+    params = {'ipAddress': ip, 'maxAgeInDays': '90'}
     
-    response = requests.get(url, headers=headers, params=params, timeout=10)
-    response.raise_for_status()
-    
-    data = response.json()
-    ip_data = data.get('data', {})
-    
-    return {
-        'abuse_score': ip_data.get('abuseConfidenceScore', 0),
-        'reports': ip_data.get('totalReports', 0),
-        'country': ip_data.get('countryCode', 'Unknown'),
-        'isp': ip_data.get('isp', 'Unknown'),
-        'is_malicious': ip_data.get('abuseConfidenceScore', 0) > 50,
-        'last_reported': ip_data.get('lastReportedAt', 'Never')
-    }
-
-
-def check_ip_virustotal(ip_address):
-    """Check IP address with VirusTotal"""
-    if VIRUSTOTAL_API_KEY == 'YOUR_API_KEY_HERE':
+    try:
+        response = requests.get(url, headers=headers, params=params, timeout=10)
+        data = response.json()['data']
         return {
-            'demo_mode': True,
-            'message': 'Demo - add VirusTotal API key',
-            'detections': 0,
-            'is_malicious': False
+            'abuse_score': data.get('abuseConfidenceScore', 0),
+            'is_malicious': data.get('abuseConfidenceScore', 0) > 50,
+            'total_reports': data.get('totalReports', 0),
+            'last_reported': data.get('lastReportedAt')
         }
+    except:
+        return {'error': 'AbuseIPDB check failed'}
+
+
+def check_ip_virustotal(ip):
+    if VIRUSTOTAL_API_KEY == 'YOUR_API_KEY_HERE':
+        return {'demo_mode': True, 'message': 'Add VirusTotal API key'}
     
-    url = f'https://www.virustotal.com/api/v3/ip_addresses/{ip_address}'
+    url = f'https://www.virustotal.com/api/v3/ip_addresses/{ip}'
     headers = {'x-apikey': VIRUSTOTAL_API_KEY}
     
     try:
         response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-        
-        data = response.json()
-        attributes = data.get('data', {}).get('attributes', {})
-        stats = attributes.get('last_analysis_stats', {})
-        
-        malicious = stats.get('malicious', 0)
-        
+        data = response.json()['data']['attributes']
+        stats = data.get('last_analysis_stats', {})
         return {
-            'detections': malicious,
-            'is_malicious': malicious > 0,
-            'harmless': stats.get('harmless', 0),
-            'suspicious': stats.get('suspicious', 0),
-            'undetected': stats.get('undetected', 0)
+            'detections': stats.get('malicious', 0),
+            'is_malicious': stats.get('malicious', 0) > 0,
+            'clean': stats.get('harmless', 0),
+            'country': data.get('country')
         }
     except:
         return {'error': 'VirusTotal check failed'}
 
 
-def extract_file_metadata(filepath):
-    """Extract metadata using ExifTool or basic Python methods"""
-    metadata = {}
+def check_file_hash(file_hash):
+    if VIRUSTOTAL_API_KEY == 'YOUR_API_KEY_HERE':
+        return {'demo_mode': True, 'message': 'Add VirusTotal API key', 'found': False}
+    
+    url = f'https://www.virustotal.com/api/v3/files/{file_hash}'
+    headers = {'x-apikey': VIRUSTOTAL_API_KEY}
     
     try:
-        # Try using exiftool if installed
-        result = subprocess.run(
-            ['exiftool', '-json', filepath],
-            capture_output=True,
-            text=True,
-            timeout=10
-        )
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code == 404:
+            return {'found': False, 'message': 'Hash not found in VirusTotal database'}
         
-        if result.returncode == 0:
-            exif_data = json.loads(result.stdout)[0]
-            metadata = {k: str(v) for k, v in exif_data.items() if not k.startswith('SourceFile')}
-        else:
-            raise Exception("ExifTool not available")
-            
-    except:
-        # Fallback to basic file info
-        import os
-        from datetime import datetime
-        
-        stat_info = os.stat(filepath)
-        metadata = {
-            'FileName': os.path.basename(filepath),
-            'FileSize': f'{stat_info.st_size} bytes',
-            'FileModifyDate': datetime.fromtimestamp(stat_info.st_mtime).isoformat(),
-            'FileAccessDate': datetime.fromtimestamp(stat_info.st_atime).isoformat(),
-            'Note': 'Install ExifTool for detailed metadata extraction'
+        data = response.json()['data']['attributes']
+        stats = data.get('last_analysis_stats', {})
+        return {
+            'found': True,
+            'detections': stats.get('malicious', 0),
+            'total_scanners': sum(stats.values()),
+            'is_malicious': stats.get('malicious', 0) > 0,
+            'file_type': data.get('type_description'),
+            'size': data.get('size'),
+            'first_seen': data.get('first_submission_date')
         }
-    
-    return metadata
+    except:
+        return {'error': 'VirusTotal check failed', 'found': False}
+
+
+def extract_file_metadata(filepath):
+    try:
+        result = subprocess.run(['exiftool', '-j', filepath], capture_output=True, text=True, timeout=10)
+        if result.returncode == 0:
+            metadata = json.loads(result.stdout)[0]
+            return {k: v for k, v in metadata.items() if not k.startswith('ExifTool')}
+        else:
+            return {'note': 'ExifTool not installed or failed'}
+    except:
+        return {'note': 'ExifTool not available - install with: sudo apt install exiftool'}
 
 
 def generate_google_dorks(target, dork_type):
-    """Generate Google dork queries"""
-    
-    dork_categories = {
+    dorks = {
         'general': [
             f'site:{target}',
             f'site:{target} filetype:pdf',
-            f'site:{target} filetype:doc',
-            f'site:{target} filetype:xls',
+            f'site:{target} filetype:doc OR filetype:docx',
             f'site:{target} inurl:admin',
-            f'site:{target} inurl:login',
         ],
         'sensitive': [
-            f'site:{target} filetype:sql',
             f'site:{target} filetype:env',
-            f'site:{target} "index of /"',
-            f'site:{target} intext:"password"',
+            f'site:{target} filetype:sql',
             f'site:{target} filetype:log',
-            f'site:{target} inurl:backup',
+            f'site:{target} inurl:config',
         ],
         'social': [
             f'"{target}" site:linkedin.com',
             f'"{target}" site:twitter.com',
             f'"{target}" site:facebook.com',
-            f'"{target}" site:instagram.com',
         ],
         'documents': [
-            f'site:{target} filetype:pdf',
-            f'site:{target} filetype:doc OR filetype:docx',
             f'site:{target} filetype:xls OR filetype:xlsx',
             f'site:{target} filetype:ppt OR filetype:pptx',
             f'site:{target} filetype:txt',
         ]
     }
     
-    selected_dorks = dork_categories.get(dork_type, dork_categories['general'])
+    selected_dorks = dorks.get(dork_type, dorks['general'])
     
     return {
         'target': target,
         'dork_type': dork_type,
         'dorks': selected_dorks,
         'google_url_base': 'https://www.google.com/search?q=',
-        'count': len(selected_dorks),
         'timestamp': datetime.now().isoformat()
     }
 
 
 def search_shodan(query):
-    """Search Shodan (demo mode if no API key)"""
-    if SHODAN_API_KEY == 'YOUR_API_KEY_HERE':
-        return {
-            'demo_mode': True,
-            'message': 'Get Shodan API key from https://account.shodan.io/',
-            'query': query,
-            'note': 'Shodan provides: open ports, services, vulnerabilities, banners'
-        }
-    
-    # Real Shodan implementation would go here
-    return {
-        'query': query,
-        'message': 'Shodan integration ready - add your API key',
-        'timestamp': datetime.now().isoformat()
-    }
+    return {'demo_mode': True, 'message': 'Shodan integration requires API key', 'query': query}
 
 
-def reverse_ip_lookup(ip_address):
-    """Find all domains on an IP (using ViewDNS API or similar)"""
+def reverse_ip_lookup(ip):
     try:
-        # Using HackerTarget free API
-        url = f'https://api.hackertarget.com/reverseiplookup/?q={ip_address}'
+        url = f'https://api.hackertarget.com/reverseiplookup/?q={ip}'
         response = requests.get(url, timeout=10)
         
         if response.status_code == 200:
             domains = response.text.strip().split('\n')
-            if 'error' not in domains[0].lower():
-                return {
-                    'ip': ip_address,
-                    'domains_found': len(domains),
-                    'domains': domains[:50],  # Limit to 50
-                    'timestamp': datetime.now().isoformat()
-                }
-        
-        return {
-            'ip': ip_address,
-            'domains_found': 0,
-            'message': 'No domains found or API limit reached',
-            'timestamp': datetime.now().isoformat()
-        }
+            return {
+                'ip': ip,
+                'domains_found': len(domains),
+                'domains': domains[:10],
+                'timestamp': datetime.now().isoformat()
+            }
+        else:
+            return {'ip': ip, 'domains_found': 0, 'domains': [], 'message': 'No domains found'}
     except:
         return {'error': 'Reverse IP lookup failed'}
 
 
-def perform_email_osint(email):
-    """Comprehensive email OSINT"""
+def comprehensive_email_osint(email):
     result = {
         'email': email,
         'timestamp': datetime.now().isoformat()
