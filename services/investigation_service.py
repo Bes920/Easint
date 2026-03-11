@@ -1,153 +1,166 @@
 """
-Investigation Service - Database operations for investigations
+Investigation Service - FIXED VERSION
+Handles investigation CRUD operations with proper NULL user_id handling
 """
 from config.supabase_config import get_supabase_client
+from typing import Dict, List, Optional
 from datetime import datetime
-from typing import List, Dict, Optional
-import uuid
 
 supabase = get_supabase_client()
 
 class InvestigationService:
-    """Handle all investigation-related database operations"""
+    """Service for managing investigations"""
     
     @staticmethod
-    def create_investigation(user_id: str, name: str, description: str = None) -> Dict:
+    def create_investigation(
+        user_id: Optional[str],
+        name: str,
+        description: str = "",
+        tags: List[str] = None
+    ) -> Dict:
         """
         Create a new investigation
-        
-        Args:
-            user_id: User UUID
-            name: Investigation name
-            description: Optional description
-            
-        Returns:
-            Dict: Created investigation
         """
         try:
-            data = {
+            investigation_data = {
                 'user_id': user_id,
                 'name': name,
                 'description': description,
-                'status': 'active'
+                'status': 'active',
+                'tags': tags or []
             }
             
-            result = supabase.table('investigations').insert(data).execute()
-            return result.data[0] if result.data else None
+            result = supabase.table('investigations').insert(investigation_data).execute()
             
+            if result.data and len(result.data) > 0:
+                print(f"✅ Investigation created: {result.data[0]['id']}")
+                return result.data[0]
+            else:
+                raise Exception("Failed to create investigation")
+                
         except Exception as e:
-            print(f"Error creating investigation: {e}")
+            print(f"❌ Error creating investigation: {e}")
             raise
     
     @staticmethod
-    def get_user_investigations(user_id: str, status: str = None) -> List[Dict]:
+    def get_user_investigations(user_id: Optional[str] = None, status: Optional[str] = None) -> List[Dict]:
         """
         Get all investigations for a user
         
-        Args:
-            user_id: User UUID
-            status: Optional status filter ('active', 'completed', 'archived')
-            
-        Returns:
-            List[Dict]: List of investigations
+        ⚠️ FIXED: Now properly handles NULL user_id
         """
         try:
-            query = supabase.table('investigations').select('*').eq('user_id', user_id)
+            # Start with base query
+            query = supabase.table('investigations').select('*')
             
+            # ✅ FIX: Handle NULL user_id properly for Supabase
+            if user_id is None:
+                # In Supabase/PostgreSQL, we need to check for NULL explicitly
+                # Using .is_() doesn't work well, so we'll get ALL and filter in Python
+                pass  # Get all investigations
+            else:
+                query = query.eq('user_id', user_id)
+            
+            # Filter by status if provided
             if status:
                 query = query.eq('status', status)
             
+            # Order by newest first
             query = query.order('created_at', desc=True)
+            
+            # Execute query
             result = query.execute()
+            
+            # ✅ FIX: Filter for NULL user_id in Python (more reliable)
+            if user_id is None and result.data:
+                # Filter to only get investigations where user_id is None/NULL
+                filtered = [inv for inv in result.data if inv.get('user_id') is None]
+                return filtered
             
             return result.data if result.data else []
             
         except Exception as e:
-            print(f"Error fetching investigations: {e}")
+            print(f"❌ Error fetching investigations: {e}")
+            import traceback
+            traceback.print_exc()
             return []
     
     @staticmethod
     def get_investigation_by_id(investigation_id: str) -> Optional[Dict]:
         """
-        Get investigation by ID
-        
-        Args:
-            investigation_id: Investigation UUID
-            
-        Returns:
-            Dict: Investigation or None
+        Get a single investigation by ID
         """
         try:
-            result = supabase.table('investigations').select('*').eq('id', investigation_id).execute()
-            return result.data[0] if result.data else None
+            result = supabase.table('investigations')\
+                .select('*')\
+                .eq('id', investigation_id)\
+                .limit(1)\
+                .execute()
+            
+            if result.data and len(result.data) > 0:
+                return result.data[0]
+            return None
             
         except Exception as e:
-            print(f"Error fetching investigation: {e}")
+            print(f"❌ Error fetching investigation: {e}")
             return None
     
     @staticmethod
     def update_investigation_status(investigation_id: str, status: str) -> bool:
         """
         Update investigation status
-        
-        Args:
-            investigation_id: Investigation UUID
-            status: New status ('active', 'completed', 'archived')
-            
-        Returns:
-            bool: Success
         """
         try:
-            result = supabase.table('investigations').update({
-                'status': status,
-                'updated_at': datetime.now().isoformat()
-            }).eq('id', investigation_id).execute()
+            result = supabase.table('investigations')\
+                .update({'status': status, 'updated_at': datetime.now().isoformat()})\
+                .eq('id', investigation_id)\
+                .execute()
             
-            return bool(result.data)
+            return result.data is not None and len(result.data) > 0
             
         except Exception as e:
-            print(f"Error updating investigation: {e}")
+            print(f"❌ Error updating investigation: {e}")
             return False
     
     @staticmethod
     def delete_investigation(investigation_id: str) -> bool:
         """
-        Delete investigation (and all related data - CASCADE)
-        
-        Args:
-            investigation_id: Investigation UUID
-            
-        Returns:
-            bool: Success
+        Delete an investigation and all its results
         """
         try:
-            result = supabase.table('investigations').delete().eq('id', investigation_id).execute()
-            return bool(result.data)
+            # First delete all results
+            supabase.table('investigation_results')\
+                .delete()\
+                .eq('investigation_id', investigation_id)\
+                .execute()
+            
+            # Then delete the investigation
+            result = supabase.table('investigations')\
+                .delete()\
+                .eq('id', investigation_id)\
+                .execute()
+            
+            print(f"✅ Deleted investigation: {investigation_id}")
+            return True
             
         except Exception as e:
-            print(f"Error deleting investigation: {e}")
+            print(f"❌ Error deleting investigation: {e}")
             return False
     
     @staticmethod
-    def add_investigation_result(investigation_id: str, tool_name: str, target: str, 
-                                 result_data: Dict, ai_analysis: str = None,
-                                 threat_level: str = 'low') -> Dict:
+    def add_investigation_result(
+        investigation_id: str,
+        tool_name: str,
+        target: str,
+        result_data: Dict,
+        ai_analysis: str = None,
+        threat_level: str = 'low'
+    ) -> Optional[Dict]:
         """
-        Add a tool result to an investigation
-        
-        Args:
-            investigation_id: Investigation UUID
-            tool_name: Name of OSINT tool used
-            target: Target that was investigated (IP, email, domain, etc.)
-            result_data: Full result data from the tool
-            ai_analysis: Optional AI-generated analysis
-            threat_level: Threat assessment ('safe', 'low', 'medium', 'high', 'critical')
-            
-        Returns:
-            Dict: Created result
+        Add a result to an investigation
         """
         try:
-            data = {
+            result_entry = {
                 'investigation_id': investigation_id,
                 'tool_name': tool_name,
                 'target': target,
@@ -156,23 +169,20 @@ class InvestigationService:
                 'threat_level': threat_level
             }
             
-            result = supabase.table('investigation_results').insert(data).execute()
-            return result.data[0] if result.data else None
+            result = supabase.table('investigation_results').insert(result_entry).execute()
+            
+            if result.data and len(result.data) > 0:
+                return result.data[0]
+            return None
             
         except Exception as e:
-            print(f"Error adding investigation result: {e}")
-            raise
+            print(f"❌ Error adding investigation result: {e}")
+            return None
     
     @staticmethod
     def get_investigation_results(investigation_id: str) -> List[Dict]:
         """
         Get all results for an investigation
-        
-        Args:
-            investigation_id: Investigation UUID
-            
-        Returns:
-            List[Dict]: List of results
         """
         try:
             result = supabase.table('investigation_results')\
@@ -184,26 +194,25 @@ class InvestigationService:
             return result.data if result.data else []
             
         except Exception as e:
-            print(f"Error fetching investigation results: {e}")
+            print(f"❌ Error fetching investigation results: {e}")
             return []
     
     @staticmethod
     def get_investigation_with_results(investigation_id: str) -> Optional[Dict]:
         """
         Get investigation with all its results
-        
-        Args:
-            investigation_id: Investigation UUID
-            
-        Returns:
-            Dict: Investigation with 'results' array
         """
-        investigation = InvestigationService.get_investigation_by_id(investigation_id)
-        if not investigation:
+        try:
+            investigation = InvestigationService.get_investigation_by_id(investigation_id)
+            
+            if not investigation:
+                return None
+            
+            results = InvestigationService.get_investigation_results(investigation_id)
+            investigation['results'] = results
+            
+            return investigation
+            
+        except Exception as e:
+            print(f"❌ Error fetching investigation with results: {e}")
             return None
-        
-        results = InvestigationService.get_investigation_results(investigation_id)
-        investigation['results'] = results
-        investigation['result_count'] = len(results)
-        
-        return investigation

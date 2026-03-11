@@ -125,3 +125,71 @@ if (document.readyState === 'loading') {
 } else {
     new ThemeManager();
 }
+async function loadInvestigationsDropdown() {
+    try {
+        const response = await fetch('/api/investigations');
+        const data = await response.json();
+
+        const dropdown = document.getElementById('currentInvestigation');
+
+        if (data.success && data.investigations.length > 0) {
+            // Clear loading option
+            dropdown.innerHTML = '';
+
+            // Add "Auto-saved Results" as default
+            const autoOption = document.createElement('option');
+            autoOption.value = 'auto';
+            autoOption.textContent = '📁 Auto-saved Results (Default)';
+            dropdown.appendChild(autoOption);
+
+            // Add all other investigations
+            data.investigations.forEach(inv => {
+                // Skip "Auto-saved Results" since we already added it
+                if (inv.name === 'Auto-saved Results') return;
+
+                const option = document.createElement('option');
+                option.value = inv.id;
+                option.textContent = `📊 ${inv.name}`;
+                dropdown.appendChild(option);
+            });
+
+            // Try to restore last selected investigation
+            const lastSelected = localStorage.getItem('selectedInvestigation');
+            if (lastSelected) {
+                dropdown.value = lastSelected;
+            }
+
+            // Save selection when changed
+            dropdown.addEventListener('change', function() {
+                localStorage.setItem('selectedInvestigation', this.value);
+                console.log(`✅ Results will now save to: ${this.options[this.selectedIndex].text}`);
+            });
+
+        } else {
+            dropdown.innerHTML = '<option value="auto">📁 Auto-saved Results (Default)</option>';
+        }
+
+    } catch (error) {
+        console.error('Failed to load investigations:', error);
+        const dropdown = document.getElementById('currentInvestigation');
+        dropdown.innerHTML = '<option value="auto">📁 Auto-saved Results (Default)</option>';
+    }
+}
+
+// Get currently selected investigation ID
+function getCurrentInvestigationId() {
+    const dropdown = document.getElementById('currentInvestigation');
+    const value = dropdown.value;
+
+    // If 'auto' or empty, return null (will use default "Auto-saved Results")
+    if (value === 'auto' || value === '') {
+        return null;
+    }
+
+    return value;
+}
+
+// Load dropdown when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadInvestigationsDropdown();
+});

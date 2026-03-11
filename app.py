@@ -4,6 +4,7 @@ EASINT - Professional Intelligence Toolkit
 Enhanced with file uploads, ExifTool, Google Dorking, and advanced features
 """
 from services.results_service import ResultsService  # ✅ ALREADY IMPORTED
+from services.investigation_service import InvestigationService  # ✅ DASHBOARD SUPPORT
 from flask import Flask, render_template, request, jsonify, send_file
 import requests
 import os
@@ -1053,6 +1054,177 @@ def is_valid_hash(hash_value):
         return True
     except:
         return False
+
+# ===================================================================
+# INVESTIGATION DASHBOARD API ROUTES
+# Add these routes to your app.py
+# ===================================================================
+
+from flask import Flask, render_template, request, jsonify
+from services.investigation_service import InvestigationService
+from datetime import datetime
+
+# =============================================================================
+# DASHBOARD PAGE
+# =============================================================================
+
+@app.route('/dashboard')
+def dashboard():
+    """Investigation Dashboard page"""
+    return render_template('dashboard.html')
+
+
+# =============================================================================
+# API ROUTES FOR INVESTIGATIONS
+# =============================================================================
+
+@app.route('/api/investigations', methods=['GET'])
+def get_investigations():
+    """Get all investigations with their result counts and threat levels"""
+    try:
+        # Get all investigations (user_id=None for development)
+        investigations = InvestigationService.get_user_investigations(user_id=None)
+        
+        # Enhance each investigation with additional data
+        for inv in investigations:
+            try:
+                # Get results for this investigation
+                results = InvestigationService.get_investigation_results(inv['id'])
+                inv['result_count'] = len(results)
+                
+                # Determine highest threat level
+                if results:
+                    threat_levels = []
+                    for r in results:
+                        if r.get('threat_level'):
+                            threat_levels.append(r['threat_level'])
+                    
+                    if threat_levels:
+                        threat_priority = {
+                            'critical': 5, 
+                            'high': 4, 
+                            'medium': 3, 
+                            'low': 2, 
+                            'safe': 1
+                        }
+                        # Get the highest threat level
+                        highest = max(threat_levels, key=lambda x: threat_priority.get(x, 0))
+                        inv['threat_level'] = highest
+                    else:
+                        inv['threat_level'] = 'low'
+                else:
+                    inv['threat_level'] = 'low'
+                    
+            except Exception as e:
+                print(f"⚠️ Error processing investigation {inv.get('id')}: {e}")
+                inv['result_count'] = 0
+                inv['threat_level'] = 'low'
+        
+        return jsonify({
+            'success': True,
+            'investigations': investigations
+        })
+        
+    except Exception as e:
+        print(f"❌ ERROR in get_investigations: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/investigations/<investigation_id>', methods=['GET'])
+def get_investigation(investigation_id):
+    """Get investigation details with all results"""
+    try:
+        investigation = InvestigationService.get_investigation_with_results(investigation_id)
+        
+        if not investigation:
+            return jsonify({'error': 'Investigation not found'}), 404
+        
+        return jsonify(investigation)
+        
+    except Exception as e:
+        print(f"❌ ERROR in get_investigation: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/investigations', methods=['POST'])
+def create_investigation():
+    """Create a new investigation"""
+    try:
+        data = request.get_json()
+        
+        name = data.get('name')
+        description = data.get('description', '')
+        tags = data.get('tags', [])
+        
+        if not name:
+            return jsonify({'error': 'Investigation name is required'}), 400
+        
+        # Create investigation
+        investigation = InvestigationService.create_investigation(
+            user_id=None,  # Will use real user ID after auth
+            name=name,
+            description=description,
+            tags=tags
+        )
+        
+        return jsonify({
+            'success': True,
+            'investigation': investigation
+        })
+        
+    except Exception as e:
+        print(f"❌ ERROR in create_investigation: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/investigations/<investigation_id>', methods=['PUT'])
+def update_investigation(investigation_id):
+    """Update investigation (status, description, etc.)"""
+    try:
+        data = request.get_json()
+        status = data.get('status')
+        
+        if status and status in ['active', 'completed', 'archived']:
+            success = InvestigationService.update_investigation_status(investigation_id, status)
+            
+            if success:
+                return jsonify({'success': True})
+            else:
+                return jsonify({'error': 'Failed to update investigation'}), 500
+        else:
+            return jsonify({'error': 'Invalid status'}), 400
+            
+    except Exception as e:
+        print(f"❌ ERROR in update_investigation: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/investigations/<investigation_id>', methods=['DELETE'])
+def delete_investigation_api(investigation_id):
+    """Delete investigation and all its results"""
+    try:
+        success = InvestigationService.delete_investigation(investigation_id)
+        
+        if success:
+            return jsonify({'success': True})
+        else:
+            return jsonify({'error': 'Failed to delete investigation'}), 500
+            
+    except Exception as e:
+        print(f"❌ ERROR in delete_investigation_api: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
 
 
 # =============================================================================

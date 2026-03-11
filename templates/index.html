@@ -43,7 +43,42 @@
         <span class="btn-icon">🛡️</span>
         <span class="btn-text">OPSEC </span>
         <span class="btn-arrow">→</span>
-    </a>
+            </a>
+          <a href="/dashboard" class="dashboard-btn">
+    <span class="btn-icon">📊</span>
+    <span class="btn-text">Dashboard</span>
+    <span class="btn-arrow">→</span>
+           </a>
+           <div class="investigation-selector-container">
+    <div class="selector-card">
+        <div class="selector-header">
+            <span class="selector-icon">📊</span>
+            <h3 class="selector-title">Active Investigation</h3>
+        </div>
+
+        <div class="selector-body">
+            <label for="currentInvestigation" class="selector-label">
+                Save tool results to:
+            </label>
+
+            <div class="selector-controls">
+                <select id="currentInvestigation" class="investigation-dropdown">
+                    <option value="">🔄 Loading investigations...</option>
+                </select>
+
+                <a href="/dashboard" class="manage-btn" title="Manage investigations">
+                    <span class="manage-icon">⚙️</span>
+                    <span class="manage-text">Manage</span>
+                </a>
+            </div>
+
+            <p class="selector-hint">
+                <span class="hint-icon">💡</span>
+                <span>All tool results will be saved to the selected investigation</span>
+            </p>
+        </div>
+    </div>
+</div>
     
     <h3>🧭 Tools</h3>
                 <nav class="tool-menu">
