@@ -57,10 +57,9 @@
 .brand-name {
     font-size: 1.6em;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #00d9ff;
+    text-shadow: 0 0 10px rgba(0, 217, 255, 0.6), 0 0 20px rgba(0, 217, 255, 0.3);
+    margin: 0;
 }
 
 /* ==================== STATS OVERVIEW ==================== */
@@ -524,6 +523,32 @@
     margin-top: 25px;
 }
 
+.form-actions .btn-primary {
+    background: linear-gradient(135deg, #00d9ff 0%, #0099ff 50%, #00d9ff 100%) !important;
+    color: #000 !important;
+    font-weight: 700 !important;
+    padding: 14px 28px !important;
+    border: 2px solid #00d9ff !important;
+    font-size: 1em !important;
+    box-shadow: 0 0 20px rgba(0, 217, 255, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    flex: 1;
+    max-width: 200px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease !important;
+}
+
+.form-actions .btn-primary:hover {
+    background: linear-gradient(135deg, #00ffff 0%, #00bbff 50%, #00ffff 100%) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 0 30px rgba(0, 217, 255, 0.8), 0 8px 20px rgba(0, 217, 255, 0.4), inset 0 2px 8px rgba(255, 255, 255, 0.5) !important;
+    border-color: #00ffff !important;
+}
+
+.form-actions .btn-primary:active {
+    transform: translateY(0) scale(0.98) !important;
+}
+
 /* ==================== INVESTIGATION DETAILS ==================== */
 .details-info {
     background: var(--bg-secondary);
@@ -760,4 +785,31 @@
     .modal-content {
         width: 95%;
     }
+}
+
+
+/* ==================== FIXES FOR BUTTON VISIBILITY ==================== */
+
+/* ✅ FIX: New Investigation button - always visible */
+.header-right .btn-primary {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
+    color: #000 !important;
+    font-weight: 700 !important;
+}
+
+/* ✅ FIX: Modal buttons - always visible */
+.modal-form .btn-primary,
+.form-actions .btn-primary {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
+    color: #000 !important;
+    font-weight: 700 !important;
+}
+
+/* ✅ FIX: Ensure all primary buttons are visible */
+.btn-primary {
+    color: #000 !important;
+}
+
+.btn-primary span {
+    color: #000 !important;
 }

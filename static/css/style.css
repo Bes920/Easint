@@ -446,6 +446,36 @@ input[type="email"]::placeholder {
     font-size: 1.2em;
 }
 
+
+/* ✅ Dashboard Button (Similar to OPSEC but different color) */
+.dashboard-link-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    border: none;
+    border-radius: 8px;
+    color: #000;
+    font-weight: 700;
+    font-size: 0.9em;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 217, 255, 0.3);
+}
+
+.dashboard-link-btn:hover {
+    background: linear-gradient(135deg, #00e6ff 0%, #00ff88 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 217, 255, 0.5);
+}
+
+.dashboard-link-btn .icon {
+    font-size: 1.2em;
+}
+
 /* OPSEC Academy Button */
 .opsec-academy-btn {
     display: flex;
@@ -469,6 +499,31 @@ input[type="email"]::placeholder {
     background: linear-gradient(135deg, #ff3399 0%, var(--accent-color) 100%);
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(255, 0, 102, 0.4);
+}
+
+/* Dashboard Button - Similar to OPSEC with cyan/blue gradient */
+.dashboard-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #00d9ff 0%, #0099ff 100%);
+    color: #ffffff;
+    border: 2px solid #00d9ff;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.dashboard-btn:hover {
+    background: linear-gradient(135deg, #0099ff 0%, #00d9ff 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 217, 255, 0.4);
 }
 
 /* Results Section */
