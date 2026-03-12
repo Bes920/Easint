@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (waybackForm) {
         waybackForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const url = document.getElementById('waybackUrl').value.trim();
+            const url = document.getElementById('waybackInput').value.trim();
             const resultsDiv = document.getElementById('waybackResults');
             
             showLoading(resultsDiv, 'Checking archives...');
@@ -301,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (macForm) {
         macForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const mac = document.getElementById('macAddress').value.trim();
+            const mac = document.getElementById('macInput').value.trim();
             const resultsDiv = document.getElementById('macResults');
             
             showLoading(resultsDiv, 'Looking up vendor...');
@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (geoForm) {
         geoForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const ip = document.getElementById('geoIP').value.trim();
+            const ip = document.getElementById('geoInput').value.trim();
             const resultsDiv = document.getElementById('geoResults');
             
             showLoading(resultsDiv, 'Getting location...');
@@ -402,7 +402,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (whoisForm) {
         whoisForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const domain = document.getElementById('whoisDomain').value.trim();
+            const domain = document.getElementById('whoisInput').value.trim();
             const resultsDiv = document.getElementById('whoisResults');
             
             showLoading(resultsDiv, 'Looking up domain...');
@@ -416,12 +416,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    const breachForm = document.getElementById('breachForm');
+    const breachForm = document.getElementById('emailForm');
     if (breachForm) {
         breachForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const email = document.getElementById('breachEmail').value.trim();
-            const resultsDiv = document.getElementById('breachResults');
+            const email = document.getElementById('emailInput').value.trim();
+            const resultsDiv = document.getElementById('emailResults');
             
             showLoading(resultsDiv, 'Checking breaches...');
             

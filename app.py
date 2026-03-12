@@ -483,6 +483,7 @@ def whois_lookup():
     """Perform WHOIS lookup"""
     data = request.get_json()
     domain = data.get('domain')
+    investigation_id = data.get('investigation_id')
     
     if not domain:
         return jsonify({'error': 'No domain provided'}), 400
@@ -495,6 +496,7 @@ def whois_lookup():
             tool_name='whois-lookup',
             target=domain,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level='low'
         )
         
