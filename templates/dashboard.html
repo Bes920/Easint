@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investigation Dashboard — Easint</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+        <button class="theme-btn" id="themeToggle" title="Toggle theme">
+            <span class="theme-icon">🌙</span>
+        </button>
+        <div class="theme-menu hidden" id="themeMenu">
+            <button class="theme-option" data-theme="light">☀️ Light</button>
+            <button class="theme-option" data-theme="dark">🌙 Dark</button>
+            <button class="theme-option active" data-theme="system">💻 System</button>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <a href="/" class="back-link">
+                    <span class="back-icon">←</span>
+                    <span>Back to Tools</span>
+                </a>
+            </div>
+            <div class="header-center">
+                <div class="brand">
+                    <span class="brand-icon">📊</span>
+                    <h1 class="brand-name">Investigation Dashboard</h1>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-primary" id="createInvestigationBtn">
+                    <span class="btn-icon">➕</span>
+                    <span>New Investigation</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Overview -->
+        <section class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-icon">📁</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalInvestigations">0</div>
+                    <div class="stat-label">Total Investigations</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="activeInvestigations">0</div>
+                    <div class="stat-label">Active</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="completedInvestigations">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+            <div class="stat-card threat-card">
+                <div class="stat-icon">🚨</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="highThreatCount">0</div>
+                    <div class="stat-label">High Threat</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filters & Search -->
+        <section class="controls-section">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Search investigations..." class="search-input">
+            </div>
+            <div class="filter-controls">
+                <select id="statusFilter" class="filter-select">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                    <option value="archived">Archived</option>
+                </select>
+                <select id="sortFilter" class="filter-select">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="most-results">Most Results</option>
+                    <option value="highest-threat">Highest Threat</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Investigations Grid -->
+        <section class="investigations-section">
+            <div id="investigationsGrid" class="investigations-grid">
+                <!-- Investigation cards will be inserted here by JavaScript -->
+                <div class="loading-state" id="loadingState">
+                    <div class="spinner"></div>
+                    <p>Loading investigations...</p>
+                </div>
+            </div>
+            <div id="emptyState" class="empty-state hidden">
+                <div class="empty-icon">📂</div>
+                <h3>No Investigations Yet</h3>
+                <p>Create your first investigation to start organizing your OSINT findings.</p>
+                <button class="btn btn-primary" onclick="document.getElementById('createInvestigationBtn').click()">
+                    <span class="btn-icon">➕</span>
+                    <span>Create Investigation</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="dashboard-footer">
+            <p>Easint Investigation Platform | Professional Intelligence Management</p>
+        </footer>
+    </div>
+
+    <!-- Create Investigation Modal -->
+    <div class="modal hidden" id="createInvestigationModal">
+        <div class="modal-overlay" onclick="closeCreateModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Investigation</h2>
+                <button class="modal-close" onclick="closeCreateModal()">✕</button>
+            </div>
+            <form id="createInvestigationForm" class="modal-form">
+                <div class="form-group">
+                    <label for="investigationName">Investigation Name *</label>
+                    <input type="text" id="investigationName" class="form-input" 
+                           placeholder="e.g., Phishing Campaign Analysis" required>
+                </div>
+                <div class="form-group">
+                    <label for="investigationDescription">Description</label>
+                    <textarea id="investigationDescription" class="form-textarea" rows="3" 
+                              placeholder="What are you investigating?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="investigationTags">Tags (comma-separated)</label>
+                    <input type="text" id="investigationTags" class="form-input" 
+                           placeholder="e.g., phishing, email, malware">
+                    <small class="form-hint">Add tags to organize your investigations</small>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-icon">✓</span>
+                        <span>Create Investigation</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Investigation Details Modal -->
+    <div class="modal hidden" id="investigationDetailsModal">
+        <div class="modal-overlay" onclick="closeDetailsModal()"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <div>
+                    <h2 id="detailsInvestigationName">Investigation Name</h2>
+                    <p class="details-meta" id="detailsInvestigationMeta"></p>
+                </div>
+                <button class="modal-close" onclick="closeDetailsModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <!-- Investigation Info -->
+                <div class="details-info">
+                    <div class="info-item">
+                        <span class="info-label">Status:</span>
+                        <select id="detailsStatus" class="status-select" onchange="updateInvestigationStatus()">
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Description:</span>
+                        <span id="detailsDescription">—</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Tags:</span>
+                        <div id="detailsTags" class="tags-container"></div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="details-section">
+                    <div class="section-header">
+                        <h3>Investigation Results</h3>
+                        <span class="result-count" id="detailsResultCount">0 results</span>
+                    </div>
+                    <div id="detailsResults" class="results-timeline">
+                        <!-- Results will be inserted here -->
+                    </div>
+                    <div id="detailsEmptyResults" class="empty-results hidden">
+                        <p>No results yet. Run some OSINT tools and link them to this investigation.</p>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="details-actions">
+                    <button class="btn btn-secondary" onclick="exportInvestigation()">
+                        <span class="btn-icon">📄</span>
+                        <span>Export PDF</span>
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteInvestigation()">
+                        <span class="btn-icon">🗑️</span>
+                        <span>Delete Investigation</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

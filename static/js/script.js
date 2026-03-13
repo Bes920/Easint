@@ -1,9 +1,79 @@
 /**
  * EASINT - Complete JavaScript
  * All 18 tools with proper handlers
+ * ✅ MODIFIED: Added investigation selector support
  */
 
+// ==========================================================================
+// INVESTIGATION SELECTOR (NEW - Step 3A)
+// ==========================================================================
+
+// Load investigations for dropdown
+async function loadInvestigationsDropdown() {
+    try {
+        const response = await fetch('/api/investigations');
+        const data = await response.json();
+        
+        const dropdown = document.getElementById('currentInvestigation');
+        
+        if (data.success && data.investigations.length > 0) {
+            dropdown.innerHTML = '';
+            
+            // Add "Auto-saved Results" as default
+            const autoOption = document.createElement('option');
+            autoOption.value = 'auto';
+            autoOption.textContent = '📁 Auto-saved Results (Default)';
+            dropdown.appendChild(autoOption);
+            
+            // Add all other investigations
+            data.investigations.forEach(inv => {
+                if (inv.name === 'Auto-saved Results') return;
+                
+                const option = document.createElement('option');
+                option.value = inv.id;
+                option.textContent = `📊 ${inv.name}`;
+                dropdown.appendChild(option);
+            });
+            
+            // Restore last selected
+            const lastSelected = localStorage.getItem('selectedInvestigation');
+            if (lastSelected) {
+                dropdown.value = lastSelected;
+            }
+            
+            // Save on change
+            dropdown.addEventListener('change', function() {
+                localStorage.setItem('selectedInvestigation', this.value);
+                console.log(`✅ Results will save to: ${this.options[this.selectedIndex].text}`);
+            });
+            
+        } else {
+            dropdown.innerHTML = '<option value="auto">📁 Auto-saved Results (Default)</option>';
+        }
+        
+    } catch (error) {
+        console.error('Failed to load investigations:', error);
+        const dropdown = document.getElementById('currentInvestigation');
+        if (dropdown) {
+            dropdown.innerHTML = '<option value="auto">📁 Auto-saved Results (Default)</option>';
+        }
+    }
+}
+
+// Get currently selected investigation ID
+function getCurrentInvestigationId() {
+    const dropdown = document.getElementById('currentInvestigation');
+    if (!dropdown) return null;
+    const value = dropdown.value;
+    return (value === 'auto' || value === '') ? null : value;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    
+    // Load investigation dropdown on page load
+    if (document.getElementById('currentInvestigation')) {
+        loadInvestigationsDropdown();
+    }
     
     // ==========================================================================
     // NAVIGATION WITH RESULT CLEARING
@@ -58,6 +128,11 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 const formData = new FormData();
                 formData.append('file', file);
+                // ✅ MODIFIED: Add investigation_id
+                const investigationId = getCurrentInvestigationId();
+                if (investigationId) {
+                    formData.append('investigation_id', investigationId);
+                }
                 
                 const response = await fetch('/upload-file', {
                     method: 'POST',
@@ -100,6 +175,11 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 const formData = new FormData();
                 formData.append('file', file);
+                // ✅ MODIFIED: Add investigation_id
+                const investigationId = getCurrentInvestigationId();
+                if (investigationId) {
+                    formData.append('investigation_id', investigationId);
+                }
                 
                 const response = await fetch('/extract-exif', {
                     method: 'POST',
@@ -224,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const mac = document.getElementById('macInput').value.trim();
             const resultsDiv = document.getElementById('macResults');
             
-            showLoading(resultsDiv, 'Looking up MAC...');
+            showLoading(resultsDiv, 'Looking up vendor...');
             
             try {
                 const data = await makeRequest('/mac-lookup', { mac });
@@ -244,11 +324,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (cryptoForm) {
         cryptoForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const address = document.getElementById('cryptoInput').value.trim();
+            const address = document.getElementById('cryptoAddress').value.trim();
             const type = document.getElementById('cryptoType').value;
             const resultsDiv = document.getElementById('cryptoResults');
             
-            showLoading(resultsDiv, 'Tracking wallet...');
+            showLoading(resultsDiv, 'Tracking address...');
             
             try {
                 const data = await makeRequest('/crypto-tracker', { address, type });
@@ -261,134 +341,206 @@ document.addEventListener('DOMContentLoaded', function() {
     
     
     // ==========================================================================
-    // EXISTING TOOLS
+    // EXISTING TOOLS - UPDATED
     // ==========================================================================
     
-    // IP Checker (Enhanced with dual source)
-    document.getElementById('ipForm')?.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const ip = document.getElementById('ipInput').value.trim();
-        const resultsDiv = document.getElementById('ipResults');
-        showLoading(resultsDiv, 'Checking IP...');
-        try {
-            const data = await makeRequest('/check-ip', { ip });
-            displayDualIPResults(data, resultsDiv);
-        } catch (error) {
-            showError(resultsDiv, error.message);
-        }
-    });
+    const hashForm = document.getElementById('hashForm');
+    if (hashForm) {
+        hashForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const hash = document.getElementById('hashInput').value.trim();
+            const resultsDiv = document.getElementById('hashResults');
+            
+            showLoading(resultsDiv, 'Checking hash...');
+            
+            try {
+                const data = await makeRequest('/check-hash', { hash });
+                displayHashResults(data, resultsDiv);
+            } catch (error) {
+                showError(resultsDiv, error.message);
+            }
+        });
+    }
     
-    // Hash Checker
-    document.getElementById('hashForm')?.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const hash = document.getElementById('hashInput').value.trim();
-        const resultsDiv = document.getElementById('hashResults');
-        showLoading(resultsDiv, 'Checking hash...');
-        try {
-            const data = await makeRequest('/check-hash', { hash });
-            displayHashResults(data, resultsDiv);
-        } catch (error) {
-            showError(resultsDiv, error.message);
-        }
-    });
+    const ipForm = document.getElementById('ipForm');
+    if (ipForm) {
+        ipForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const ip = document.getElementById('ipInput').value.trim();
+            const resultsDiv = document.getElementById('ipResults');
+            
+            showLoading(resultsDiv, 'Checking IP...');
+            
+            try {
+                const data = await makeRequest('/check-ip', { ip });
+                displayIPResults(data, resultsDiv);
+            } catch (error) {
+                showError(resultsDiv, error.message);
+            }
+        });
+    }
     
-    // Geolocation
-    document.getElementById('geoForm')?.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const ip = document.getElementById('geoInput').value.trim();
-        const resultsDiv = document.getElementById('geoResults');
-        showLoading(resultsDiv, 'Geolocating...');
-        try {
-            const data = await makeRequest('/geolocate-ip', { ip });
-            displayGeolocationResults(data, resultsDiv);
-        } catch (error) {
-            showError(resultsDiv, error.message);
-        }
-    });
+    const geoForm = document.getElementById('geoForm');
+    if (geoForm) {
+        geoForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const ip = document.getElementById('geoInput').value.trim();
+            const resultsDiv = document.getElementById('geoResults');
+            
+            showLoading(resultsDiv, 'Getting location...');
+            
+            try {
+                const data = await makeRequest('/geolocate-ip', { ip });
+                displayGeolocationResults(data, resultsDiv);
+            } catch (error) {
+                showError(resultsDiv, error.message);
+            }
+        });
+    }
     
-    // WHOIS
-    document.getElementById('whoisForm')?.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const domain = document.getElementById('whoisInput').value.trim();
-        const resultsDiv = document.getElementById('whoisResults');
-        showLoading(resultsDiv, 'Looking up WHOIS...');
-        try {
-            const data = await makeRequest('/whois-lookup', { domain });
-            displayWhoisResults(data, resultsDiv);
-        } catch (error) {
-            showError(resultsDiv, error.message);
-        }
-    });
+    const whoisForm = document.getElementById('whoisForm');
+    if (whoisForm) {
+        whoisForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const domain = document.getElementById('whoisInput').value.trim();
+            const resultsDiv = document.getElementById('whoisResults');
+            
+            showLoading(resultsDiv, 'Looking up domain...');
+            
+            try {
+                const data = await makeRequest('/whois-lookup', { domain });
+                displayWhoisResults(data, resultsDiv);
+            } catch (error) {
+                showError(resultsDiv, error.message);
+            }
+        });
+    }
     
-    // Email Breach
-    document.getElementById('emailForm')?.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const email = document.getElementById('emailInput').value.trim();
-        const resultsDiv = document.getElementById('emailResults');
-        showLoading(resultsDiv, 'Checking breaches...');
-        try {
-            const data = await makeRequest('/email-breach', { email });
-            displayEmailBreachResults(data, resultsDiv);
-        } catch (error) {
-            showError(resultsDiv, error.message);
-        }
-    });
+    const breachForm = document.getElementById('emailForm');
+    if (breachForm) {
+        breachForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('emailInput').value.trim();
+            const resultsDiv = document.getElementById('emailResults');
+            
+            showLoading(resultsDiv, 'Checking breaches...');
+            
+            try {
+                const data = await makeRequest('/email-breach', { email });
+                displayEmailBreachResults(data, resultsDiv);
+            } catch (error) {
+                showError(resultsDiv, error.message);
+            }
+        });
+    }
     
-    // Username Search
-    document.getElementById('usernameForm')?.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const username = document.getElementById('usernameInput').value.trim();
-        const resultsDiv = document.getElementById('usernameResults');
-        showLoading(resultsDiv, 'Searching username...');
-        try {
-            const data = await makeRequest('/username-search', { username });
-            displayUsernameResults(data, resultsDiv);
-        } catch (error) {
-            showError(resultsDiv, error.message);
-        }
-    });
+    const usernameForm = document.getElementById('usernameForm');
+    if (usernameForm) {
+        usernameForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('usernameInput').value.trim();
+            const resultsDiv = document.getElementById('usernameResults');
+            
+            showLoading(resultsDiv, 'Searching platforms...');
+            
+            try {
+                const data = await makeRequest('/username-search', { username });
+                displayUsernameResults(data, resultsDiv);
+            } catch (error) {
+                showError(resultsDiv, error.message);
+            }
+        });
+    }
     
-    // Subdomains
-    document.getElementById('subdomainForm')?.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const domain = document.getElementById('subdomainInput').value.trim();
-        const resultsDiv = document.getElementById('subdomainResults');
-        showLoading(resultsDiv, 'Finding subdomains...');
-        try {
-            const data = await makeRequest('/subdomain-enum', { domain });
-            displaySubdomainResults(data, resultsDiv);
-        } catch (error) {
-            showError(resultsDiv, error.message);
-        }
-    });
+    const subdomainForm = document.getElementById('subdomainForm');
+    if (subdomainForm) {
+        subdomainForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const domain = document.getElementById('subdomainInput').value.trim();
+            const resultsDiv = document.getElementById('subdomainResults');
+            
+            showLoading(resultsDiv, 'Enumerating subdomains...');
+            
+            try {
+                const data = await makeRequest('/subdomain-enum', { domain });
+                displaySubdomainResults(data, resultsDiv);
+            } catch (error) {
+                showError(resultsDiv, error.message);
+            }
+        });
+    }
     
-    // DNS
-    document.getElementById('dnsForm')?.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const domain = document.getElementById('dnsInput').value.trim();
-        const resultsDiv = document.getElementById('dnsResults');
-        showLoading(resultsDiv, 'Looking up DNS...');
-        try {
-            const data = await makeRequest('/dns-lookup', { domain });
-            displayDNSResults(data, resultsDiv);
-        } catch (error) {
-            showError(resultsDiv, error.message);
-        }
-    });
+    const dnsForm = document.getElementById('dnsForm');
+    if (dnsForm) {
+        dnsForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const domain = document.getElementById('dnsInput').value.trim();
+            const resultsDiv = document.getElementById('dnsResults');
+            
+            showLoading(resultsDiv, 'Looking up DNS records...');
+            
+            try {
+                const data = await makeRequest('/dns-lookup', { domain });
+                displayDNSResults(data, resultsDiv);
+            } catch (error) {
+                showError(resultsDiv, error.message);
+            }
+        });
+    }
     
-    // SSL
-    document.getElementById('sslForm')?.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const domain = document.getElementById('sslInput').value.trim();
-        const resultsDiv = document.getElementById('sslResults');
-        showLoading(resultsDiv, 'Checking SSL...');
-        try {
-            const data = await makeRequest('/ssl-info', { domain });
-            displaySSLResults(data, resultsDiv);
-        } catch (error) {
-            showError(resultsDiv, error.message);
-        }
-    });
+    const sslForm = document.getElementById('sslForm');
+    if (sslForm) {
+        sslForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const domain = document.getElementById('sslInput').value.trim();
+            const resultsDiv = document.getElementById('sslResults');
+            
+            showLoading(resultsDiv, 'Checking SSL certificate...');
+            
+            try {
+                const data = await makeRequest('/ssl-info', { domain });
+                displaySSLResults(data, resultsDiv);
+            } catch (error) {
+                showError(resultsDiv, error.message);
+            }
+        });
+    }
+    
+    const phoneForm = document.getElementById('phoneForm');
+    if (phoneForm) {
+        phoneForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const phone = document.getElementById('phoneInput').value.trim();
+            const resultsDiv = document.getElementById('phoneResults');
+            
+            showLoading(resultsDiv, 'Looking up phone number...');
+            
+            try {
+                const data = await makeRequest('/phone-lookup', { phone });
+                displayPhoneResults(data, resultsDiv);
+            } catch (error) {
+                showError(resultsDiv, error.message);
+            }
+        });
+    }
+    
+    const shodanForm = document.getElementById('shodanForm');
+    if (shodanForm) {
+        shodanForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const query = document.getElementById('shodanQuery').value.trim();
+            const resultsDiv = document.getElementById('shodanResults');
+            
+            showLoading(resultsDiv, 'Searching Shodan...');
+            
+            try {
+                const data = await makeRequest('/shodan-search', { query });
+                displayShodanResults(data, resultsDiv);
+            } catch (error) {
+                showError(resultsDiv, error.message);
+            }
+        });
+    }
     
     
     // ==========================================================================
@@ -399,15 +551,12 @@ document.addEventListener('DOMContentLoaded', function() {
         let html = '<h3>File Analysis</h3>';
         html += `<div class="result-item"><span class="result-label">File:</span><span class="result-value">${data.filename}</span></div>`;
         html += `<div class="result-item"><span class="result-label">Size:</span><span class="result-value">${formatBytes(data.size)}</span></div>`;
-        html += `<div class="hash-display"><div class="hash-label">MD5:</div><div class="hash-value">${data.md5}</div></div>`;
-        html += `<div class="hash-display"><div class="hash-label">SHA-256:</div><div class="hash-value">${data.sha256}</div></div>`;
+        html += `<div class="result-item"><span class="result-label">MD5:</span><span class="result-value"><code>${data.md5}</code></span></div>`;
+        html += `<div class="result-item"><span class="result-label">SHA256:</span><span class="result-value"><code>${data.sha256}</code></span></div>`;
         
         if (data.virustotal && data.virustotal.found) {
-            const badge = data.virustotal.is_malicious ? 
-                '<span class="badge badge-danger">⚠️ Malicious</span>' : 
-                '<span class="badge badge-safe">✓ Clean</span>';
-            html += `<h4 style="color: #00d9ff; margin-top: 20px;">VirusTotal:</h4>`;
-            html += `<div class="result-item"><span class="result-label">Status:</span><span class="result-value">${badge}</span></div>`;
+            const badge = data.virustotal.is_malicious ? '<span class="badge badge-danger">⚠️ Malicious</span>' : '<span class="badge badge-safe">✓ Clean</span>';
+            html += `<div class="result-item"><span class="result-label">VirusTotal:</span>${badge}</div>`;
             html += `<div class="result-item"><span class="result-label">Detections:</span><span class="result-value">${data.virustotal.detections} / ${data.virustotal.total_scanners}</span></div>`;
         }
         
@@ -416,50 +565,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function displayExifResults(data, container) {
-        let html = '<h3>Metadata</h3>';
+        let html = '<h3>Metadata Extraction</h3>';
         html += `<div class="result-item"><span class="result-label">File:</span><span class="result-value">${data.filename}</span></div>`;
         
-        if (data.metadata && Object.keys(data.metadata).length > 0) {
+        if (data.metadata) {
             html += '<div class="metadata-grid">';
             for (const [key, value] of Object.entries(data.metadata)) {
-                html += `<div class="metadata-item"><div class="metadata-key">${key}</div><div class="metadata-value">${value}</div></div>`;
+                if (key !== 'SourceFile') {
+                    html += `<div class="metadata-item"><span class="meta-key">${key}:</span><span class="meta-value">${value}</span></div>`;
+                }
             }
             html += '</div>';
-        } else {
-            html += '<div class="info-box">No metadata found. Install ExifTool for full extraction.</div>';
         }
-        
-        container.innerHTML = html;
-        container.classList.remove('hidden');
-    }
-    
-    function displayDualIPResults(data, container) {
-        let html = '<h3>IP Reputation (Multi-Source)</h3>';
-        html += `<div class="result-item"><span class="result-label">IP:</span><span class="result-value">${data.ip}</span></div>`;
-        
-        html += '<div class="dual-results">';
-        
-        // AbuseIPDB
-        html += '<div class="result-source"><h4>AbuseIPDB</h4>';
-        if (data.abuseipdb) {
-            const badge = data.abuseipdb.is_malicious ? 
-                '<span class="badge badge-danger">⚠️ Malicious</span>' : 
-                '<span class="badge badge-safe">✓ Clean</span>';
-            html += `<div class="result-item"><span class="result-label">Status:</span>${badge}</div>`;
-            html += `<div class="result-item"><span class="result-label">Score:</span>${data.abuseipdb.abuse_score}%</div>`;
-        }
-        html += '</div>';
-        
-        // VirusTotal
-        html += '<div class="result-source"><h4>VirusTotal</h4>';
-        if (data.virustotal && !data.virustotal.error) {
-            const badge = data.virustotal.is_malicious ? 
-                '<span class="badge badge-danger">⚠️ Malicious</span>' : 
-                '<span class="badge badge-safe">✓ Clean</span>';
-            html += `<div class="result-item"><span class="result-label">Status:</span>${badge}</div>`;
-            html += `<div class="result-item"><span class="result-label">Detections:</span>${data.virustotal.detections}</div>`;
-        }
-        html += '</div></div>';
         
         container.innerHTML = html;
         container.classList.remove('hidden');
@@ -468,14 +585,16 @@ document.addEventListener('DOMContentLoaded', function() {
     function displayDorkResults(data, container) {
         let html = '<h3>Google Dorks</h3>';
         html += `<div class="result-item"><span class="result-label">Target:</span><span class="result-value">${data.target}</span></div>`;
-        html += `<div class="result-item"><span class="result-label">Category:</span><span class="result-value">${data.dork_type}</span></div>`;
+        html += `<div class="result-item"><span class="result-label">Type:</span><span class="result-value">${data.dork_type}</span></div>`;
         
-        html += '<div class="dork-list">';
-        data.dorks.forEach(dork => {
-            const url = data.google_url_base + encodeURIComponent(dork);
-            html += `<div class="dork-item"><div class="dork-query">${dork}</div><a href="${url}" target="_blank" class="dork-link">Search</a></div>`;
-        });
-        html += '</div>';
+        if (data.dorks && data.dorks.length) {
+            html += '<div class="dork-list">';
+            data.dorks.forEach(dork => {
+                const encoded = encodeURIComponent(dork);
+                html += `<div class="dork-item"><code>${dork}</code><a href="${data.google_url_base}${encoded}" target="_blank" class="dork-link">Search →</a></div>`;
+            });
+            html += '</div>';
+        }
         
         container.innerHTML = html;
         container.classList.remove('hidden');
@@ -484,7 +603,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function displayReverseIPResults(data, container) {
         let html = '<h3>Reverse IP</h3>';
         html += `<div class="result-item"><span class="result-label">IP:</span><span class="result-value">${data.ip}</span></div>`;
-        html += `<div class="result-item"><span class="result-label">Domains:</span><span class="result-value">${data.domains_found}</span></div>`;
+        html += `<div class="result-item"><span class="result-label">Domains Found:</span><span class="result-value">${data.domains_found}</span></div>`;
         
         if (data.domains && data.domains.length > 0) {
             html += '<div class="domain-list">';
@@ -532,6 +651,40 @@ document.addEventListener('DOMContentLoaded', function() {
         let html = '<h3>Crypto Tracker</h3>';
         if (data.demo_mode) html += `<div class="demo-message">${data.message}</div>`;
         html += `<div class="result-item"><span class="result-label">Address:</span><span class="result-value">${data.address}</span></div>`;
+        container.innerHTML = html;
+        container.classList.remove('hidden');
+    }
+    
+    function displayIPResults(data, container) {
+        let html = '<h3>IP Reputation</h3>';
+        html += `<div class="result-item"><span class="result-label">IP:</span><span class="result-value">${data.ip}</span></div>`;
+        
+        if (data.abuseipdb) {
+            const badge = data.abuseipdb.is_malicious ? '<span class="badge badge-danger">⚠️ Malicious</span>' : '<span class="badge badge-safe">✓ Clean</span>';
+            html += `<div class="result-item"><span class="result-label">AbuseIPDB:</span>${badge}</div>`;
+            html += `<div class="result-item"><span class="result-label">Abuse Score:</span><span class="result-value">${data.abuseipdb.abuse_score}%</span></div>`;
+        }
+        
+        if (data.virustotal && data.virustotal.detections !== undefined) {
+            html += `<div class="result-item"><span class="result-label">VirusTotal:</span><span class="result-value">${data.virustotal.detections} detections</span></div>`;
+        }
+        
+        container.innerHTML = html;
+        container.classList.remove('hidden');
+    }
+    
+    function displayPhoneResults(data, container) {
+        let html = '<h3>Phone Lookup</h3>';
+        if (data.demo_mode) html += `<div class="demo-message">${data.message}</div>`;
+        html += `<div class="result-item"><span class="result-label">Phone:</span><span class="result-value">${data.phone}</span></div>`;
+        container.innerHTML = html;
+        container.classList.remove('hidden');
+    }
+    
+    function displayShodanResults(data, container) {
+        let html = '<h3>Shodan Search</h3>';
+        if (data.demo_mode) html += `<div class="demo-message">${data.message}</div>`;
+        html += `<div class="result-item"><span class="result-label">Query:</span><span class="result-value">${data.query}</span></div>`;
         container.innerHTML = html;
         container.classList.remove('hidden');
     }
@@ -639,13 +792,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ==========================================================================
     // UTILITY FUNCTIONS
+    // ✅ MODIFIED: makeRequest now includes investigation_id automatically
     // ==========================================================================
     
     async function makeRequest(endpoint, data) {
+        // ✅ MODIFIED: Automatically add investigation_id to all requests
+        const requestData = {
+            ...data,
+            investigation_id: getCurrentInvestigationId()
+        };
+        
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify(requestData)
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'Request failed');

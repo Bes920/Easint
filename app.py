@@ -3,7 +3,8 @@ EASINT - Professional Intelligence Toolkit
 ✅ MODIFIED: Auto-save integrated for all OSINT tools
 Enhanced with file uploads, ExifTool, Google Dorking, and advanced features
 """
-from services.results_service import ResultsService  # ✅ ALREADY IMPORTED
+from services.results_service import ResultsService  
+from services.investigation_service import InvestigationService 
 from flask import Flask, render_template, request, jsonify, send_file
 import requests
 import os
@@ -69,11 +70,11 @@ def index():
 @app.route('/upload-file', methods=['POST'])
 def upload_file():
     """Upload file, calculate MD5/SHA256, and check with VirusTotal"""
-    
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
     
     file = request.files['file']
+    investigation_id = request.form.get('investigation_id')
     
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
@@ -106,7 +107,8 @@ def upload_file():
                 tool_name='file-upload',
                 target=filename,
                 result_data=result,
-                threat_level=threat_level
+                threat_level=threat_level,
+                investigation_id=investigation_id
             )
             
             return jsonify(result)
@@ -120,6 +122,7 @@ def check_hash():
     """Check if a file hash is malicious using VirusTotal"""
     data = request.get_json()
     file_hash = data.get('hash')
+    investigation_id = data.get('investigation_id')
     
     if not file_hash:
         return jsonify({'error': 'No file hash provided'}), 400
@@ -136,6 +139,7 @@ def check_hash():
             tool_name='hash-checker',
             target=file_hash,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level=threat_level
         )
         
@@ -154,6 +158,7 @@ def check_ip():
     """Check IP with both AbuseIPDB and VirusTotal"""
     data = request.get_json()
     ip_address = data.get('ip')
+    investigation_id = data.get('investigation_id')
     
     if not ip_address:
         return jsonify({'error': 'No IP address provided'}), 400
@@ -182,6 +187,7 @@ def check_ip():
             tool_name='ip-checker',
             target=ip_address,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level=threat_level
         )
         
@@ -198,11 +204,11 @@ def check_ip():
 @app.route('/extract-exif', methods=['POST'])
 def extract_exif():
     """Extract metadata from uploaded file using ExifTool"""
-    
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
     
     file = request.files['file']
+    investigation_id = request.form.get('investigation_id')
     
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
@@ -230,6 +236,7 @@ def extract_exif():
             tool_name='exif-extraction',
             target=filename,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level='low'
         )
         
@@ -250,6 +257,7 @@ def google_dork():
     data = request.get_json()
     target = data.get('target')
     dork_type = data.get('dork_type', 'general')
+    investigation_id = data.get('investigation_id')
     
     if not target:
         return jsonify({'error': 'No target provided'}), 400
@@ -262,6 +270,7 @@ def google_dork():
             tool_name='google-dork',
             target=target,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level='low'
         )
         
@@ -280,6 +289,7 @@ def shodan_search():
     """Search Shodan for IP/domain information"""
     data = request.get_json()
     query = data.get('query')
+    investigation_id = data.get('investigation_id')
     
     if not query:
         return jsonify({'error': 'No query provided'}), 400
@@ -292,6 +302,7 @@ def shodan_search():
             tool_name='shodan-search',
             target=query,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level='low'
         )
         
@@ -305,6 +316,7 @@ def reverse_ip():
     """Find all domains hosted on an IP"""
     data = request.get_json()
     ip_address = data.get('ip')
+    investigation_id = data.get('investigation_id')
     
     if not ip_address:
         return jsonify({'error': 'No IP provided'}), 400
@@ -317,6 +329,7 @@ def reverse_ip():
             tool_name='reverse-ip',
             target=ip_address,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level='low'
         )
         
@@ -330,6 +343,7 @@ def email_osint():
     """Comprehensive email OSINT"""
     data = request.get_json()
     email = data.get('email')
+    investigation_id = data.get('investigation_id')
     
     if not email:
         return jsonify({'error': 'No email provided'}), 400
@@ -343,6 +357,7 @@ def email_osint():
             tool_name='email-osint',
             target=email,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level=threat_level
         )
         
@@ -356,6 +371,7 @@ def wayback_machine():
     """Check Wayback Machine for archived snapshots"""
     data = request.get_json()
     url = data.get('url')
+    investigation_id = data.get('investigation_id')
     
     if not url:
         return jsonify({'error': 'No URL provided'}), 400
@@ -368,6 +384,7 @@ def wayback_machine():
             tool_name='wayback-machine',
             target=url,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level='low'
         )
         
@@ -382,6 +399,7 @@ def crypto_tracker():
     data = request.get_json()
     address = data.get('address')
     crypto_type = data.get('type', 'btc')
+    investigation_id = data.get('investigation_id')
     
     if not address:
         return jsonify({'error': 'No address provided'}), 400
@@ -394,6 +412,7 @@ def crypto_tracker():
             tool_name='crypto-tracker',
             target=address,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level='low'
         )
         
@@ -407,6 +426,7 @@ def mac_lookup():
     """Lookup MAC address vendor"""
     data = request.get_json()
     mac = data.get('mac')
+    investigation_id = data.get('investigation_id')
     
     if not mac:
         return jsonify({'error': 'No MAC address provided'}), 400
@@ -419,6 +439,7 @@ def mac_lookup():
             tool_name='mac-lookup',
             target=mac,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level='low'
         )
         
@@ -433,6 +454,7 @@ def export_results():
     data = request.get_json()
     results = data.get('results', {})
     format_type = data.get('format', 'csv')
+    
     
     if not results:
         return jsonify({'error': 'No results to export'}), 400
@@ -461,6 +483,7 @@ def whois_lookup():
     """Perform WHOIS lookup"""
     data = request.get_json()
     domain = data.get('domain')
+    investigation_id = data.get('investigation_id')
     
     if not domain:
         return jsonify({'error': 'No domain provided'}), 400
@@ -473,6 +496,7 @@ def whois_lookup():
             tool_name='whois-lookup',
             target=domain,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level='low'
         )
         
@@ -486,6 +510,7 @@ def email_breach():
     """Check if email has been in a data breach"""
     data = request.get_json()
     email = data.get('email')
+    investigation_id = data.get('investigation_id')
     
     if not email:
         return jsonify({'error': 'No email provided'}), 400
@@ -499,6 +524,7 @@ def email_breach():
             tool_name='email-breach',
             target=email,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level=threat_level
         )
         
@@ -512,6 +538,7 @@ def username_search():
     """Search for username across platforms"""
     data = request.get_json()
     username = data.get('username')
+    investigation_id = data.get('investigation_id')
     
     if not username:
         return jsonify({'error': 'No username provided'}), 400
@@ -524,6 +551,7 @@ def username_search():
             tool_name='username-search',
             target=username,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level='low'
         )
         
@@ -537,6 +565,7 @@ def subdomain_enum():
     """Enumerate subdomains"""
     data = request.get_json()
     domain = data.get('domain')
+    investigation_id = data.get('investigation_id')
     
     if not domain:
         return jsonify({'error': 'No domain provided'}), 400
@@ -549,6 +578,7 @@ def subdomain_enum():
             tool_name='subdomain-enum',
             target=domain,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level='low'
         )
         
@@ -562,6 +592,7 @@ def dns_lookup():
     """Perform DNS lookup"""
     data = request.get_json()
     domain = data.get('domain')
+    investigation_id = data.get('investigation_id')
     
     if not domain:
         return jsonify({'error': 'No domain provided'}), 400
@@ -574,6 +605,7 @@ def dns_lookup():
             tool_name='dns-lookup',
             target=domain,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level='low'
         )
         
@@ -587,6 +619,7 @@ def ssl_info():
     """Get SSL certificate information"""
     data = request.get_json()
     domain = data.get('domain')
+    investigation_id = data.get('investigation_id')
     
     if not domain:
         return jsonify({'error': 'No domain provided'}), 400
@@ -600,6 +633,7 @@ def ssl_info():
             tool_name='ssl-info',
             target=domain,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level=threat_level
         )
         
@@ -613,6 +647,7 @@ def geolocate_ip():
     """Get IP geolocation"""
     data = request.get_json()
     ip_address = data.get('ip')
+    investigation_id = data.get('investigation_id')
     
     if not ip_address:
         return jsonify({'error': 'No IP address provided'}), 400
@@ -625,6 +660,7 @@ def geolocate_ip():
             tool_name='ip-geolocation',
             target=ip_address,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level='low'
         )
         
@@ -638,6 +674,7 @@ def phone_lookup():
     """Lookup phone number information"""
     data = request.get_json()
     phone = data.get('phone')
+    investigation_id = data.get('investigation_id')
     
     if not phone:
         return jsonify({'error': 'No phone number provided'}), 400
@@ -650,6 +687,7 @@ def phone_lookup():
             tool_name='phone-lookup',
             target=phone,
             result_data=result,
+            investigation_id=investigation_id,
             threat_level='low'
         )
         
@@ -1053,6 +1091,177 @@ def is_valid_hash(hash_value):
         return True
     except:
         return False
+
+# ===================================================================
+# INVESTIGATION DASHBOARD API ROUTES
+# Add these routes to your app.py
+# ===================================================================
+
+from flask import Flask, render_template, request, jsonify
+from services.investigation_service import InvestigationService
+from datetime import datetime
+
+# =============================================================================
+# DASHBOARD PAGE
+# =============================================================================
+
+@app.route('/dashboard')
+def dashboard():
+    """Investigation Dashboard page"""
+    return render_template('dashboard.html')
+
+
+# =============================================================================
+# API ROUTES FOR INVESTIGATIONS
+# =============================================================================
+
+@app.route('/api/investigations', methods=['GET'])
+def get_investigations():
+    """Get all investigations with their result counts and threat levels"""
+    try:
+        # Get all investigations (user_id=None for development)
+        investigations = InvestigationService.get_user_investigations(user_id=None)
+        
+        # Enhance each investigation with additional data
+        for inv in investigations:
+            try:
+                # Get results for this investigation
+                results = InvestigationService.get_investigation_results(inv['id'])
+                inv['result_count'] = len(results)
+                
+                # Determine highest threat level
+                if results:
+                    threat_levels = []
+                    for r in results:
+                        if r.get('threat_level'):
+                            threat_levels.append(r['threat_level'])
+                    
+                    if threat_levels:
+                        threat_priority = {
+                            'critical': 5, 
+                            'high': 4, 
+                            'medium': 3, 
+                            'low': 2, 
+                            'safe': 1
+                        }
+                        # Get the highest threat level
+                        highest = max(threat_levels, key=lambda x: threat_priority.get(x, 0))
+                        inv['threat_level'] = highest
+                    else:
+                        inv['threat_level'] = 'low'
+                else:
+                    inv['threat_level'] = 'low'
+                    
+            except Exception as e:
+                print(f"⚠️ Error processing investigation {inv.get('id')}: {e}")
+                inv['result_count'] = 0
+                inv['threat_level'] = 'low'
+        
+        return jsonify({
+            'success': True,
+            'investigations': investigations
+        })
+        
+    except Exception as e:
+        print(f"❌ ERROR in get_investigations: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/investigations/<investigation_id>', methods=['GET'])
+def get_investigation(investigation_id):
+    """Get investigation details with all results"""
+    try:
+        investigation = InvestigationService.get_investigation_with_results(investigation_id)
+        
+        if not investigation:
+            return jsonify({'error': 'Investigation not found'}), 404
+        
+        return jsonify(investigation)
+        
+    except Exception as e:
+        print(f"❌ ERROR in get_investigation: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/investigations', methods=['POST'])
+def create_investigation():
+    """Create a new investigation"""
+    try:
+        data = request.get_json()
+        
+        name = data.get('name')
+        description = data.get('description', '')
+        tags = data.get('tags', [])
+        
+        if not name:
+            return jsonify({'error': 'Investigation name is required'}), 400
+        
+        # Create investigation
+        investigation = InvestigationService.create_investigation(
+            user_id=None,  # Will use real user ID after auth
+            name=name,
+            description=description,
+            tags=tags
+        )
+        
+        return jsonify({
+            'success': True,
+            'investigation': investigation
+        })
+        
+    except Exception as e:
+        print(f"❌ ERROR in create_investigation: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/investigations/<investigation_id>', methods=['PUT'])
+def update_investigation(investigation_id):
+    """Update investigation (status, description, etc.)"""
+    try:
+        data = request.get_json()
+        status = data.get('status')
+        
+        if status and status in ['active', 'completed', 'archived']:
+            success = InvestigationService.update_investigation_status(investigation_id, status)
+            
+            if success:
+                return jsonify({'success': True})
+            else:
+                return jsonify({'error': 'Failed to update investigation'}), 500
+        else:
+            return jsonify({'error': 'Invalid status'}), 400
+            
+    except Exception as e:
+        print(f"❌ ERROR in update_investigation: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/investigations/<investigation_id>', methods=['DELETE'])
+def delete_investigation_api(investigation_id):
+    """Delete investigation and all its results"""
+    try:
+        success = InvestigationService.delete_investigation(investigation_id)
+        
+        if success:
+            return jsonify({'success': True})
+        else:
+            return jsonify({'error': 'Failed to delete investigation'}), 500
+            
+    except Exception as e:
+        print(f"❌ ERROR in delete_investigation_api: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
 
 
 # =============================================================================
