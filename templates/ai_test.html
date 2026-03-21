@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Test — Easint</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .ai-test-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        
+        .ai-test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .ai-test-header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        
+        .status-badge.success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .test-section {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-section h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .chat-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+        
+        .chat-message {
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s;
+        }
+        
+        .chat-message.user {
+            text-align: right;
+        }
+        
+        .message-bubble {
+            display: inline-block;
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .message-bubble.user {
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            color: #000;
+            font-weight: 500;
+        }
+        
+        .message-bubble.bot {
+            background: var(--surface-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .message-time {
+            font-size: 0.75em;
+            color: var(--text-tertiary);
+        }
+        
+        .chat-input-area {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 10px 15px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+        }
+        
+        .send-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 10px;
+        }
+        
+        .typing-indicator.active {
+            display: block;
+        }
+        
+        .typing-dots {
+            display: inline-block;
+        }
+        
+        .typing-dots span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-tertiary);
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .investigation-selector {
+            margin-bottom: 15px;
+        }
+        
+        .investigation-selector select {
+            width: 100%;
+            padding: 10px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+        }
+        
+        .quick-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .quick-question-btn {
+            padding: 6px 12px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.85em;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+        
+        .quick-question-btn:hover {
+            border-color: #00d9ff;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        
+        .back-link:hover {
+            color: #00d9ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="ai-test-container">
+        <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+        
+        <div class="ai-test-header">
+            <h1>🤖 AI Chat Test</h1>
+            <p>Test the AI chatbot before integrating into dashboard</p>
+            <span class="status-badge success">Gemini API Connected</span>
+        </div>
+        
+        <div class="test-section">
+            <h3>Select Investigation</h3>
+            <div class="investigation-selector">
+                <select id="investigationSelect">
+                    <option value="">Loading investigations...</option>
+                </select>
+            </div>
+            <div id="investigationInfo" style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Chat with AI</h3>
+            <div class="quick-questions">
+                <button class="quick-question-btn" onclick="askQuestion('What\\'s the overall threat level?')">Overall threat?</button>
+                <button class="quick-question-btn" onclick="askQuestion('Which results are most concerning?')">Most concerning?</button>
+                <button class="quick-question-btn" onclick="askQuestion('Are there any correlations?')">Correlations?</button>
+                <button class="quick-question-btn" onclick="askQuestion('What should I investigate next?')">Next steps?</button>
+            </div>
+            
+            <div class="chat-container" style="margin-top: 15px;">
+                <div class="chat-messages" id="chatMessages">
+                    <div style="text-align: center; padding: 40px; color: var(--text-tertiary);">
+                        <div style="font-size: 3em;">💬</div>
+                        <p>Select an investigation and start chatting!</p>
+                    </div>
+                </div>
+                
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="message-bubble bot">
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-input-area">
+                    <input 
+                        type="text" 
+                        id="chatInput" 
+                        class="chat-input" 
+                        placeholder="Ask a question about this investigation..."
+                        onkeydown="if(event.key==='Enter') sendMessage()"
+                    >
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/ai_chat.js') }}"></script>
+    <script>
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadInvestigations();
+        });
+    </script>
+</body>
+</html>

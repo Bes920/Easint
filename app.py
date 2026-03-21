@@ -21,12 +21,12 @@ import base64
 from io import BytesIO
 import csv
 from dotenv import load_dotenv
-
+from routes.ai_routes import ai_bp
 # Load environment variables from .env file
 load_dotenv()
 
 app = Flask(__name__)
-
+app.register_blueprint(ai_bp)
 # Upload configuration
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx', 'exe', 'zip', 'rar'}
@@ -55,6 +55,14 @@ BLOCKCHAIN_API_KEY = os.getenv('BLOCKCHAIN_API_KEY', 'YOUR_API_KEY_HERE')
 # =============================================================================
 # ROUTES
 # =============================================================================
+
+#ai_chat route is in routes/ai_routes.py for better organization
+@app.route('/ai-test')
+def ai_test_page():
+    """AI chatbot test page"""
+    return render_template('ai_test.html')
+
+
 
 @app.route('/')
 def index():
