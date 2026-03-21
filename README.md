@@ -157,6 +157,43 @@ Visit: **http://localhost:5000** 🎉
 
 ---
 
+## 🧱 **Architecture Overview**
+
+### How the pieces fit together
+- **Flask backend (`app.py`)** exposes REST endpoints for each OSINT tool, handles uploads, formats API responses, and coordinates investigation metadata by calling `services/results_service.py` and `services/investigation_service.py`.
+- **Frontend assets (`static/js/` + templates)** breathe life into the user experience: `script.js` drives the main tool dashboard, `dashboard.js` owns the investigation management UI, and `opsec.js` powers the OPSEC education page while `theme.js` keeps them all in sync on look-and-feel.
+- **Supabase (`config/supabase_config.py`) stores state** in tables such as `investigations`, `investigation_results`, and `chat_history` so every tool result can be auto-saved and reviewed later.
+- **External APIs** (VirusTotal, AbuseIPDB, HIBP, MAC Vendors, DNS, WHOIS, etc.) are queried by helper functions in `app.py`, and fall back to safe demo messages when keys are missing.
+
+### Key data flows
+1. **Tool request**: user submits a form → browser sends a POST to `/check-ip`, `/google-dork`, `/hash-check`, etc. → backend enriches the payload with API responses → `ResultsService` automatically saves the output to the currently selected investigation (defaulting to the “Auto-saved Results” investigation if none is selected).
+2. **Investigation dashboard**: `/api/investigations` populates the sidebar dropdown on the tools page, while `/dashboard` renders the management interface powered by `dashboard.js`.
+3. **Investigation lifecycle**: results are grouped per investigation via `InvestigationService.add_investigation_result` with threat-level heuristics, and CRUD operations + status updates/deletions are handled via dedicated REST endpoints.
+
+## 🧭 **Investigations & Auto-save Flow**
+
+- The dropdown on the tools page (and mirrored in `theme.js`) loads every investigation via `/api/investigations`, prioritizes the auto-save one, and persists the user's choice in `localStorage`.
+- When a tool posts data, `static/js/script.js` injects `investigation_id` automatically so the backend knows where to stash the result. `ResultsService.save_tool_result` creates the default investigation if needed, while `determine_threat_level` provides quick categorization (e.g., VirusTotal detection = `critical`).
+- The investigation dashboard at `/dashboard` lets analysts filter/search investigations, inspect results, change statuses, or delete entire investigations. Every change reflates back to Supabase via the service layer with consistent timestamps/metadata.
+
+## 🛠️ **Tool-to-Endpoint Snapshot**
+
+| Category | Frontend form (`templates` + `static/js/script.js`) | Backend route (`app.py`) |
+| --- | --- | --- |
+| File analysis | File upload form, Hash checker, ExifTool | `/upload-file`, `/check-hash`, `/extract-exif` |
+| Network | IP reputation, Geolocation, Reverse IP, MAC lookup | `/check-ip`, `/geolocate-ip`, `/reverse-ip`, `/mac-lookup` |
+| Domain | WHOIS, DNS, Subdomains, SSL, Wayback | `/whois-lookup`, `/dns-lookup`, `/subdomain-enum`, `/ssl-info`, `/wayback-machine` |
+| People | Email OSINT, Breach, Username search | `/email-osint`, `/email-breach`, `/username-search` |
+| Advanced | Google Dork, Crypto tracker, Shodan, Phone lookup | `/google-dork`, `/crypto-tracker`, `/shodan-search`, `/phone-lookup` |
+
+Each tool returns structured JSON that `script.js` renders into the UI with badges, lists, and helper links, keeping the experience consistent while the backend handles the heavy lifting.
+
+## ⚙️ **Testing & Diagnostics**
+
+- `test_supabase.py` and `test_investigations.py` live in the repo root and exercise Supabase CRUD, investigation/result linkage, and chat history flows. Run them after configuring `.env` so you know your database hooks are solid.
+- `test_mistral.py` validates the Mistral AI client connection (requires `MISTRAL_API_KEY`), ensuring the AI side of future features can talk to the API without surprises.
+- These scripts print guided outputs/error handling, making it easy to see what needs fixing before launching the UI.
+
 ## 📖 **How It Works**
 
 ### **What is OSINT?**
