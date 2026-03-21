@@ -24,6 +24,7 @@ A **professional-grade Open Source Intelligence (OSINT) platform** that replaces
 | 🖥️ **Mac Lookup** | Identify device vendors by MAC address |
 | 💾 **Export Results** | Download findings as JSON for reports |
 | 🧹 **Clean Interface** | Professional dark theme, easy navigation |
+| 🤖 **AI Analyst Chat** | Select a saved investigation, then ask Gemini-powered questions for threat context, correlations, and next steps. |
 
 ---
 
@@ -63,6 +64,9 @@ A **professional-grade Open Source Intelligence (OSINT) platform** that replaces
 ### **Advanced (2 tools)**
 17. ✅ **Google Dorking** - Advanced search queries
 18. ✅ **Crypto Tracker** - Cryptocurrency wallets
+
+### **AI Assistant**
+19. ✅ **Investigation Chat & Analysis** - Converse with Gemini about investigation results, ask for correlations, and receive summarized threat assessments.
 
 ---
 
@@ -107,6 +111,7 @@ VIRUSTOTAL_API_KEY=your_key_here
 ABUSEIPDB_API_KEY=your_key_here
 HIBP_API_KEY=your_key_here
 SHODAN_API_KEY=your_key_here
+GEMINI_API_KEY=your_key_here
 ```
 
 **Get Free API Keys:**
@@ -133,7 +138,18 @@ sudo dnf install perl-Image-ExifTool
 # Download from: https://exiftool.org/
 ```
 
-### **▶️ Step 4: Run the Application**
+### **▶️ Step 4: (Optional) Enable AI Assistant**
+
+- Install the Gemini client:
+
+```bash
+pip install google-genai --break-system-packages
+```
+
+- Make sure `GEMINI_API_KEY` is set in `.env`
+- Run `python test_gemini_api.py` to list available models and confirm the key is valid before opening the chat page
+
+### **▶️ Step 5: Run the Application**
 
 ```bash
 # Make sure your virtual environment is activated
@@ -151,7 +167,7 @@ python app.py
  * Press CTRL+C to quit
 ```
 
-### **🌐 Step 5: Open in Browser**
+### **🌐 Step 6: Open in Browser**
 
 Visit: **http://localhost:5000** 🎉
 
@@ -169,6 +185,14 @@ Visit: **http://localhost:5000** 🎉
 1. **Tool request**: user submits a form → browser sends a POST to `/check-ip`, `/google-dork`, `/hash-check`, etc. → backend enriches the payload with API responses → `ResultsService` automatically saves the output to the currently selected investigation (defaulting to the “Auto-saved Results” investigation if none is selected).
 2. **Investigation dashboard**: `/api/investigations` populates the sidebar dropdown on the tools page, while `/dashboard` renders the management interface powered by `dashboard.js`.
 3. **Investigation lifecycle**: results are grouped per investigation via `InvestigationService.add_investigation_result` with threat-level heuristics, and CRUD operations + status updates/deletions are handled via dedicated REST endpoints.
+
+## 🤖 **AI Assistant & Investigation Insights**
+
+- **Blueprint & routes**: `routes/ai_routes.py` registers a dedicated `/ai` blueprint that exposes `/chat` for conversational questions, `/analyze/<investigation_id>` for AI-generated executive summaries, and `/test` to verify the Gemini connection. `app.py` mounts the blueprint and adds a `/ai-test` view so the chat UI can be exercised independently before wiring into dashboards.
+- **Gemini service**: `services/gemini_ai_service.py` wraps `google-genai`/Gemini, builds structured prompts from `InvestigationService.get_investigation_with_results`, and exposes `chat`, `analyze_result`, and `analyze_investigation` helpers to assess threat levels, extract findings, correlations, and recommend next steps.
+- **UI & quick questions**: `templates/ai_test.html` + `static/js/ai_chat.js` power the AI chat page. Users pick an investigation, see result counts + status, then ask free-form questions or hit the quick-question buttons (“Overall threat?”, “Most concerning?”, etc.). The client shows typing indicators, timestamps, and leverages `/ai/chat` for each turn.
+- **Chat persistence (future-ready)**: `services/chat_service.py` centralizes Supabase interactions for saving sessions and histories so conversational context can later be reloaded or audited.
+- **Test harness**: `test_gemini_api.py` lists available Gemini models and generates a “hello” prompt so you know the key, network, and `google-genai` install are working before relying on the assistant in production.
 
 ## 🧭 **Investigations & Auto-save Flow**
 
@@ -192,6 +216,7 @@ Each tool returns structured JSON that `script.js` renders into the UI with badg
 
 - `test_supabase.py` and `test_investigations.py` live in the repo root and exercise Supabase CRUD, investigation/result linkage, and chat history flows. Run them after configuring `.env` so you know your database hooks are solid.
 - `test_mistral.py` validates the Mistral AI client connection (requires `MISTRAL_API_KEY`), ensuring the AI side of future features can talk to the API without surprises.
+- `test_gemini_api.py` lists available Gemini models, pings the API, and generates a short response so you know `GEMINI_API_KEY` + `google-genai` are configured before opening `/ai-test`.
 - These scripts print guided outputs/error handling, making it easy to see what needs fixing before launching the UI.
 
 ## 📖 **How It Works**
