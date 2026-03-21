@@ -1184,16 +1184,45 @@ def get_investigation(investigation_id):
         investigation = InvestigationService.get_investigation_with_results(investigation_id)
         
         if not investigation:
-            return jsonify({'error': 'Investigation not found'}), 404
+            return jsonify({
+                'success': False,
+                'error': 'Investigation not found'
+            }), 404
         
-        return jsonify(investigation)
+        # ✅ FIX: Wrap in success response
+        return jsonify({
+            'success': True,
+            'investigation': investigation
+        })
         
     except Exception as e:
         print(f"❌ ERROR in get_investigation: {e}")
         import traceback
         traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
-
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+ 
+@app.route('/api/investigations/<investigation_id>/results', methods=['GET'])
+def get_investigation_results(investigation_id):
+    """Get all results for an investigation"""
+    try:
+        results = InvestigationService.get_investigation_results(investigation_id)
+        
+        return jsonify({
+            'success': True,
+            'results': results
+        })
+        
+    except Exception as e:
+        print(f"❌ ERROR in get_investigation_results: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @app.route('/api/investigations', methods=['POST'])
 def create_investigation():

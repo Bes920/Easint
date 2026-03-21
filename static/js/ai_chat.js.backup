@@ -1,10 +1,11 @@
 /**
- * AI Chat JavaScript - COMPLETELY FIXED
- * All issues from Codex diagnosis resolved
+ * AI Chat JavaScript - FIXED VERSION
+ * Handles chatbot functionality for EASINT platform
+ * 
+ * Location: static/js/ai_chat.js
  */
 
 let currentInvestigationId = null;
-let currentInvestigation = null; // ✅ Store full investigation data
 let chatMessages = [];
 
 /**
@@ -40,14 +41,13 @@ async function loadInvestigations() {
 }
 
 /**
- * Handle investigation selection change - COMPLETELY FIXED
+ * Handle investigation selection change - FIXED
  */
 async function onInvestigationChange(event) {
     const investigationId = event.target.value;
     
     if (!investigationId) {
         currentInvestigationId = null;
-        currentInvestigation = null;
         document.getElementById('investigationInfo').textContent = '';
         clearChat();
         return;
@@ -55,27 +55,23 @@ async function onInvestigationChange(event) {
     
     currentInvestigationId = investigationId;
     
+    // Load investigation details
     try {
-        // ✅ FIX 1: Get investigation (expecting {success, investigation})
+        // Get investigation
         const invResponse = await fetch(`/api/investigations/${investigationId}`);
         const invData = await invResponse.json();
         
-        console.log('Investigation data:', invData); // Debug
-        
-        // ✅ FIX 2: Check for success flag
         if (!invData.success) {
-            throw new Error(invData.error || 'Failed to load investigation');
+            throw new Error('Failed to load investigation');
         }
         
         const inv = invData.investigation;
-        currentInvestigation = inv;
         
-        // ✅ FIX 3: Use already-loaded results instead of separate fetch
-        // The investigation already has results from get_investigation_with_results
-        const results = inv.results || [];
-        const resultsCount = results.length;
+        // Get results separately
+        const resultsResponse = await fetch(`/api/investigations/${investigationId}/results`);
+        const resultsData = await resultsResponse.json();
         
-        console.log('Results count:', resultsCount); // Debug
+        const resultsCount = resultsData.success ? resultsData.results.length : 0;
         
         // Update info display
         const info = `${resultsCount} result${resultsCount !== 1 ? 's' : ''} • Status: ${inv.status}`;
@@ -99,7 +95,7 @@ async function onInvestigationChange(event) {
     } catch (error) {
         console.error('Error loading investigation:', error);
         document.getElementById('investigationInfo').textContent = 'Error loading investigation';
-        addMessageToUI('Error loading investigation. Please try again.', 'bot');
+        addMessageToUI('Error loading investigation details. Please try again.', 'bot');
     }
 }
 
@@ -160,16 +156,14 @@ async function sendMessage() {
         if (data.success) {
             addMessageToUI(data.response, 'bot', data.timestamp);
         } else {
-            // Show user-friendly error message
-            const errorMsg = data.error || 'Unknown error occurred';
-            addMessageToUI(`❌ ${errorMsg}`, 'bot');
+            addMessageToUI(`Error: ${data.error}`, 'bot');
             console.error('AI Error:', data.error); // Debug
         }
         
     } catch (error) {
         console.error('Chat error:', error);
         showTyping(false);
-        addMessageToUI('Sorry, I encountered an error. Please check the console for details.', 'bot');
+        addMessageToUI('Sorry, I encountered an error. Please try again.', 'bot');
     } finally {
         input.disabled = false;
         sendBtn.disabled = false;
