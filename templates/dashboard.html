@@ -197,16 +197,74 @@
                         <h3>Investigation Results</h3>
                         <span class="result-count" id="detailsResultCount">0 results</span>
                     </div>
-                    <div id="detailsResults" class="results-timeline">
-                        <!-- Results will be inserted here -->
+                <div id="detailsResults" class="results-timeline">
+                    <!-- Results will be inserted here -->
+                </div>
+                <div id="detailsEmptyResults" class="empty-results hidden">
+                    <p>No results yet. Run some OSINT tools and link them to this investigation.</p>
+                </div>
+            </div>
+
+            <!-- AI Chat Section -->
+            <div class="details-section ai-chat-section">
+                <div class="section-header">
+                    <h3>🤖 AI Analysis</h3>
+                    <span class="ai-status" id="aiStatus">Ready</span>
+                </div>
+
+                <!-- Suggested Questions -->
+                <div class="suggested-questions" id="suggestedQuestions">
+                    <button class="suggested-question" onclick="askDashboardQuestion('What is the overall threat level?')">
+                        Overall threat?
+                    </button>
+                    <button class="suggested-question" onclick="askDashboardQuestion('Which results are most concerning?')">
+                        Most concerning?
+                    </button>
+                    <button class="suggested-question" onclick="askDashboardQuestion('Are there any correlations between the results?')">
+                        Correlations?
+                    </button>
+                    <button class="suggested-question" onclick="askDashboardQuestion('What should I investigate next?')">
+                        Next steps?
+                    </button>
+                </div>
+
+                <!-- Chat Messages Container -->
+                <div class="dashboard-chat-container">
+                    <div class="dashboard-chat-messages" id="dashboardChatMessages">
+                        <div class="empty-chat-state">
+                            <div class="empty-chat-icon">💬</div>
+                            <p>Ask me anything about this investigation!</p>
+                        </div>
                     </div>
-                    <div id="detailsEmptyResults" class="empty-results hidden">
-                        <p>No results yet. Run some OSINT tools and link them to this investigation.</p>
+
+                    <!-- Typing Indicator -->
+                    <div class="typing-indicator" id="dashboardTypingIndicator">
+                        <div class="message-bubble bot">
+                            <div class="typing-dots">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Actions -->
-                <div class="details-actions">
+                <!-- Chat Input -->
+                <div class="dashboard-chat-input-area">
+                    <input 
+                        type="text" 
+                        id="dashboardChatInput" 
+                        class="dashboard-chat-input" 
+                        placeholder="Ask about this investigation..."
+                    >
+                    <button class="dashboard-chat-send-btn" id="dashboardChatSendBtn" onclick="sendDashboardMessage()">
+                        Send
+                    </button>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="details-actions">
                     <button class="btn btn-secondary" onclick="exportInvestigation()">
                         <span class="btn-icon">📄</span>
                         <span>Export PDF</span>
