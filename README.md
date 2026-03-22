@@ -24,7 +24,7 @@ A **professional-grade Open Source Intelligence (OSINT) platform** that replaces
 | 🖥️ **Mac Lookup** | Identify device vendors by MAC address |
 | 💾 **Export Results** | Download findings as JSON for reports |
 | 🧹 **Clean Interface** | Professional dark theme, easy navigation |
-| 🤖 **AI Analyst Chat** | Select a saved investigation, then ask Gemini-powered questions for threat context, correlations, and next steps. |
+| 🤖 **AI Analyst Chat** | Select a saved investigation and open the detail modal to ask Gemini-powered questions, view typing indicators, and see responses inside the investigation UI. |
 
 ---
 
@@ -147,7 +147,8 @@ pip install google-genai --break-system-packages
 ```
 
 - Make sure `GEMINI_API_KEY` is set in `.env`
-- Run `python test_gemini_api.py` to list available models and confirm the key is valid before opening the chat page
+- Run `python test_gemini_api.py` to list available models and confirm the key is valid before opening the chat features
+- Once the server is running, open `/dashboard`, click an investigation, and interact with the new AI Analysis section at the bottom of the modal (typed messages or quick-question buttons trigger `/ai/chat` and show replies inline).
 
 ### **▶️ Step 5: Run the Application**
 
@@ -188,9 +189,10 @@ Visit: **http://localhost:5000** 🎉
 
 ## 🤖 **AI Assistant & Investigation Insights**
 
-- **Blueprint & routes**: `routes/ai_routes.py` registers a dedicated `/ai` blueprint that exposes `/chat` for conversational questions, `/analyze/<investigation_id>` for AI-generated executive summaries, and `/test` to verify the Gemini connection. `app.py` mounts the blueprint and adds a `/ai-test` view so the chat UI can be exercised independently before wiring into dashboards.
+- **Blueprint & routes**: `routes/ai_routes.py` registers a dedicated `/ai` blueprint that exposes `/chat` for conversational questions, `/analyze/<investigation_id>` for AI-generated executive summaries, and `/test` to verify the Gemini connection. `app.py` mounts the blueprint and adds a `/ai-test` view so the chat UI can be exercised independently alongside the dashboard.
 - **Gemini service**: `services/gemini_ai_service.py` wraps `google-genai`/Gemini, builds structured prompts from `InvestigationService.get_investigation_with_results`, and exposes `chat`, `analyze_result`, and `analyze_investigation` helpers to assess threat levels, extract findings, correlations, and recommend next steps.
-- **UI & quick questions**: `templates/ai_test.html` + `static/js/ai_chat.js` power the AI chat page. Users pick an investigation, see result counts + status, then ask free-form questions or hit the quick-question buttons (“Overall threat?”, “Most concerning?”, etc.). The client shows typing indicators, timestamps, and leverages `/ai/chat` for each turn.
+- **Dashboard integration**: `templates/dashboard.html` now includes the AI Analysis section in the investigation details modal, while `static/js/dashboard.js` handles the chat state (`initializeDashboardChat`, typing indicator, quick-answer buttons, and `/ai/chat` requests). The newest CSS block in `static/css/dashboard.css` styles the chat bubbles, typing indicator, and related controls.
+- **Legacy UI**: The standalone `templates/ai_test.html` + `static/js/ai_chat.js` remain available for direct experimentation, showing typing indicators and quick-question shortcuts; their responses now mirror what the dashboard provides inside each investigation.
 - **Chat persistence (future-ready)**: `services/chat_service.py` centralizes Supabase interactions for saving sessions and histories so conversational context can later be reloaded or audited.
 - **Test harness**: `test_gemini_api.py` lists available Gemini models and generates a “hello” prompt so you know the key, network, and `google-genai` install are working before relying on the assistant in production.
 
