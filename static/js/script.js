@@ -81,6 +81,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const menuItems = document.querySelectorAll('.menu-item');
     const toolPanels = document.querySelectorAll('.tool-panel');
+    const toolDescriptionTitle = document.getElementById('toolDescriptionTitle');
+    const toolDescriptionText = document.getElementById('toolDescriptionText');
+
+    function updateToolDescription(button) {
+        if (!button || !toolDescriptionTitle || !toolDescriptionText) return;
+        const title = button.dataset.toolTitle || button.textContent.trim();
+        const description = button.dataset.description || 'Select a tool to read a quick summary of what it can do.';
+        toolDescriptionTitle.textContent = title;
+        toolDescriptionText.textContent = description;
+    }
     
     menuItems.forEach(item => {
         item.addEventListener('click', function() {
@@ -102,8 +112,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (targetPanel) {
                 targetPanel.classList.add('active');
             }
+            updateToolDescription(this);
         });
     });
+
+    const initialTool = document.querySelector('.menu-item.active');
+    if (initialTool) {
+        updateToolDescription(initialTool);
+    }
     
     
     // ==========================================================================
