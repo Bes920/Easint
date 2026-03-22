@@ -1,55 +1,41 @@
 """
-Test Mistral AI Connection - FIXED
+Quick check that the Mistral API key in `.env` is reachable.
 """
+
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
 try:
-    # Correct import for Mistral SDK
-    from mistralai.client import MistralClient
-    from mistralai.models.chat_completion import ChatMessage
-    
-    # Get API key
+    from mistralai.client import Mistral
+
     api_key = os.getenv('MISTRAL_API_KEY')
-    
     if not api_key:
-        print("❌ MISTRAL_API_KEY not found in .env file")
-        print("Add this line to your .env file:")
-        print("MISTRAL_API_KEY=your-key-here")
-        exit(1)
-    
-    print("Testing Mistral AI connection...")
-    
-    # Initialize client
-    client = MistralClient(api_key=api_key)
-    
-    # Test API call
-    messages = [
-        ChatMessage(role="user", content="Say 'Hello Easint!' in one sentence.")
-    ]
-    
-    response = client.chat(
-        model="mistral-small-latest",
-        messages=messages
+        raise ValueError('MISTRAL_API_KEY not set in environment variables')
+
+    client = Mistral(api_key=api_key)
+    print('Testing Mistral API...')
+
+    response = client.chat.complete(
+        model='mistral-small-latest',
+        messages=[
+            {'role': 'system', 'content': 'You are a helpful assistant that only says one sentence.'},
+            {'role': 'user', 'content': 'Say "Hello from Mistral!" in one sentence.'}
+        ]
     )
-    
-    print("✅ Mistral AI works!")
-    print(f"Response: {response.choices[0].message.content}")
-    print("\n🎉 Ready to build AI features!")
-    
-except ImportError as e:
-    print(f"❌ Import Error: {e}")
-    print("\nTry reinstalling:")
-    print("pip uninstall mistralai -y")
-    print("pip install mistralai --break-system-packages")
-    
-except Exception as e:
-    print(f"❌ Error: {e}")
-    print("\nTroubleshooting:")
-    print("1. Check your API key is correct")
-    print("2. Verify you have internet connection")
-    print("3. Make sure you have free credits in your Mistral account")
-    print("4. Try: pip install --upgrade mistralai --break-system-packages")
+
+    content = response.choices[0].message.content
+    print('✅ Mistral API works!')
+    print('Response:', content)
+    print('Model used: mistral-small-latest')
+
+except ImportError:
+    print('❌ mistralai client missing. Run: pip install mistralai --break-system-packages')
+
+except Exception as err:
+    print(f'❌ Error: {err}')
+    print('\nTroubleshooting:')
+    print('1. Confirm MISTRAL_API_KEY is set in the .env file and exported before running this script.')
+    print('2. Ensure the key is active and has no IP/referrer restrictions.')
+    print('3. Verify internet access and that mistralai 2.0+ is installed correctly.')

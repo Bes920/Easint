@@ -21,12 +21,12 @@ import base64
 from io import BytesIO
 import csv
 from dotenv import load_dotenv
-
+from routes.ai_routes import ai_bp
 # Load environment variables from .env file
 load_dotenv()
 
 app = Flask(__name__)
-
+app.register_blueprint(ai_bp)
 # Upload configuration
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx', 'exe', 'zip', 'rar'}
@@ -55,6 +55,14 @@ BLOCKCHAIN_API_KEY = os.getenv('BLOCKCHAIN_API_KEY', 'YOUR_API_KEY_HERE')
 # =============================================================================
 # ROUTES
 # =============================================================================
+
+#ai_chat route is in routes/ai_routes.py for better organization
+@app.route('/ai-test')
+def ai_test_page():
+    """AI chatbot test page"""
+    return render_template('ai_test.html')
+
+
 
 @app.route('/')
 def index():
@@ -1176,16 +1184,45 @@ def get_investigation(investigation_id):
         investigation = InvestigationService.get_investigation_with_results(investigation_id)
         
         if not investigation:
-            return jsonify({'error': 'Investigation not found'}), 404
+            return jsonify({
+                'success': False,
+                'error': 'Investigation not found'
+            }), 404
         
-        return jsonify(investigation)
+        # ✅ FIX: Wrap in success response
+        return jsonify({
+            'success': True,
+            'investigation': investigation
+        })
         
     except Exception as e:
         print(f"❌ ERROR in get_investigation: {e}")
         import traceback
         traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
-
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+ 
+@app.route('/api/investigations/<investigation_id>/results', methods=['GET'])
+def get_investigation_results(investigation_id):
+    """Get all results for an investigation"""
+    try:
+        results = InvestigationService.get_investigation_results(investigation_id)
+        
+        return jsonify({
+            'success': True,
+            'results': results
+        })
+        
+    except Exception as e:
+        print(f"❌ ERROR in get_investigation_results: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @app.route('/api/investigations', methods=['POST'])
 def create_investigation():

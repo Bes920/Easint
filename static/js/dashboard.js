@@ -339,8 +339,9 @@ async function viewInvestigation(investigationId) {
         const data = await response.json();
         
         if (response.ok) {
-            currentInvestigation = data;
-            showInvestigationDetails(data);
+            const investigation = data.investigation || data;
+            currentInvestigation = investigation;
+            showInvestigationDetails(investigation);
         } else {
             showError('Failed to load investigation details');
         }
@@ -402,6 +403,9 @@ function showInvestigationDetails(investigation) {
     
     // Show modal
     document.getElementById('investigationDetailsModal').classList.remove('hidden');
+
+    // Initialize AI chat
+    initializeDashboardChat(investigation.id);
 }
 
 function closeDetailsModal() {
@@ -528,4 +532,189 @@ function showSuccess(message) {
 function showError(message) {
     // Simple alert for now - you can replace with a toast notification
     alert('❌ ' + message);
+}
+
+// ==========================================================================
+// AI CHAT FUNCTIONALITY
+// ==========================================================================
+
+// AI Chat State
+let dashboardChatMessages = [];
+
+/**
+ * Initialize AI chat when investigation modal opens
+ */
+function initializeDashboardChat(investigationId) {
+    if (!investigationId) return;
+    
+    // Clear previous chat
+    dashboardChatMessages = [];
+    const messagesContainer = document.getElementById('dashboardChatMessages');
+    if (messagesContainer) {
+        messagesContainer.innerHTML = `
+            <div class="empty-chat-state">
+                <div class="empty-chat-icon">💬</div>
+                <p>Ask me anything about this investigation!</p>
+            </div>
+        `;
+    }
+    
+    // Add Enter key support
+    const input = document.getElementById('dashboardChatInput');
+    if (input) {
+        const newInput = input.cloneNode(true);
+        input.parentNode.replaceChild(newInput, input);
+        
+        newInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendDashboardMessage();
+            }
+        });
+    }
+    
+    console.log('AI chat initialized for investigation:', investigationId);
+}
+
+/**
+ * Send message from dashboard chat
+ */
+async function sendDashboardMessage() {
+    const input = document.getElementById('dashboardChatInput');
+    const sendBtn = document.getElementById('dashboardChatSendBtn');
+    if (!input || !sendBtn) return;
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    if (!currentInvestigation) {
+        alert('No investigation selected');
+        return;
+    }
+    
+    input.disabled = true;
+    sendBtn.disabled = true;
+    
+    addDashboardMessage(message, 'user');
+    input.value = '';
+    
+    showDashboardTyping(true);
+    
+    try {
+        const response = await fetch('/ai/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                investigation_id: currentInvestigation.id,
+                message: message
+            })
+        });
+        
+        const data = await response.json();
+        
+        showDashboardTyping(false);
+        
+        if (data.success) {
+            addDashboardMessage(data.response, 'bot', data.timestamp);
+        } else {
+            addDashboardMessage(`❌ ${data.error || 'Error occurred'}`, 'bot');
+        }
+        
+    } catch (error) {
+        console.error('Dashboard chat error:', error);
+        showDashboardTyping(false);
+        addDashboardMessage('Sorry, I encountered an error. Please try again.', 'bot');
+    } finally {
+        input.disabled = false;
+        sendBtn.disabled = false;
+        input.focus();
+    }
+}
+
+/**
+ * Ask a suggested question
+ */
+function askDashboardQuestion(question) {
+    const input = document.getElementById('dashboardChatInput');
+    if (input) {
+        input.value = question;
+        sendDashboardMessage();
+    }
+}
+
+/**
+ * Add message to chat UI
+ */
+function addDashboardMessage(text, sender, timestamp = null) {
+    const messagesContainer = document.getElementById('dashboardChatMessages');
+    const typingIndicator = document.getElementById('dashboardTypingIndicator');
+    
+    if (!messagesContainer) return;
+    
+    const emptyState = messagesContainer.querySelector('.empty-chat-state');
+    if (emptyState) {
+        emptyState.remove();
+    }
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${sender}`;
+    
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = `message-bubble ${sender}`;
+    bubbleDiv.textContent = text;
+    
+    messageDiv.appendChild(bubbleDiv);
+    
+    if (timestamp) {
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'message-time';
+        timeDiv.textContent = formatChatTimestamp(timestamp);
+        messageDiv.appendChild(timeDiv);
+    }
+    
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    dashboardChatMessages.push({ text, sender, timestamp });
+}
+
+/**
+ * Show/hide typing indicator
+ */
+function showDashboardTyping(show) {
+    const indicator = document.getElementById('dashboardTypingIndicator');
+    if (!indicator) return;
+    
+    if (show) {
+        indicator.classList.add('active');
+    } else {
+        indicator.classList.remove('active');
+    }
+    
+    const messagesContainer = document.getElementById('dashboardChatMessages');
+    if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+}
+
+/**
+ * Format timestamp
+ */
+function formatChatTimestamp(timestamp) {
+    if (!timestamp) return '';
+    
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 60000) return 'Just now';
+    if (diff < 3600000) {
+        const minutes = Math.floor(diff / 60000);
+        return `${minutes} min${minutes > 1 ? 's' : ''} ago`;
+    }
+    if (diff < 86400000) {
+        const hours = Math.floor(diff / 3600000);
+        return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    }
+    return date.toLocaleString();
 }
