@@ -21,7 +21,7 @@ class GeminiAIService:
             raise ValueError("GEMINI_API_KEY not found in environment variables")
         
         self.client = genai.Client(api_key=api_key)
-        self.model = "gemini-2.0-flash-exp"  # Fast, free model
+        self.model = "gemini-flash-latest"  # Fast, free model
     
     def chat(self, investigation_data: Dict, user_message: str, chat_history: List[Dict] = None) -> str:
         """
