@@ -339,8 +339,9 @@ async function viewInvestigation(investigationId) {
         const data = await response.json();
         
         if (response.ok) {
-            currentInvestigation = data;
-            showInvestigationDetails(data);
+            const investigation = data.investigation || data;
+            currentInvestigation = investigation;
+            showInvestigationDetails(investigation);
         } else {
             showError('Failed to load investigation details');
         }
