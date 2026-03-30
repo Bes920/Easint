@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easint - Understand, investigate, and learn OSINT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</head>
+<body class="homepage">
+    <div class="container home-shell">
+        <header class="home-header">
+            <div class="header-top">
+                <div class="header-left">
+                    <p class="eyebrow">OSINT workspace for research, investigation, and learning</p>
+                    <h1>Easint helps people understand OSINT from the first click.</h1>
+                    <p class="subtitle home-subtitle">
+                        Investigate domains, people, files, and infrastructure with focused tools, saved investigations,
+                        and guided learning that makes the platform feel approachable instead of overwhelming.
+                    </p>
+                </div>
+                <div class="header-right home-header-actions">
+                    <a href="{{ url_for('tools_page') }}" class="header-link">Tools</a>
+                    <a href="{{ url_for('dashboard') }}" class="header-link">Dashboard</a>
+                    <a href="{{ url_for('opsec') }}" class="header-link">Learn OSINT</a>
+                    <div class="theme-switcher">
+                        <button class="theme-btn" id="themeToggle" title="Switch theme">
+                            <span class="theme-icon">🌙</span>
+                            <span class="theme-label">Theme</span>
+                        </button>
+                        <div class="theme-menu" id="themeMenu">
+                            <button class="theme-option" data-theme="system">🖥️ System</button>
+                            <button class="theme-option" data-theme="dark">🌙 Dark</button>
+                            <button class="theme-option" data-theme="light">☀️ Light</button>
+                            <button class="theme-option" data-theme="neon">⚡ Neon</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="home-page">
+            <section class="hero-section">
+                <div class="hero-copy">
+                    <span class="hero-badge">Built for first-time visitors and repeat analysts</span>
+                    <h2>Choose the path that matches what you need right now.</h2>
+                    <p>
+                        Easint is not only a toolbox. It is also a guided entry point into OSINT workflows:
+                        start a full investigation, launch a single tool for a quick check, or learn the
+                        tradecraft and OPSEC behind the work.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary hero-cta">Start an Investigation</a>
+                        <a href="{{ url_for('tools_page') }}" class="btn btn-secondary hero-cta ghost-cta">Open the Tool Workspace</a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <strong>18+</strong>
+                            <span>Integrated tools</span>
+                        </div>
+                        <div class="hero-stat">
+                            <strong>3</strong>
+                            <span>Clear user journeys</span>
+                        </div>
+                        <div class="hero-stat">
+                            <strong>1</strong>
+                            <span>Place to save results</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-panel">
+                    <div class="signal-card">
+                        <span class="signal-label">What Easint is for</span>
+                        <ul class="signal-list">
+                            <li>Checking a suspicious file or hash</li>
+                            <li>Investigating an IP, domain, username, or email</li>
+                            <li>Saving findings into investigations for later analysis</li>
+                            <li>Learning safer and smarter OSINT practices</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="journey-section">
+                <div class="section-heading">
+                    <span class="section-kicker">Three primary paths</span>
+                    <h2>Every visitor should immediately know where to go next.</h2>
+                </div>
+                <div class="journey-grid">
+                    <article class="journey-card">
+                        <span class="journey-icon">1</span>
+                        <h3>Run a full investigation</h3>
+                        <p>Create or select an investigation, run multiple tools, and keep results organized in one place.</p>
+                        <a href="{{ url_for('dashboard') }}" class="journey-link">Go to Dashboard</a>
+                    </article>
+                    <article class="journey-card">
+                        <span class="journey-icon">2</span>
+                        <h3>Use one tool quickly</h3>
+                        <p>Jump directly into the tools workspace when you already know the exact lookup or analysis you need.</p>
+                        <a href="{{ url_for('tools_page') }}" class="journey-link">Go to Tools</a>
+                    </article>
+                    <article class="journey-card">
+                        <span class="journey-icon">3</span>
+                        <h3>Learn OSINT safely</h3>
+                        <p>Explore OPSEC, privacy, metadata, and investigation habits so users understand both capability and caution.</p>
+                        <a href="{{ url_for('opsec') }}" class="journey-link">Go to Learning</a>
+                    </article>
+                </div>
+            </section>
+
+            <section class="quick-launch-section">
+                <div class="section-heading">
+                    <span class="section-kicker">Quick launch</span>
+                    <h2>Direct entry points for common tasks.</h2>
+                    <p>These links open the workspace already focused on a specific tool.</p>
+                </div>
+                <div class="quick-launch-grid">
+                    <a href="{{ url_for('tools_page') }}?tool=email-osint" class="launch-card">
+                        <strong>Email OSINT</strong>
+                        <span>Validate an email and inspect related mail infrastructure.</span>
+                    </a>
+                    <a href="{{ url_for('tools_page') }}?tool=whois-lookup" class="launch-card">
+                        <strong>Domain WHOIS</strong>
+                        <span>Check ownership, registrar, and lifecycle details for a domain.</span>
+                    </a>
+                    <a href="{{ url_for('tools_page') }}?tool=ip-checker" class="launch-card">
+                        <strong>IP Reputation</strong>
+                        <span>Review abuse signals and reputation data across multiple sources.</span>
+                    </a>
+                    <a href="{{ url_for('tools_page') }}?tool=file-upload" class="launch-card">
+                        <strong>File Analysis</strong>
+                        <span>Upload a file, calculate hashes, and compare against VirusTotal.</span>
+                    </a>
+                    <a href="{{ url_for('tools_page') }}?tool=username-search" class="launch-card">
+                        <strong>Username Search</strong>
+                        <span>Search for matching public profiles across common platforms.</span>
+                    </a>
+                    <a href="{{ url_for('tools_page') }}?tool=google-dork" class="launch-card">
+                        <strong>Google Dorking</strong>
+                        <span>Generate focused queries for documents, social footprints, and exposed pages.</span>
+                    </a>
+                </div>
+            </section>
+
+            <section class="workflow-section">
+                <div class="section-heading">
+                    <span class="section-kicker">How it works</span>
+                    <h2>A calmer way to understand the platform.</h2>
+                </div>
+                <div class="workflow-grid">
+                    <article class="workflow-step">
+                        <span class="step-number">01</span>
+                        <h3>Pick a target or a question</h3>
+                        <p>Start with a file, IP, domain, email, username, wallet, or investigative topic.</p>
+                    </article>
+                    <article class="workflow-step">
+                        <span class="step-number">02</span>
+                        <h3>Run the right tool or toolset</h3>
+                        <p>Use a quick single lookup or combine several tools to build a broader picture.</p>
+                    </article>
+                    <article class="workflow-step">
+                        <span class="step-number">03</span>
+                        <h3>Save and review findings</h3>
+                        <p>Store results inside investigations, revisit them in the dashboard, and continue with AI-assisted analysis.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="category-section">
+                <div class="section-heading">
+                    <span class="section-kicker">Platform overview</span>
+                    <h2>What users can investigate inside Easint.</h2>
+                </div>
+                <div class="category-grid">
+                    <article class="category-card">
+                        <h3>Files</h3>
+                        <p>Hash lookup, upload analysis, and metadata extraction for suspicious documents and media.</p>
+                    </article>
+                    <article class="category-card">
+                        <h3>Infrastructure</h3>
+                        <p>IP reputation, geolocation, reverse IP, DNS, WHOIS, SSL, and subdomain enumeration.</p>
+                    </article>
+                    <article class="category-card">
+                        <h3>People and identities</h3>
+                        <p>Email OSINT, breach checks, username hunting, and related public account discovery.</p>
+                    </article>
+                    <article class="category-card">
+                        <h3>Learning and OPSEC</h3>
+                        <p>Training-oriented content for safer investigations, metadata awareness, and privacy hygiene.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="trust-strip">
+                <div>
+                    <span class="section-kicker">Use responsibly</span>
+                    <h2>Built for authorized research, education, and legitimate investigations.</h2>
+                </div>
+                <p>
+                    Easint should help people understand OSINT quickly, but it should also make the legal and ethical
+                    boundary clear from the start.
+                </p>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

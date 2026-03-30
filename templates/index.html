@@ -12,7 +12,7 @@
         <header>
             <div class="header-top">
                 <div class="header-left">
-                    <h1>🔍Easint</h1>
+                    <h1><a href="{{ url_for('index') }}" class="brand-link">🔍Easint</a></h1>
                     <p class="subtitle">Professional Intelligence & Investigation Toolkit</p>
                 </div>
                 <div class="header-right">
@@ -39,12 +39,17 @@
         <div class="main-layout">
             <aside class="sidebar">
     
-            <a href="/opsec" class="opsec-academy-btn">
+            <a href="{{ url_for('index') }}" class="dashboard-btn">
+        <span class="btn-icon">🏠</span>
+        <span class="btn-text">Home</span>
+        <span class="btn-arrow">→</span>
+            </a>
+            <a href="{{ url_for('opsec') }}" class="opsec-academy-btn">
         <span class="btn-icon">🛡️</span>
         <span class="btn-text">OPSEC </span>
         <span class="btn-arrow">→</span>
             </a>
-          <a href="/dashboard" class="dashboard-btn">
+          <a href="{{ url_for('dashboard') }}" class="dashboard-btn">
     <span class="btn-icon">📊</span>
     <span class="btn-text">Dashboard</span>
     <span class="btn-arrow">→</span>
@@ -66,7 +71,7 @@
                     <option value="">🔄 Loading investigations...</option>
                 </select>
 
-                <a href="/dashboard" class="manage-btn" title="Manage investigations">
+                <a href="{{ url_for('dashboard') }}" class="manage-btn" title="Manage investigations">
                     <span class="manage-icon">⚙️</span>
                     <span class="manage-text">Manage</span>
                 </a>

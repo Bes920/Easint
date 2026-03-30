@@ -91,34 +91,48 @@ document.addEventListener('DOMContentLoaded', function() {
         toolDescriptionTitle.textContent = title;
         toolDescriptionText.textContent = description;
     }
-    
+
+    function activateTool(toolId) {
+        const targetButton = document.querySelector(`.menu-item[data-tool="${toolId}"]`);
+        if (!targetButton) return false;
+
+        // Clear all results when switching tools
+        document.querySelectorAll('.results').forEach(div => {
+            div.classList.add('hidden');
+            div.innerHTML = '';
+        });
+
+        menuItems.forEach(mi => mi.classList.remove('active'));
+        targetButton.classList.add('active');
+
+        toolPanels.forEach(panel => panel.classList.remove('active'));
+        const targetPanel = document.getElementById(toolId);
+        if (targetPanel) {
+            targetPanel.classList.add('active');
+        }
+
+        updateToolDescription(targetButton);
+        return true;
+    }
+
     menuItems.forEach(item => {
         item.addEventListener('click', function() {
             const toolId = this.getAttribute('data-tool');
-            
-            // CLEAR ALL RESULTS when switching tools
-            document.querySelectorAll('.results').forEach(div => {
-                div.classList.add('hidden');
-                div.innerHTML = '';
-            });
-            
-            // Update menu
-            menuItems.forEach(mi => mi.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Show tool panel
-            toolPanels.forEach(panel => panel.classList.remove('active'));
-            const targetPanel = document.getElementById(toolId);
-            if (targetPanel) {
-                targetPanel.classList.add('active');
-            }
-            updateToolDescription(this);
+            activateTool(toolId);
         });
     });
 
     const initialTool = document.querySelector('.menu-item.active');
     if (initialTool) {
         updateToolDescription(initialTool);
+    }
+
+    const toolFromQuery = new URLSearchParams(window.location.search).get('tool');
+    const toolFromHash = window.location.hash ? window.location.hash.slice(1) : '';
+    if (toolFromQuery) {
+        activateTool(toolFromQuery);
+    } else if (toolFromHash) {
+        activateTool(toolFromHash);
     }
     
     

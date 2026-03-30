@@ -126,11 +126,12 @@ if (document.readyState === 'loading') {
     new ThemeManager();
 }
 async function loadInvestigationsDropdown() {
+    const dropdown = document.getElementById('currentInvestigation');
+    if (!dropdown) return;
+
     try {
         const response = await fetch('/api/investigations');
         const data = await response.json();
-
-        const dropdown = document.getElementById('currentInvestigation');
 
         if (data.success && data.investigations.length > 0) {
             // Clear loading option
@@ -171,7 +172,6 @@ async function loadInvestigationsDropdown() {
 
     } catch (error) {
         console.error('Failed to load investigations:', error);
-        const dropdown = document.getElementById('currentInvestigation');
         dropdown.innerHTML = '<option value="auto">📁 Auto-saved Results (Default)</option>';
     }
 }
@@ -179,6 +179,7 @@ async function loadInvestigationsDropdown() {
 // Get currently selected investigation ID
 function getCurrentInvestigationId() {
     const dropdown = document.getElementById('currentInvestigation');
+    if (!dropdown) return null;
     const value = dropdown.value;
 
     // If 'auto' or empty, return null (will use default "Auto-saved Results")

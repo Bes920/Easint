@@ -66,7 +66,13 @@ def ai_test_page():
 
 @app.route('/')
 def index():
-    """Home page with all OSINT tools"""
+    """Homepage that explains the platform and directs users to the right workflow"""
+    return render_template('home.html')
+
+
+@app.route('/tools')
+def tools_page():
+    """Primary workspace containing all OSINT tools"""
     return render_template('index.html')
 
 

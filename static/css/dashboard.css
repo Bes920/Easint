@@ -24,6 +24,13 @@
     box-shadow: var(--shadow-sm);
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .header-left .back-link {
     display: flex;
     align-items: center;
