@@ -2,7 +2,7 @@
 
 > **18+ Investigation Tools | Production-Ready | For Security Researchers & Analysts**
 
-A **professional-grade Open Source Intelligence (OSINT) platform** that replaces expensive, complex investigation workflows. Instead of juggling 5-10 different websites and tools, EASINT brings all 18+ OSINT capabilities into one unified interface. Designed for cybersecurity professionals, researchers, and analysts who need fast, reliable intelligence gathering.
+A **professional-grade Open Source Intelligence (OSINT) platform** that replaces expensive, complex investigation workflows. Instead of juggling 5-10 different websites and tools, EASINT brings its investigation, analysis, and learning workflows into one unified interface. The production app opens on a guided homepage, then routes users into the tool workspace, the investigation dashboard, or the OPSEC learning area.
 
 ---
 
@@ -25,13 +25,15 @@ A **professional-grade Open Source Intelligence (OSINT) platform** that replaces
 | 💾 **Export Results** | Download findings as JSON for reports |
 | 🧹 **Clean Interface** | Professional dark theme, easy navigation |
 | 🤖 **AI Analyst Chat** | Select a saved investigation and open the detail modal to ask Gemini-powered questions, view typing indicators, and see responses inside the investigation UI. |
+| 🏠 **Guided Homepage** | Production-ready landing page that introduces the platform and routes users to the right workspace |
+| 🧭 **Cross-Page Navigation** | Direct navigation between Home, Tools, Dashboard, and Learn OSINT pages |
 
 ---
 
 
-- Results clear when switching tools.
-- No confusing leftover data.
-- Professional investigation workflow.
+- Guided homepage for first-time and returning users.
+- Clear movement between workspaces without losing orientation.
+- Professional investigation workflow with saved results and AI analysis.
 
 ---
 
@@ -100,13 +102,13 @@ pip install -r requirements.txt
 
 ### **🔑 Step 2: Configure API Keys**
 
-1. **Copy the example configuration:**
+1. **Create a `.env` file in the project root:**
 ```bash
-cp .env.example .env
+touch .env
 ```
 
-2. **Edit `.env` file and add your API keys:**
-```
+2. **Edit `.env` and add your API keys:**
+```env
 VIRUSTOTAL_API_KEY=your_key_here
 ABUSEIPDB_API_KEY=your_key_here
 HIBP_API_KEY=your_key_here
@@ -172,6 +174,14 @@ python app.py
 
 Visit: **http://localhost:5000** 🎉
 
+### **🗺️ Route Overview**
+
+- `/` opens the guided homepage
+- `/tools` opens the full OSINT tool workspace
+- `/dashboard` opens saved investigations and AI-assisted analysis
+- `/opsec` opens the OPSEC and OSINT learning area
+- Dashboard and OPSEC both include direct links back to the homepage
+
 ---
 
 ## 🧱 **Architecture Overview**
@@ -184,8 +194,9 @@ Visit: **http://localhost:5000** 🎉
 
 ### Key data flows
 1. **Tool request**: user submits a form → browser sends a POST to `/check-ip`, `/google-dork`, `/hash-check`, etc. → backend enriches the payload with API responses → `ResultsService` automatically saves the output to the currently selected investigation (defaulting to the “Auto-saved Results” investigation if none is selected).
-2. **Investigation dashboard**: `/api/investigations` populates the sidebar dropdown on the tools page, while `/dashboard` renders the management interface powered by `dashboard.js`.
-3. **Investigation lifecycle**: results are grouped per investigation via `InvestigationService.add_investigation_result` with threat-level heuristics, and CRUD operations + status updates/deletions are handled via dedicated REST endpoints.
+2. **Workspace routing**: `/` introduces the platform, while the primary navigation moves users into `/tools`, `/dashboard`, or `/opsec` depending on whether they want to investigate, manage saved work, or learn.
+3. **Investigation dashboard**: `/api/investigations` populates the sidebar dropdown on the tools page, while `/dashboard` renders the management interface powered by `dashboard.js`.
+4. **Investigation lifecycle**: results are grouped per investigation via `InvestigationService.add_investigation_result` with threat-level heuristics, and CRUD operations + status updates/deletions are handled via dedicated REST endpoints.
 
 ## 🤖 **AI Assistant & Investigation Insights**
 
@@ -201,6 +212,7 @@ Visit: **http://localhost:5000** 🎉
 - The dropdown on the tools page (and mirrored in `theme.js`) loads every investigation via `/api/investigations`, prioritizes the auto-save one, and persists the user's choice in `localStorage`.
 - When a tool posts data, `static/js/script.js` injects `investigation_id` automatically so the backend knows where to stash the result. `ResultsService.save_tool_result` creates the default investigation if needed, while `determine_threat_level` provides quick categorization (e.g., VirusTotal detection = `critical`).
 - The investigation dashboard at `/dashboard` lets analysts filter/search investigations, inspect results, change statuses, or delete entire investigations. Every change reflates back to Supabase via the service layer with consistent timestamps/metadata.
+- From both `/dashboard` and `/opsec`, users can now jump directly back to the homepage to switch context without retracing through the tools page first.
 
 ## 🛠️ **Tool-to-Endpoint Snapshot**
 
@@ -216,7 +228,6 @@ Each tool returns structured JSON that `script.js` renders into the UI with badg
 
 ## ⚙️ **Testing & Diagnostics**
 
-- `test_supabase.py` and `test_investigations.py` live in the repo root and exercise Supabase CRUD, investigation/result linkage, and chat history flows. Run them after configuring `.env` so you know your database hooks are solid.
 - `test_mistral.py` validates the Mistral AI client connection (requires `MISTRAL_API_KEY`), ensuring the AI side of future features can talk to the API without surprises.
 - `test_gemini_api.py` lists available Gemini models, pings the API, and generates a short response so you know `GEMINI_API_KEY` + `google-genai` are configured before opening `/ai-test`.
 - These scripts print guided outputs/error handling, making it easy to see what needs fixing before launching the UI.
@@ -347,7 +358,7 @@ EASINT centralizes ALL investigation tools in one interface:
 ✅ Input validation on all forms  
 ✅ File upload size limits (32MB)  
 ✅ Secure filename handling  
-✅ No data persistence (privacy)  
+✅ Investigation persistence through Supabase-backed services  
 ✅ API key environment variable support  
 ✅ Rate limiting ready  
 ✅ CORS security headers  
@@ -381,8 +392,10 @@ EASINT centralizes ALL investigation tools in one interface:
 
 ## 🎨 **UI/UX Excellence**
 
+- **Guided homepage** - Clear entry points for first-time and repeat users
 - **Professional dark theme** - OSINT aesthetic
-- **Sidebar navigation** - Easy tool switching
+- **Cross-page navigation** - Direct movement between Home, Tools, Dashboard, and Learn OSINT
+- **Sidebar navigation** - Easy tool switching within each workspace
 - **Result clearing** - Clean investigation flow
 - **Loading indicators** - User feedback
 - **Error handling** - Graceful failures
