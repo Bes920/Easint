@@ -174,6 +174,42 @@ python app.py
 
 Visit: **http://localhost:5000** 🎉
 
+## 🏷️ **Versioning & Previous Releases**
+
+- This repository now follows git tag versions such as `v0.0.1`, `v0.0.2`, `v0.1.0`.
+- The current tracked version is stored in `VERSION`.
+- Pushing a tag that matches `v*.*.*` triggers `.github/workflows/release-on-tag.yml`, which creates a GitHub Release automatically.
+- Even without the workflow, GitHub lets you download the exact source for any tag from the **Releases** or **Tags** page.
+
+### Create the next version
+
+```bash
+# Update the version file first
+echo "v0.0.2" > VERSION
+
+# Commit the change
+git add VERSION README.md .github/workflows/release-on-tag.yml
+git commit -m "chore: prepare v0.0.2"
+
+# Create and push the tag
+git tag -a v0.0.2 -m "Release v0.0.2"
+git push origin <your-branch> --tags
+```
+
+### Run an older version locally
+
+```bash
+# See available versions
+git tag --list
+
+# Switch to a specific version
+git checkout v0.0.1
+
+# Install dependencies if needed, then run
+pip install -r requirements.txt
+python app.py
+```
+
 ### **🗺️ Route Overview**
 
 - `/` opens the guided homepage
