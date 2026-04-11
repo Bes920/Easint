@@ -12,7 +12,7 @@
         <header>
             <div class="header-top">
                 <div class="header-left">
-                    <h1>🔍Easint</h1>
+                    <h1><a href="{{ url_for('index') }}" class="brand-link">🔍Easint</a></h1>
                     <p class="subtitle">Professional Intelligence & Investigation Toolkit</p>
                 </div>
                 <div class="header-right">
@@ -39,12 +39,17 @@
         <div class="main-layout">
             <aside class="sidebar">
     
-            <a href="/opsec" class="opsec-academy-btn">
+            <a href="{{ url_for('index') }}" class="dashboard-btn">
+        <span class="btn-icon">🏠</span>
+        <span class="btn-text">Home</span>
+        <span class="btn-arrow">→</span>
+            </a>
+            <a href="{{ url_for('opsec') }}" class="opsec-academy-btn">
         <span class="btn-icon">🛡️</span>
         <span class="btn-text">OPSEC </span>
         <span class="btn-arrow">→</span>
             </a>
-          <a href="/dashboard" class="dashboard-btn">
+          <a href="{{ url_for('dashboard') }}" class="dashboard-btn">
     <span class="btn-icon">📊</span>
     <span class="btn-text">Dashboard</span>
     <span class="btn-arrow">→</span>
@@ -66,7 +71,7 @@
                     <option value="">🔄 Loading investigations...</option>
                 </select>
 
-                <a href="/dashboard" class="manage-btn" title="Manage investigations">
+                <a href="{{ url_for('dashboard') }}" class="manage-btn" title="Manage investigations">
                     <span class="manage-icon">⚙️</span>
                     <span class="manage-text">Manage</span>
                 </a>
@@ -85,40 +90,45 @@
 
                     <div class="menu-section">
                         <h4>File Analysis</h4>
-                        <button class="menu-item active" data-tool="file-upload"><span class="icon">📤</span> File Upload</button>
-                        <button class="menu-item" data-tool="hash-checker"><span class="icon">🔐</span> Hash Check</button>
-                        <button class="menu-item" data-tool="exif-tool"><span class="icon">📸</span> ExifTool</button>
+                        <button class="menu-item active" data-tool="file-upload" data-tool-title="File Upload" data-description="Upload suspicious files, compute hashes, and scan them with VirusTotal before saving the output."><span class="icon">📤</span> File Upload</button>
+                        <button class="menu-item" data-tool="hash-checker" data-tool-title="Hash Check" data-description="Lookup MD5/SHA hashes to see if the file has been observed by VirusTotal or other repositories."><span class="icon">🔐</span> Hash Check</button>
+                        <button class="menu-item" data-tool="exif-tool" data-tool-title="ExifTool" data-description="Extract embedded metadata from images or documents to uncover creation dates, locations, and more."><span class="icon">📸</span> ExifTool</button>
                     </div>
                     <div class="menu-section">
                         <h4>Network</h4>
-                        <button class="menu-item" data-tool="ip-checker"><span class="icon">📍</span> IP Reputation</button>
-                        <button class="menu-item" data-tool="geo-lookup"><span class="icon">🌍</span> Geolocation</button>
-                        <button class="menu-item" data-tool="reverse-ip"><span class="icon">🔄</span> Reverse IP</button>
-                        <button class="menu-item" data-tool="mac-lookup"><span class="icon">💳</span> MAC Lookup</button>
+                        <button class="menu-item" data-tool="ip-checker" data-tool-title="IP Reputation" data-description="Combine AbuseIPDB and VirusTotal insights to understand an IP&apos;s risk profile."><span class="icon">📍</span> IP Reputation</button>
+                        <button class="menu-item" data-tool="geo-lookup" data-tool-title="Geolocation" data-description="Map an IP address to its approximate physical region and infrastructure."><span class="icon">🌍</span> Geolocation</button>
+                        <button class="menu-item" data-tool="reverse-ip" data-tool-title="Reverse IP" data-description="Discover every domain that currently resolves to the same IP address."><span class="icon">🔄</span> Reverse IP</button>
+                        <button class="menu-item" data-tool="mac-lookup" data-tool-title="MAC Lookup" data-description="Identify the manufacturer or vendor from a MAC address captured during network monitoring."><span class="icon">💳</span> MAC Lookup</button>
                     </div>
                     <div class="menu-section">
                         <h4>Domain</h4>
-                        <button class="menu-item" data-tool="whois-lookup"><span class="icon">📋</span> WHOIS</button>
-                        <button class="menu-item" data-tool="dns-lookup"><span class="icon">🌐</span> DNS</button>
-                        <button class="menu-item" data-tool="subdomain-enum"><span class="icon">🔗</span> Subdomains</button>
-                        <button class="menu-item" data-tool="ssl-info"><span class="icon">🔒</span> SSL</button>
-                        <button class="menu-item" data-tool="wayback-machine"><span class="icon">⏰</span> Wayback</button>
+                        <button class="menu-item" data-tool="whois-lookup" data-tool-title="WHOIS" data-description="Pull domain registration details such as owner, registrar, and expiration dates."><span class="icon">📋</span> WHOIS</button>
+                        <button class="menu-item" data-tool="dns-lookup" data-tool-title="DNS" data-description="Inspect A, CNAME, MX, TXT, and other DNS records for the domain."><span class="icon">🌐</span> DNS</button>
+                        <button class="menu-item" data-tool="subdomain-enum" data-tool-title="Subdomain Finder" data-description="Enumerate subdomains that could expose additional assets or services."><span class="icon">🔗</span> Subdomains</button>
+                        <button class="menu-item" data-tool="ssl-info" data-tool-title="SSL Certificate" data-description="Review SSL certificate details, including issuer, validity, and SANs."><span class="icon">🔒</span> SSL</button>
+                        <button class="menu-item" data-tool="wayback-machine" data-tool-title="Wayback Machine" data-description="Browse archived captures of a site to understand past content or changes."><span class="icon">⏰</span> Wayback</button>
                     </div>
                     <div class="menu-section">
                         <h4>People</h4>
-                        <button class="menu-item" data-tool="email-osint"><span class="icon">📧</span> Email OSINT</button>
-                        <button class="menu-item" data-tool="email-breach"><span class="icon">🚨</span> Breach Check</button>
-                        <button class="menu-item" data-tool="username-search"><span class="icon">👤</span> Username</button>
+                        <button class="menu-item" data-tool="email-osint" data-tool-title="Email OSINT" data-description="Gather contextual information and validation for suspects or targets via email research."><span class="icon">📧</span> Email OSINT</button>
+                        <button class="menu-item" data-tool="email-breach" data-tool-title="Email Breach Check" data-description="See whether an email address appears in known compromise datasets."><span class="icon">🚨</span> Breach Check</button>
+                        <button class="menu-item" data-tool="username-search" data-tool-title="Username Search" data-description="Track down online profiles across major platforms using a handle."><span class="icon">👤</span> Username</button>
                     </div>
                     <div class="menu-section">
                         <h4>Advanced</h4>
-                        <button class="menu-item" data-tool="google-dork"><span class="icon">🔎</span> Google Dork</button>
-                        <button class="menu-item" data-tool="crypto-tracker"><span class="icon">₿</span> Crypto</button>
+                        <button class="menu-item" data-tool="google-dork" data-tool-title="Google Dorking" data-description="Build advanced Google queries to surface sensitive files or hidden directories."><span class="icon">🔎</span> Google Dork</button>
+                        <button class="menu-item" data-tool="crypto-tracker" data-tool-title="Cryptocurrency Tracker" data-description="Trace Bitcoin or Ethereum wallet addresses and surface linked activity."><span class="icon">₿</span> Crypto</button>
                     </div>
                 </nav>
             </aside>
 
             <main class="content-area">
+                <div class="tool-description-card" id="toolDescriptionCard">
+                    <h3 id="toolDescriptionTitle">File Upload</h3>
+                    <p id="toolDescriptionText">Upload suspicious files to compute hashes, scan against VirusTotal, and store the findings with your investigation.</p>
+                    <span class="tool-description-note">Descriptions update automatically as you pick a tool.</span>
+                </div>
                 <!-- File Upload Tool -->
                 <div id="file-upload" class="tool-panel active">
                     <div class="tool-header">

@@ -352,6 +352,8 @@ async function viewInvestigation(investigationId) {
 }
 
 function showInvestigationDetails(investigation) {
+    resetAnalysisSection();
+
     // Set basic info
     document.getElementById('detailsInvestigationName').textContent = investigation.name;
     document.getElementById('detailsInvestigationMeta').textContent = 
@@ -410,6 +412,7 @@ function showInvestigationDetails(investigation) {
 
 function closeDetailsModal() {
     document.getElementById('investigationDetailsModal').classList.add('hidden');
+    resetAnalysisSection();
     currentInvestigation = null;
 }
 
@@ -717,4 +720,203 @@ function formatChatTimestamp(timestamp) {
         return `${hours} hour${hours > 1 ? 's' : ''} ago`;
     }
     return date.toLocaleString();
+}
+
+// ==========================================================================
+// AI INVESTIGATION ANALYSIS
+// ==========================================================================
+
+function getAnalysisElements() {
+    return {
+        section: document.getElementById('aiAnalysisSection'),
+        threatBadge: document.getElementById('overallThreatBadge'),
+        threatIcon: document.getElementById('threatIcon'),
+        threatText: document.getElementById('threatText'),
+        summary: document.getElementById('executiveSummary'),
+        insights: document.getElementById('keyInsights'),
+        correlations: document.getElementById('correlationsContent'),
+        actions: document.getElementById('recommendedActions'),
+        button: document.getElementById('analyzeInvestigationBtn'),
+        buttonText: document.getElementById('analyzeBtnText')
+    };
+}
+
+function createSkeletonMarkup() {
+    return '<div class="skeleton-loader"></div>';
+}
+
+function resetAnalysisSection() {
+    const elements = getAnalysisElements();
+    if (!elements.section) return;
+
+    elements.section.classList.add('hidden');
+    elements.threatBadge.className = 'threat-badge-large';
+    elements.threatIcon.textContent = '🛡️';
+    elements.threatText.textContent = 'ANALYZING...';
+
+    [elements.summary, elements.insights, elements.correlations, elements.actions].forEach((container) => {
+        if (container) {
+            container.innerHTML = createSkeletonMarkup();
+        }
+    });
+
+    if (elements.button) {
+        elements.button.disabled = false;
+    }
+
+    if (elements.buttonText) {
+        elements.buttonText.textContent = 'Analyze Investigation';
+    }
+}
+
+async function analyzeInvestigation() {
+    if (!currentInvestigation) {
+        alert('No investigation selected');
+        return;
+    }
+
+    const results = currentInvestigation.results || [];
+    if (results.length === 0) {
+        alert('No results to analyze. Run some OSINT tools first.');
+        return;
+    }
+
+    const elements = getAnalysisElements();
+    elements.section.classList.remove('hidden');
+
+    const originalText = elements.buttonText.textContent;
+    elements.button.disabled = true;
+    elements.buttonText.textContent = `Analyzing ${results.length} results...`;
+
+    showAnalysisLoading(true);
+
+    try {
+        const response = await fetch(`/ai/analyze/${currentInvestigation.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            displayAnalysisResults(data.summary || {});
+        } else {
+            showAnalysisError(data.error || 'Analysis failed');
+        }
+    } catch (error) {
+        console.error('Analysis error:', error);
+        showAnalysisError('Failed to analyze investigation. Please try again.');
+    } finally {
+        elements.button.disabled = false;
+        elements.buttonText.textContent = originalText;
+    }
+}
+
+function displayAnalysisResults(summary) {
+    showAnalysisLoading(false);
+
+    const elements = getAnalysisElements();
+    const threatLevel = summary.overall_threat || 'medium';
+    const threatIcons = {
+        critical: '🔴',
+        high: '🟠',
+        medium: '🟡',
+        low: '🟢',
+        safe: '✅'
+    };
+
+    elements.threatBadge.className = `threat-badge-large threat-${threatLevel}`;
+    elements.threatText.textContent = threatLevel.toUpperCase();
+    elements.threatIcon.textContent = threatIcons[threatLevel] || '🛡️';
+
+    elements.summary.innerHTML = formatAnalysisText(summary.summary);
+    elements.insights.innerHTML = formatAnalysisText(summary.insights);
+    elements.correlations.innerHTML = formatAnalysisText(summary.correlations);
+    elements.actions.innerHTML = formatAnalysisText(summary.actions);
+
+    elements.section.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest'
+    });
+}
+
+function formatAnalysisText(text) {
+    if (!text) return '<p class="no-data">No information available</p>';
+
+    const lines = text
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+    if (lines.length === 0) {
+        return '<p class="no-data">No information available</p>';
+    }
+
+    const htmlParts = [];
+    let listItems = [];
+
+    function flushList() {
+        if (listItems.length > 0) {
+            htmlParts.push(`<ul>${listItems.join('')}</ul>`);
+            listItems = [];
+        }
+    }
+
+    lines.forEach((line) => {
+        if (/^[-•*]\s/.test(line)) {
+            listItems.push(`<li>${escapeHtml(line.substring(2).trim())}</li>`);
+            return;
+        }
+
+        if (/^\d+\.\s/.test(line)) {
+            listItems.push(`<li>${escapeHtml(line.substring(line.indexOf('.') + 1).trim())}</li>`);
+            return;
+        }
+
+        flushList();
+        htmlParts.push(`<p>${escapeHtml(line)}</p>`);
+    });
+
+    flushList();
+
+    return htmlParts.join('');
+}
+
+function showAnalysisLoading(show) {
+    const elements = getAnalysisElements();
+    if (!elements.section) return;
+
+    [elements.summary, elements.insights, elements.correlations, elements.actions].forEach((container) => {
+        if (container) {
+            container.innerHTML = show ? createSkeletonMarkup() : container.innerHTML;
+        }
+    });
+
+    if (show) {
+        elements.threatBadge.className = 'threat-badge-large';
+        elements.threatText.textContent = 'ANALYZING...';
+        elements.threatIcon.textContent = '⏳';
+    }
+}
+
+function showAnalysisError(errorMessage) {
+    showAnalysisLoading(false);
+
+    const elements = getAnalysisElements();
+    const errorHtml = `<p class="error-message">❌ ${escapeHtml(errorMessage)}</p>`;
+
+    elements.summary.innerHTML = errorHtml;
+    elements.insights.innerHTML = '<p class="no-data">No insights available</p>';
+    elements.correlations.innerHTML = '<p class="no-data">No correlations available</p>';
+    elements.actions.innerHTML = '<p class="no-data">No actions available</p>';
+
+    elements.threatBadge.className = 'threat-badge-large';
+    elements.threatText.textContent = 'ERROR';
+    elements.threatIcon.textContent = '⚠️';
+}
+
+function closeAnalysis() {
+    const elements = getAnalysisElements();
+    if (!elements.section) return;
+    elements.section.classList.add('hidden');
 }

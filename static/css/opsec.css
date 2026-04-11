@@ -5,6 +5,10 @@
 
 /* Breadcrumb Navigation */
 .breadcrumb-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
     margin-bottom: 25px;
 }
 
