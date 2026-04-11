@@ -243,11 +243,19 @@
 
                     <!-- Typing Indicator -->
                     <div class="typing-indicator" id="dashboardTypingIndicator">
-                        <div class="message-bubble bot">
-                            <div class="typing-dots">
-                                <span></span>
-                                <span></span>
-                                <span></span>
+                        <div class="typing-shell">
+                            <div class="typing-avatar">AI</div>
+                            <div class="typing-card">
+                                <div class="typing-label-row">
+                                    <span class="typing-label">Easint AI is thinking</span>
+                                    <span class="typing-pulse"></span>
+                                </div>
+                                <div class="typing-dots">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                                <div class="typing-subtext">Analyzing your investigation context and preparing a response...</div>
                             </div>
                         </div>
                     </div>
@@ -267,8 +275,70 @@
                 </div>
             </div>
 
+            <!-- AI Analysis Results Section -->
+            <div class="ai-analysis-section hidden" id="aiAnalysisSection">
+                <div class="analysis-header">
+                    <h3>🎯 AI Analysis Results</h3>
+                    <button class="close-analysis-btn" onclick="closeAnalysis()">✕</button>
+                </div>
+
+                <div class="analysis-content">
+                    <div class="threat-overview">
+                        <div class="threat-label">Overall Threat Level</div>
+                        <div class="threat-badge-large" id="overallThreatBadge">
+                            <span class="threat-icon" id="threatIcon">🛡️</span>
+                            <span class="threat-text" id="threatText">ANALYZING...</span>
+                        </div>
+                    </div>
+
+                    <div class="analysis-card">
+                        <div class="card-header">
+                            <span class="card-icon">📋</span>
+                            <span class="card-title">Executive Summary</span>
+                        </div>
+                        <div class="card-content" id="executiveSummary">
+                            <div class="skeleton-loader"></div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-card">
+                        <div class="card-header">
+                            <span class="card-icon">💡</span>
+                            <span class="card-title">Key Insights</span>
+                        </div>
+                        <div class="card-content" id="keyInsights">
+                            <div class="skeleton-loader"></div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-card">
+                        <div class="card-header">
+                            <span class="card-icon">🔗</span>
+                            <span class="card-title">Correlations</span>
+                        </div>
+                        <div class="card-content" id="correlationsContent">
+                            <div class="skeleton-loader"></div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-card">
+                        <div class="card-header">
+                            <span class="card-icon">⚡</span>
+                            <span class="card-title">Recommended Actions</span>
+                        </div>
+                        <div class="card-content" id="recommendedActions">
+                            <div class="skeleton-loader"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Actions -->
             <div class="details-actions">
+                    <button class="btn btn-primary" id="analyzeInvestigationBtn" onclick="analyzeInvestigation()">
+                        <span class="btn-icon">🤖</span>
+                        <span id="analyzeBtnText">Analyze Investigation</span>
+                    </button>
                     <button class="btn btn-secondary" onclick="exportInvestigation()">
                         <span class="btn-icon">📄</span>
                         <span>Export PDF</span>
