@@ -340,6 +340,8 @@ async function viewInvestigation(investigationId) {
         
         if (response.ok) {
             const investigation = data.investigation || data;
+            investigation.aiSummary = investigation.ai_summary || null;
+            investigation.aiAnalyzedAt = investigation.ai_analyzed_at || null;
             currentInvestigation = investigation;
             showInvestigationDetails(investigation);
         } else {
@@ -408,6 +410,13 @@ function showInvestigationDetails(investigation) {
 
     // Initialize AI chat
     initializeDashboardChat(investigation.id);
+
+    if (hasAnalysisSummary(investigation)) {
+        displayAnalysisResults(investigation.aiSummary, {
+            analyzedAt: investigation.aiAnalyzedAt,
+            scrollIntoView: false
+        });
+    }
 }
 
 function closeDetailsModal() {
@@ -475,12 +484,74 @@ async function deleteInvestigation() {
 }
 
 // ==========================================================================
-// EXPORT INVESTIGATION (Placeholder)
+// EXPORT INVESTIGATION
 // ==========================================================================
 
-function exportInvestigation() {
-    if (!currentInvestigation) return;
-    showError('PDF export feature coming soon!');
+async function exportInvestigation() {
+    if (!currentInvestigation) {
+        showError('Select an investigation first.');
+        return;
+    }
+
+    const results = currentInvestigation.results || [];
+    if (results.length === 0) {
+        showError('No results available to export.');
+        return;
+    }
+
+    if (!hasAnalysisSummary(currentInvestigation)) {
+        showError('Click "Analyze Investigation" first so the PDF can include AI analysis.');
+        return;
+    }
+
+    try {
+        const response = await fetch('/export-results', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                format: 'pdf',
+                investigation: currentInvestigation,
+                results,
+                analysis_summary: currentInvestigation.aiSummary
+            })
+        });
+
+        if (!response.ok) {
+            let message = 'Failed to export PDF';
+
+            try {
+                const errorData = await response.json();
+                if (errorData.error) {
+                    message = errorData.error;
+                }
+            } catch (parseError) {
+                console.error('Failed to parse export error response:', parseError);
+            }
+
+            throw new Error(message);
+        }
+
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const safeName = (currentInvestigation.name || 'investigation-report')
+            .replace(/[^a-z0-9-_]+/gi, '_')
+            .replace(/^_+|_+$/g, '');
+
+        link.href = downloadUrl;
+        link.download = `${safeName || 'investigation-report'}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+
+        showSuccess('PDF exported successfully!');
+    } catch (error) {
+        console.error('Error exporting investigation:', error);
+        showError(error.message || 'Failed to export PDF');
+    }
 }
 
 // ==========================================================================
@@ -799,7 +870,9 @@ async function analyzeInvestigation() {
         const data = await response.json();
 
         if (response.ok && data.success) {
-            displayAnalysisResults(data.summary || {});
+            displayAnalysisResults(data.summary || {}, {
+                analyzedAt: data.analyzed_at
+            });
         } else {
             showAnalysisError(data.error || 'Analysis failed');
         }
@@ -812,8 +885,13 @@ async function analyzeInvestigation() {
     }
 }
 
-function displayAnalysisResults(summary) {
+function displayAnalysisResults(summary, options = {}) {
     showAnalysisLoading(false);
+
+    if (currentInvestigation) {
+        currentInvestigation.aiSummary = summary;
+        currentInvestigation.aiAnalyzedAt = options.analyzedAt || new Date().toISOString();
+    }
 
     const elements = getAnalysisElements();
     const threatLevel = summary.overall_threat || 'medium';
@@ -834,10 +912,14 @@ function displayAnalysisResults(summary) {
     elements.correlations.innerHTML = formatAnalysisText(summary.correlations);
     elements.actions.innerHTML = formatAnalysisText(summary.actions);
 
-    elements.section.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest'
-    });
+    elements.section.classList.remove('hidden');
+
+    if (options.scrollIntoView !== false) {
+        elements.section.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest'
+        });
+    }
 }
 
 function formatAnalysisText(text) {
@@ -919,4 +1001,17 @@ function closeAnalysis() {
     const elements = getAnalysisElements();
     if (!elements.section) return;
     elements.section.classList.add('hidden');
+}
+
+function hasAnalysisSummary(investigation) {
+    return Boolean(
+        investigation &&
+        investigation.aiSummary &&
+        (
+            investigation.aiSummary.summary ||
+            investigation.aiSummary.insights ||
+            investigation.aiSummary.correlations ||
+            investigation.aiSummary.actions
+        )
+    );
 }
