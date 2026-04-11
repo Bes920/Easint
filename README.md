@@ -1,80 +1,110 @@
 # EASINT
 
-EASINT is a Flask-based OSINT platform for collecting, saving, and analyzing investigation results in one place.
+Professional OSINT platform built with Flask, Supabase, and Gemini-powered investigation assistance.
 
-It combines:
+The app currently ships with:
+- a guided home page
 - a tools workspace for OSINT lookups
-- Supabase-backed investigation storage
-- an investigation dashboard
-- Gemini-powered AI chat
-- one-click AI investigation analysis
+- a dashboard for saved investigations
+- AI chat inside investigation details
+- one-click AI investigation analysis with threat badges and structured summaries
 - an OPSEC learning page
 
 Current version: `v0.0.1`
 
-## Overview
+## What The App Does
 
-EASINT is designed around a simple workflow:
+EASINT lets you run OSINT checks, automatically save results into investigations, and then review or analyze those results later from the dashboard.
 
-1. Run a tool from `/tools`
-2. Save the result into an investigation automatically
-3. Review results in `/dashboard`
-4. Ask the AI questions or generate a full AI summary
+Main workflows:
+1. Open `/tools` and run an OSINT tool.
+2. The result is auto-saved to a selected investigation, or to `Auto-saved Results`.
+3. Open `/dashboard` to review investigations and results.
+4. Ask the AI questions about an investigation, or click `Analyze Investigation` for a full summary.
 
-## Main Pages
+## Current Pages
 
-| Route | Description |
+| Route | Purpose |
 | --- | --- |
-| `/` | Landing page |
-| `/tools` | Main OSINT tools workspace |
-| `/dashboard` | Investigation dashboard with AI features |
-| `/opsec` | OPSEC / learning page |
+| `/` | Home / landing page |
+| `/tools` | Main OSINT tool workspace |
+| `/dashboard` | Investigation management and AI-assisted review |
+| `/opsec` | OPSEC / OSINT learning page |
 | `/ai-test` | Standalone AI test page |
 
-## Current Features
+## Current AI Features
 
-### OSINT Tools
-- file upload and hash analysis
-- EXIF metadata extraction
-- IP reputation checking
-- IP geolocation
-- reverse IP lookup
-- MAC lookup
-- Shodan search
-- WHOIS lookup
-- DNS lookup
-- subdomain enumeration
-- SSL certificate lookup
-- Wayback Machine search
-- email OSINT
-- email breach checks
-- username search
-- phone lookup
-- Google dork generation
-- crypto tracking
+AI functionality is provided through the blueprint in [routes/ai_routes.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/routes/ai_routes.py).
 
-### Investigation Dashboard
-- create investigations
-- update status
-- delete investigations
-- review saved results
-- see threat badges
-- inspect result timelines
+Available AI endpoints:
+- `POST /ai/chat`
+- `POST /ai/analyze/<investigation_id>`
+- `GET /ai/test`
 
-### AI Features
-- ask questions about an investigation with `POST /ai/chat`
-- generate one-click investigation summaries with `POST /ai/analyze/<investigation_id>`
-- view threat level, summary, insights, correlations, and recommended actions
-- use inline dashboard chat with animated loading states
+What is already implemented in the dashboard:
+- inline AI chat per investigation
+- suggested quick questions
+- animated loading state while the AI is thinking
+- one-click investigation analysis
+- executive summary
+- key insights
+- correlations
+- recommended actions
+- overall threat badge with visual severity state
 
-## Quick Start
+## Current Tool Endpoints
+
+These routes are defined in [app.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/app.py).
+
+| Category | Endpoints |
+| --- | --- |
+| File analysis | `/upload-file`, `/check-hash`, `/extract-exif` |
+| Network / infra | `/check-ip`, `/geolocate-ip`, `/reverse-ip`, `/mac-lookup`, `/shodan-search` |
+| Domain / DNS | `/whois-lookup`, `/dns-lookup`, `/subdomain-enum`, `/ssl-info`, `/wayback-machine` |
+| Identity / people | `/email-osint`, `/email-breach`, `/username-search`, `/phone-lookup` |
+| Research / advanced | `/google-dork`, `/crypto-tracker` |
+| Export | `/export-results` |
+| Investigations API | `/api/investigations`, `/api/investigations/<investigation_id>`, `/api/investigations/<investigation_id>/results` |
+
+## Architecture
+
+### Backend
+- [app.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/app.py): Flask app, main routes, API integrations, investigation APIs
+- [routes/ai_routes.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/routes/ai_routes.py): AI chat and investigation analysis routes
+- [services/results_service.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/services/results_service.py): auto-save logic and threat heuristics
+- [services/investigation_service.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/services/investigation_service.py): investigation CRUD and result retrieval
+- [services/gemini_ai_service.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/services/gemini_ai_service.py): Gemini prompts and response parsing
+- [services/chat_service.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/services/chat_service.py): chat history helpers for Supabase
+- [config/supabase_config.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/config/supabase_config.py): Supabase client initialization
+
+### Frontend
+- [templates/home.html](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/templates/home.html): landing page
+- [templates/index.html](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/templates/index.html): tools page
+- [templates/dashboard.html](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/templates/dashboard.html): investigations UI and AI modal
+- [templates/opsec.html](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/templates/opsec.html): OPSEC page
+- [templates/ai_test.html](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/templates/ai_test.html): standalone AI playground
+- [static/js/script.js](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/static/js/script.js): main tools page behavior
+- [static/js/dashboard.js](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/static/js/dashboard.js): dashboard state, AI chat, AI analysis UI
+- [static/js/ai_chat.js](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/static/js/ai_chat.js): standalone AI test page logic
+- [static/js/theme.js](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/static/js/theme.js): theme coordination
+
+## Data Flow
+
+1. A tool request is submitted from the tools UI.
+2. The backend returns structured JSON.
+3. [services/results_service.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/services/results_service.py) saves the result to Supabase.
+4. If no investigation is selected, the app uses `Auto-saved Results`.
+5. The dashboard loads investigations through `/api/investigations`.
+6. Opening an investigation modal loads results and enables AI chat plus full AI analysis.
+
+## Setup
 
 ### Requirements
 - Python 3.10+ recommended
-- Supabase project
-- internet access for external APIs
-- optional: ExifTool
-- optional: Gemini API key
+- Supabase project and credentials
+- Internet access for external API-backed tools
+- Optional: ExifTool for richer metadata extraction
+- Optional: Gemini API key for AI features
 
 ### Install
 
@@ -86,21 +116,20 @@ python -m venv venv
 source venv/bin/activate
 
 pip install -r requirements.txt
-pip install google-genai
 ```
 
 ### Environment Variables
 
 Create a `.env` file in the project root.
 
-Required to start the app:
+Required for the app to start:
 
 ```env
 SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_key
+SUPABASE_KEY=your_supabase_service_or_anon_key
 ```
 
-Optional keys used by current features:
+Optional but used by features already in the code:
 
 ```env
 VIRUSTOTAL_API_KEY=your_key
@@ -113,6 +142,14 @@ GEMINI_API_KEY=your_key
 MISTRAL_API_KEY=your_key
 ```
 
+### Gemini Dependency
+
+The current code imports `google.genai` in [services/gemini_ai_service.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/services/gemini_ai_service.py), so if it is not already available in your environment install it before using AI features:
+
+```bash
+pip install google-genai
+```
+
 ### Optional ExifTool
 
 ```bash
@@ -123,142 +160,130 @@ sudo apt-get install exiftool
 brew install exiftool
 ```
 
-### Run
+## Run The App
 
 ```bash
 source venv/bin/activate
 python app.py
 ```
 
-Open:
+Default URL:
 
 ```text
 http://127.0.0.1:5000
 ```
 
-## API Summary
+## Investigation Dashboard
 
-### Tool Routes
+The dashboard is not just a list view anymore. It currently supports:
+- investigation creation
+- status updates
+- deletion
+- tag display
+- result timelines
+- threat badge rendering
+- AI chat inside the details modal
+- one-click `Analyze Investigation` summaries
 
-| Category | Routes |
-| --- | --- |
-| File analysis | `/upload-file`, `/check-hash`, `/extract-exif` |
-| Network | `/check-ip`, `/geolocate-ip`, `/reverse-ip`, `/mac-lookup`, `/shodan-search` |
-| Domain | `/whois-lookup`, `/dns-lookup`, `/subdomain-enum`, `/ssl-info`, `/wayback-machine` |
-| Identity | `/email-osint`, `/email-breach`, `/username-search`, `/phone-lookup` |
-| Research | `/google-dork`, `/crypto-tracker` |
-| Export | `/export-results` |
-
-### Investigation Routes
-
-| Route | Method | Purpose |
-| --- | --- | --- |
-| `/api/investigations` | `GET` | List investigations |
-| `/api/investigations` | `POST` | Create investigation |
-| `/api/investigations/<investigation_id>` | `GET` | Get one investigation with details |
-| `/api/investigations/<investigation_id>` | `PUT` | Update status |
-| `/api/investigations/<investigation_id>` | `DELETE` | Delete investigation |
-| `/api/investigations/<investigation_id>/results` | `GET` | Get investigation results |
-
-### AI Routes
-
-| Route | Method | Purpose |
-| --- | --- | --- |
-| `/ai/chat` | `POST` | Ask questions about an investigation |
-| `/ai/analyze/<investigation_id>` | `POST` | Generate full AI summary |
-| `/ai/test` | `GET` | Check AI route registration / Gemini status |
-
-## How Storage Works
-
-The app saves tool results through Supabase using:
-- `investigations`
-- `investigation_results`
-- `chat_history`
-
-If a tool result is created without a selected investigation, the app stores it in:
-
-```text
-Auto-saved Results
-```
-
-Important: Supabase is required at startup. If `SUPABASE_URL` or `SUPABASE_KEY` is missing, the app will fail during import.
-
-## Project Structure
-
-### Core Backend
-- [app.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/app.py)
-- [routes/ai_routes.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/routes/ai_routes.py)
-- [services/results_service.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/services/results_service.py)
-- [services/investigation_service.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/services/investigation_service.py)
-- [services/gemini_ai_service.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/services/gemini_ai_service.py)
-- [services/chat_service.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/services/chat_service.py)
-- [config/supabase_config.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/config/supabase_config.py)
-
-### Frontend
-- [templates/home.html](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/templates/home.html)
-- [templates/index.html](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/templates/index.html)
+Important frontend files:
 - [templates/dashboard.html](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/templates/dashboard.html)
-- [templates/opsec.html](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/templates/opsec.html)
-- [templates/ai_test.html](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/templates/ai_test.html)
-- [static/js/script.js](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/static/js/script.js)
 - [static/js/dashboard.js](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/static/js/dashboard.js)
-- [static/js/ai_chat.js](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/static/js/ai_chat.js)
 - [static/css/dashboard.css](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/static/css/dashboard.css)
 
-## Diagnostics
+## AI Investigation Analysis
 
-Helper scripts included in the repo:
-- [test_gemini_api.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/test_gemini_api.py)
-- [test_mistral.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/test_mistral.py)
+When a saved investigation has results, the dashboard can send the full investigation to:
 
-Examples:
+```text
+POST /ai/analyze/<investigation_id>
+```
+
+The response is rendered into:
+- overall threat
+- executive summary
+- key insights
+- correlations
+- recommended actions
+
+The dashboard also supports:
+
+```text
+POST /ai/chat
+```
+
+for question-and-answer style interaction about the same investigation.
+
+## Testing / Diagnostics
+
+Available helper scripts:
+- [test_gemini_api.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/test_gemini_api.py): checks Gemini connectivity
+- [test_mistral.py](/home/exploitforge/Documents/School/finalyear/proto/osint-fixed/test_mistral.py): checks Mistral connectivity
+
+Useful checks:
 
 ```bash
 python test_gemini_api.py
 python test_mistral.py
 ```
 
-## Known Limitations
+You can also verify the AI blueprint directly:
 
+```text
+GET /ai/test
+```
+
+## Notes About Storage
+
+The current code expects Supabase tables for:
+- `investigations`
+- `investigation_results`
+- `chat_history`
+
+The app relies on Supabase during import, so missing `SUPABASE_URL` or `SUPABASE_KEY` will prevent startup.
+
+## Known Gaps / Current State
+
+This README reflects the code as it exists now, including a few practical realities:
 - PDF export in the dashboard is still a placeholder
-- some tools depend on third-party APIs and may fail without keys
-- chat persistence helpers exist, but the dashboard currently sends empty chat history to the AI route
+- some helper/test files exist for experimentation
+- some external tools depend on third-party APIs and may fall back or fail when keys are missing
+- AI chat history persistence helpers exist, but the dashboard currently sends an empty chat history on each request
 
 ## Troubleshooting
 
-### App fails with Supabase configuration error
+### App fails on startup with Supabase error
 
-Check your `.env`:
+Check that your `.env` includes:
 
 ```env
 SUPABASE_URL=...
 SUPABASE_KEY=...
 ```
 
-### AI features fail
+### AI routes return configuration errors
 
 Check:
 - `GEMINI_API_KEY` is set
 - `google-genai` is installed
-- the app was restarted after updating `.env`
+- the server was restarted after updating `.env`
 
-### Results are not being saved
+### Tool results are not being saved
 
 Check:
 - Supabase credentials are valid
 - required tables exist
-- your key has the required permissions
+- the API key used by Supabase has insert/select permission
 
-### EXIF extraction fails
+### Exif extraction fails
 
-Install ExifTool and ensure it is available in your system path.
+Install ExifTool and ensure it is available on your system path.
 
 ## Summary
 
-EASINT currently provides:
-- multi-tool OSINT collection
+EASINT in its current codebase is a Flask OSINT platform with:
+- multi-tool OSINT workflows
+- Supabase-backed investigation storage
 - automatic result saving
-- investigation management
-- dashboard review workflows
-- AI chat
-- full AI investigation summaries
+- dashboard-based investigation review
+- Gemini-powered AI chat
+- Gemini-powered one-click investigation analysis
