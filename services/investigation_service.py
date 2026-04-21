@@ -10,6 +10,8 @@ supabase = get_supabase_client()
 
 class InvestigationService:
     """Service for managing investigations"""
+
+    ANALYSIS_RESULT_TOOL = '__ai_investigation_summary__'
     
     @staticmethod
     def create_investigation(
@@ -180,7 +182,7 @@ class InvestigationService:
             return None
     
     @staticmethod
-    def get_investigation_results(investigation_id: str) -> List[Dict]:
+    def get_investigation_results(investigation_id: str, include_analysis: bool = False) -> List[Dict]:
         """
         Get all results for an investigation
         """
@@ -191,11 +193,70 @@ class InvestigationService:
                 .order('created_at', desc=True)\
                 .execute()
             
-            return result.data if result.data else []
+            results = result.data if result.data else []
+
+            if include_analysis:
+                return results
+
+            return [
+                item for item in results
+                if item.get('tool_name') != InvestigationService.ANALYSIS_RESULT_TOOL
+            ]
             
         except Exception as e:
             print(f"❌ Error fetching investigation results: {e}")
             return []
+
+    @staticmethod
+    def get_investigation_analysis(investigation_id: str) -> Optional[Dict]:
+        """
+        Get the most recent persisted AI analysis summary for an investigation
+        """
+        try:
+            result = supabase.table('investigation_results')\
+                .select('*')\
+                .eq('investigation_id', investigation_id)\
+                .eq('tool_name', InvestigationService.ANALYSIS_RESULT_TOOL)\
+                .order('created_at', desc=True)\
+                .limit(1)\
+                .execute()
+
+            if result.data and len(result.data) > 0:
+                return result.data[0]
+            return None
+
+        except Exception as e:
+            print(f"❌ Error fetching investigation analysis: {e}")
+            return None
+
+    @staticmethod
+    def save_investigation_analysis(investigation_id: str, summary: Dict) -> Optional[Dict]:
+        """
+        Persist AI investigation summary as a dedicated internal result record
+        """
+        try:
+            # Remove older summaries so the investigation has one current persisted analysis
+            supabase.table('investigation_results')\
+                .delete()\
+                .eq('investigation_id', investigation_id)\
+                .eq('tool_name', InvestigationService.ANALYSIS_RESULT_TOOL)\
+                .execute()
+
+            summary_payload = dict(summary or {})
+            summary_payload['saved_at'] = datetime.now().isoformat()
+
+            return InvestigationService.add_investigation_result(
+                investigation_id=investigation_id,
+                tool_name=InvestigationService.ANALYSIS_RESULT_TOOL,
+                target='investigation-summary',
+                result_data=summary_payload,
+                ai_analysis=summary_payload.get('full_text'),
+                threat_level=summary_payload.get('overall_threat', 'low')
+            )
+
+        except Exception as e:
+            print(f"❌ Error saving investigation analysis: {e}")
+            return None
     
     @staticmethod
     def get_investigation_with_results(investigation_id: str) -> Optional[Dict]:
@@ -209,7 +270,10 @@ class InvestigationService:
                 return None
             
             results = InvestigationService.get_investigation_results(investigation_id)
+            analysis = InvestigationService.get_investigation_analysis(investigation_id)
             investigation['results'] = results
+            investigation['ai_summary'] = analysis.get('result_data') if analysis else None
+            investigation['ai_analyzed_at'] = analysis.get('created_at') if analysis else None
             
             return investigation
             

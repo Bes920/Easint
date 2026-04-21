@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easint Project Proposal</title>
+    <style>
+        :root {
+            --ink: #132238;
+            --muted: #5f6c7a;
+            --accent: #0f766e;
+            --accent-soft: #dff7f4;
+            --line: #d8e1e8;
+            --panel: #f7fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Liberation Sans", Arial, sans-serif;
+            color: var(--ink);
+            background: #ffffff;
+            line-height: 1.5;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 42px 52px 56px;
+        }
+
+        .hero {
+            border: 1px solid var(--line);
+            background: linear-gradient(135deg, #effcf8 0%, #f7fafc 100%);
+            border-radius: 18px;
+            padding: 28px 30px;
+            margin-bottom: 26px;
+        }
+
+        .eyebrow {
+            margin: 0 0 8px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            font-size: 30px;
+            line-height: 1.15;
+        }
+
+        h2 {
+            margin: 0 0 12px;
+            font-size: 20px;
+            line-height: 1.2;
+        }
+
+        p {
+            margin: 0 0 12px;
+            color: var(--muted);
+            font-size: 13.5px;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .metric {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .metric strong {
+            display: block;
+            font-size: 22px;
+            color: var(--ink);
+        }
+
+        .metric span {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 20px 22px;
+            background: #fff;
+        }
+
+        .card.tint {
+            background: var(--panel);
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--ink);
+        }
+
+        li {
+            margin-bottom: 9px;
+            font-size: 13.5px;
+        }
+
+        .feature-list strong,
+        .compare-table strong {
+            color: var(--ink);
+        }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+
+        .compare-table th,
+        .compare-table td {
+            border: 1px solid var(--line);
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .compare-table th {
+            background: #eef7f6;
+        }
+
+        .footer-note {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-left: 4px solid var(--accent);
+            background: var(--accent-soft);
+            border-radius: 10px;
+            color: var(--ink);
+            font-size: 13px;
+        }
+
+        @media print {
+            .page {
+                padding: 24px 28px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <section class="hero">
+            <p class="eyebrow">Project Proposal</p>
+            <h1>Easint: A guided OSINT investigation platform for practical analysis, learning, and reporting</h1>
+            <p>
+                Easint is a web-based OSINT platform designed to reduce the friction of digital investigations.
+                Instead of forcing users to jump between disconnected tools, Easint combines collection,
+                organization, interpretation, and reporting in one workspace.
+            </p>
+            <div class="summary">
+                <div class="metric">
+                    <strong>18+</strong>
+                    <span>Integrated OSINT tools across file, network, domain, and identity workflows</span>
+                </div>
+                <div class="metric">
+                    <strong>AI</strong>
+                    <span>Investigation-level analysis, correlation, and next-step guidance inside the dashboard</span>
+                </div>
+                <div class="metric">
+                    <strong>1 workflow</strong>
+                    <span>From data gathering to exportable reports without leaving the platform</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid">
+            <article class="card">
+                <h2>Project Goal</h2>
+                <p>
+                    The project addresses a common OSINT problem: many tools are powerful on their own, but they are
+                    fragmented, difficult for beginners, and weak at preserving investigation context. Easint is built
+                    to make OSINT more approachable while still supporting structured analysis.
+                </p>
+                <p>
+                    The platform gives users a clear path to investigate files, domains, IPs, emails, usernames, and
+                    related infrastructure, while storing results inside named investigations for later review.
+                </p>
+            </article>
+
+            <article class="card tint">
+                <h2>Target Users</h2>
+                <ul>
+                    <li>Cybersecurity students learning practical OSINT workflows</li>
+                    <li>Analysts and researchers handling small to medium investigations</li>
+                    <li>Teams that need organized case tracking rather than isolated lookups</li>
+                    <li>Users who want guided learning alongside operational tools</li>
+                </ul>
+            </article>
+        </section>
+
+        <section class="card">
+            <h2>Key Features</h2>
+            <ul class="feature-list">
+                <li><strong>Multi-source OSINT toolkit:</strong> File analysis, hash checking, EXIF extraction, IP reputation, geolocation, reverse IP, WHOIS, DNS, SSL, subdomain enumeration, email OSINT, breach checks, username search, and Google dork generation.</li>
+                <li><strong>Investigation dashboard:</strong> Findings are grouped into investigations so users can track status, review results over time, and avoid losing context.</li>
+                <li><strong>AI-assisted analysis:</strong> Users can ask the system to summarize risk, explain patterns, surface correlations, and suggest what to investigate next.</li>
+                <li><strong>Built-in reporting:</strong> Investigations can be exported into a structured PDF workflow, helping convert raw findings into presentable output.</li>
+                <li><strong>Guided user experience:</strong> The homepage, navigation, and learning paths reduce overwhelm for new users and improve workflow clarity.</li>
+                <li><strong>OPSEC learning support:</strong> Easint includes a learning area focused on safer OSINT practice, not just raw collection capability.</li>
+            </ul>
+        </section>
+
+        <section class="card" style="margin-top: 20px;">
+            <h2>Why Easint is stronger than many similar tools</h2>
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>Comparison Area</th>
+                        <th>Many Similar Tools</th>
+                        <th>Easint Advantage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Workflow continuity</strong></td>
+                        <td>Often focused on one lookup at a time, with little support for preserving case context.</td>
+                        <td>Easint stores outputs inside investigations, making it easier to build and revisit a full case narrative.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ease of use</strong></td>
+                        <td>Can be technical, cluttered, or intimidating for new users.</td>
+                        <td>Easint adds a guided homepage, quick-launch paths, and a cleaner navigation model for faster onboarding.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Analysis support</strong></td>
+                        <td>Many tools stop after returning raw data.</td>
+                        <td>Easint extends beyond collection with AI-assisted threat interpretation, correlation, and actionable next steps.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Learning value</strong></td>
+                        <td>Usually optimized for output, not education or safe practice.</td>
+                        <td>Easint combines tooling with OPSEC and OSINT learning content, making it more suitable for student and guided-use environments.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Reporting</strong></td>
+                        <td>Users may need external notes or manual report writing.</td>
+                        <td>Easint supports export-oriented workflows, reducing the gap between investigation and presentation.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="grid" style="margin-top: 20px;">
+            <article class="card tint">
+                <h2>Expected Impact</h2>
+                <ul>
+                    <li>Improves analyst efficiency by reducing tool-switching and manual note consolidation</li>
+                    <li>Supports education by helping students understand both method and responsible use</li>
+                    <li>Encourages better investigation habits through saved context, tagging, and review workflows</li>
+                    <li>Bridges the gap between data collection and decision-ready analysis</li>
+                </ul>
+            </article>
+
+            <article class="card">
+                <h2>Proposal Summary</h2>
+                <p>
+                    Easint is not just another OSINT utility page. It is a lightweight investigation environment that
+                    combines discovery tools, structured case management, AI-assisted reasoning, and safety-oriented
+                    learning in one platform.
+                </p>
+                <p>
+                    This combination gives it a stronger value proposition than many similar tools that only provide
+                    isolated lookups without context, interpretation, or educational support.
+                </p>
+            </article>
+        </section>
+
+        <div class="footer-note">
+            Suggested positioning statement: <strong>Easint helps users investigate, understand, and present OSINT findings in one guided workflow.</strong>
+        </div>
+    </main>
+</body>
+</html>

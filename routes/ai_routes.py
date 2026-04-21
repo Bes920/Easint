@@ -129,11 +129,23 @@ def analyze_investigation(investigation_id):
             investigation=investigation,
             results=results
         )
+
+        persisted_summary = InvestigationService.save_investigation_analysis(
+            investigation_id=investigation_id,
+            summary=summary
+        )
+
+        analyzed_at = (
+            persisted_summary.get('created_at')
+            if persisted_summary else
+            datetime.now().isoformat()
+        )
         
         return jsonify({
             'success': True,
             'summary': summary,
-            'total_results': len(results)
+            'total_results': len(results),
+            'analyzed_at': analyzed_at
         })
         
     except Exception as e:

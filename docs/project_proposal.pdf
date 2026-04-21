@@ -1,0 +1,206 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 2 /Kids [6 0 R 8 0 R] >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Length 3368 >>
+stream
+BT
+/F2 20 Tf
+1 0 0 1 54 770 Tm
+(Easint Project Proposal) Tj
+/F1 12 Tf
+1 0 0 1 54 740 Tm
+(A guided OSINT investigation platform focused on analysis, learning,) Tj
+/F1 12 Tf
+1 0 0 1 54 724 Tm
+(and reporting) Tj
+/F2 14 Tf
+1 0 0 1 54 700 Tm
+(Project overview) Tj
+/F1 11 Tf
+1 0 0 1 54 678 Tm
+(Easint is a web-based OSINT platform created to reduce the friction of digital) Tj
+/F1 11 Tf
+1 0 0 1 54 663 Tm
+(investigations. Instead of forcing users to jump between disconnected tools, it combines) Tj
+/F1 11 Tf
+1 0 0 1 54 648 Tm
+(collection, organization, interpretation, and reporting in one workflow.) Tj
+/F2 14 Tf
+1 0 0 1 54 627 Tm
+(Core value proposition) Tj
+/F1 11 Tf
+1 0 0 1 54 605 Tm
+(- 18+ integrated tools for file analysis, network intelligence, domain) Tj
+/F1 11 Tf
+1 0 0 1 54 590 Tm
+(  intelligence, and identity research.) Tj
+/F1 11 Tf
+1 0 0 1 54 572 Tm
+(- Saved investigations that keep related findings grouped, searchable, and easier) Tj
+/F1 11 Tf
+1 0 0 1 54 557 Tm
+(  to review.) Tj
+/F1 11 Tf
+1 0 0 1 54 539 Tm
+(- AI-assisted analysis that summarizes risk, identifies correlations, and suggests) Tj
+/F1 11 Tf
+1 0 0 1 54 524 Tm
+(  next steps.) Tj
+/F1 11 Tf
+1 0 0 1 54 506 Tm
+(- Built-in export support for turning investigation outputs into structured) Tj
+/F1 11 Tf
+1 0 0 1 54 491 Tm
+(  reports.) Tj
+/F1 11 Tf
+1 0 0 1 54 473 Tm
+(- OPSEC and learning content that helps users understand safer and more) Tj
+/F1 11 Tf
+1 0 0 1 54 458 Tm
+(  responsible OSINT practice.) Tj
+/F2 14 Tf
+1 0 0 1 54 440 Tm
+(Key features) Tj
+/F1 11 Tf
+1 0 0 1 54 418 Tm
+(- File workflows: upload analysis, hash checking, and metadata extraction.) Tj
+/F1 11 Tf
+1 0 0 1 54 400 Tm
+(- Infrastructure workflows: IP reputation, geolocation, reverse IP, WHOIS, DNS,) Tj
+/F1 11 Tf
+1 0 0 1 54 385 Tm
+(  SSL, and subdomain enumeration.) Tj
+/F1 11 Tf
+1 0 0 1 54 367 Tm
+(- Identity workflows: email OSINT, breach checks, and username discovery.) Tj
+/F1 11 Tf
+1 0 0 1 54 349 Tm
+(- Investigation dashboard: create cases, track status, tag findings, and review) Tj
+/F1 11 Tf
+1 0 0 1 54 334 Tm
+(  result history.) Tj
+/F1 11 Tf
+1 0 0 1 54 316 Tm
+(- AI dashboard support: ask questions about an investigation and receive) Tj
+/F1 11 Tf
+1 0 0 1 54 301 Tm
+(  summary-level guidance.) Tj
+/F2 14 Tf
+1 0 0 1 54 283 Tm
+(Why it stands out against similar tools) Tj
+/F1 11 Tf
+1 0 0 1 54 261 Tm
+(- Many similar tools focus on one lookup at a time. Easint keeps the full) Tj
+/F1 11 Tf
+1 0 0 1 54 246 Tm
+(  investigation context in one place.) Tj
+/F1 11 Tf
+1 0 0 1 54 228 Tm
+(- Many tools return raw data only. Easint adds interpretation through AI-assisted) Tj
+/F1 11 Tf
+1 0 0 1 54 213 Tm
+(  analysis and follow-up guidance.) Tj
+/F1 11 Tf
+1 0 0 1 54 195 Tm
+(- Many tools are technical or overwhelming for new users. Easint introduces a) Tj
+/F1 11 Tf
+1 0 0 1 54 180 Tm
+(  guided homepage and clearer navigation.) Tj
+/F1 11 Tf
+1 0 0 1 54 162 Tm
+(- Many tools support collection but not learning. Easint adds OPSEC and) Tj
+/F1 11 Tf
+1 0 0 1 54 147 Tm
+(  educational content for students and beginners.) Tj
+/F1 11 Tf
+1 0 0 1 54 129 Tm
+(- Many tools require separate notes and manual report writing. Easint is designed) Tj
+/F1 11 Tf
+1 0 0 1 54 114 Tm
+(  around saved investigations and report export.) Tj
+/F2 14 Tf
+1 0 0 1 54 96 Tm
+(Target users) Tj
+/F1 10 Tf
+1 0 0 1 54 30 Tm
+(Generated on 2026-04-21 | Page 1 of 2) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 1071 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 54 770 Tm
+(- Cybersecurity students learning practical OSINT workflows.) Tj
+/F1 11 Tf
+1 0 0 1 54 752 Tm
+(- Researchers and analysts handling small to medium investigations.) Tj
+/F1 11 Tf
+1 0 0 1 54 734 Tm
+(- Teams that need organized case tracking instead of isolated checks.) Tj
+/F2 14 Tf
+1 0 0 1 54 716 Tm
+(Expected impact) Tj
+/F1 11 Tf
+1 0 0 1 54 694 Tm
+(Easint improves efficiency by reducing tool-switching, supports better case management) Tj
+/F1 11 Tf
+1 0 0 1 54 679 Tm
+(through saved investigations, and increases accessibility by combining operational) Tj
+/F1 11 Tf
+1 0 0 1 54 664 Tm
+(capability with guidance. Its strongest advantage is that it is not only a toolbox; it) Tj
+/F1 11 Tf
+1 0 0 1 54 649 Tm
+(is a lightweight investigation environment.) Tj
+/F2 14 Tf
+1 0 0 1 54 628 Tm
+(Positioning statement) Tj
+/F1 11 Tf
+1 0 0 1 54 606 Tm
+(Easint helps users investigate, understand, and present OSINT findings in one guided) Tj
+/F1 11 Tf
+1 0 0 1 54 591 Tm
+(workflow.) Tj
+/F1 10 Tf
+1 0 0 1 54 30 Tm
+(Generated on 2026-04-21 | Page 2 of 2) Tj
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 7 0 R >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000127 00000 n 
+0000000197 00000 n 
+0000000272 00000 n 
+0000003692 00000 n 
+0000003828 00000 n 
+0000004951 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+5087
+%%EOF
