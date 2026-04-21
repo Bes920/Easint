@@ -63,8 +63,8 @@
                             <span>Integrated tools</span>
                         </div>
                         <div class="hero-stat">
-                            <strong>3</strong>
-                            <span>Clear user journeys</span>
+                            <strong>AI</strong>
+                            <span>Built into investigations</span>
                         </div>
                         <div class="hero-stat">
                             <strong>1</strong>
@@ -82,6 +82,36 @@
                             <li>Saving findings into investigations for later analysis</li>
                             <li>Learning safer and smarter OSINT practices</li>
                         </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="ai-spotlight-section">
+                <div class="ai-spotlight-card">
+                    <div class="ai-spotlight-copy">
+                        <span class="section-kicker">AI inside Easint</span>
+                        <h2>Users can ask AI to review an investigation and suggest what to do next.</h2>
+                        <p>
+                            Easint includes an AI assistant for investigation review, threat interpretation, result
+                            correlation, and next-step guidance. This is not hidden in a separate page.
+                        </p>
+                        <p>
+                            Specific location: go to the <strong>Dashboard</strong>, open any investigation, then use the
+                            <strong>AI Analysis</strong> section inside the investigation details view.
+                        </p>
+                        <div class="ai-spotlight-actions">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-primary hero-cta">Open Dashboard</a>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary hero-cta ghost-cta">Find AI Analysis</a>
+                        </div>
+                    </div>
+                    <div class="ai-location-card">
+                        <span class="signal-label">Where to find it</span>
+                        <ol class="ai-location-list">
+                            <li>Open <strong>Dashboard</strong></li>
+                            <li>Select or create an investigation</li>
+                            <li>Open the investigation details</li>
+                            <li>Scroll to <strong>AI Analysis</strong> and start asking questions</li>
+                        </ol>
                     </div>
                 </div>
             </section>

@@ -235,10 +235,70 @@ html[data-theme="light"] .trust-strip {
 }
 
 .journey-section,
+.ai-spotlight-section,
 .quick-launch-section,
 .workflow-section,
 .category-section {
     margin-bottom: 1.5rem;
+}
+
+.ai-spotlight-card {
+    display: grid;
+    grid-template-columns: 1.25fr 0.85fr;
+    gap: 1rem;
+    padding: 1.5rem;
+    background:
+        radial-gradient(circle at top right, rgba(0, 217, 255, 0.16), transparent 40%),
+        linear-gradient(135deg, rgba(7, 12, 24, 0.7), rgba(7, 12, 24, 0.42));
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(14px);
+}
+
+html[data-theme="light"] .ai-spotlight-card {
+    background:
+        radial-gradient(circle at top right, rgba(0, 217, 255, 0.12), transparent 40%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(246, 250, 255, 0.84));
+}
+
+.ai-spotlight-copy h2 {
+    font-size: clamp(1.7rem, 2.8vw, 2.8rem);
+    margin: 0.55rem 0 0.9rem;
+}
+
+.ai-spotlight-copy p {
+    color: var(--text-secondary);
+    max-width: 42rem;
+}
+
+.ai-spotlight-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.25rem;
+}
+
+.ai-location-card {
+    padding: 1.25rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-color);
+    align-self: stretch;
+}
+
+html[data-theme="light"] .ai-location-card {
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.ai-location-list {
+    margin: 0.9rem 0 0;
+    padding-left: 1.2rem;
+    color: var(--text-secondary);
+}
+
+.ai-location-list li + li {
+    margin-top: 0.7rem;
 }
 
 .journey-grid {
@@ -327,6 +387,7 @@ html[data-theme="light"] .trust-strip {
 
 @media (max-width: 1024px) {
     .hero-section,
+    .ai-spotlight-card,
     .journey-grid,
     .quick-launch-grid,
     .workflow-grid,
@@ -347,12 +408,17 @@ html[data-theme="light"] .trust-strip {
     }
 
     .hero-copy,
+    .ai-spotlight-card,
     .journey-card,
     .launch-card,
     .workflow-step,
     .category-card,
     .trust-strip {
         padding: 1.2rem;
+    }
+
+    .ai-spotlight-actions {
+        justify-content: flex-start;
     }
 
     .hero-stats {
