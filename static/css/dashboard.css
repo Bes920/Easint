@@ -1094,6 +1094,18 @@
     transform: none;
 }
 
+.btn.is-loading,
+.dashboard-chat-send-btn.is-loading {
+    opacity: 0.72;
+    cursor: progress;
+    pointer-events: none;
+}
+
+.btn.is-loading .btn-icon,
+.dashboard-chat-send-btn.is-loading {
+    animation: spin 0.8s linear infinite;
+}
+
 @keyframes messageSlideIn {
     from {
         opacity: 0;
@@ -1133,6 +1145,62 @@
     from {
         opacity: 0;
         transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.toast-region {
+    position: fixed;
+    top: 22px;
+    right: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 2100;
+    max-width: min(380px, calc(100vw - 28px));
+}
+
+.toast {
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(8, 17, 28, 0.94);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
+    animation: toastSlideIn 0.28s ease;
+}
+
+.toast.success {
+    border-color: rgba(0, 255, 136, 0.28);
+}
+
+.toast.error {
+    border-color: rgba(255, 68, 68, 0.32);
+}
+
+.toast.info {
+    border-color: rgba(0, 217, 255, 0.28);
+}
+
+.toast-title {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.toast-message {
+    color: var(--text-secondary);
+    font-size: 0.94em;
+}
+
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
     }
     to {
         opacity: 1;
@@ -1445,5 +1513,289 @@
 
     .analysis-card {
         padding: 15px;
+    }
+}
+
+/* ==========================================================================
+   NETWORK GRAPH VISUALIZATION STYLES
+   ========================================================================== */
+
+.network-graph-section {
+    position: relative;
+    margin-top: 30px;
+    padding: 25px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.network-graph-section.hidden {
+    display: none;
+}
+
+.graph-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.graph-header h3 {
+    margin: 0;
+    font-size: 1.5em;
+    color: var(--text-primary);
+}
+
+.graph-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.graph-control-btn {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.graph-control-btn:hover {
+    border-color: #00d9ff;
+    transform: scale(1.08);
+}
+
+.close-graph-btn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    padding: 5px 10px;
+    transition: all 0.2s ease;
+}
+
+.close-graph-btn:hover {
+    color: var(--text-primary);
+    transform: scale(1.08);
+}
+
+.graph-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: var(--bg-primary);
+    border-radius: 8px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85em;
+    color: var(--text-secondary);
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+.graph-stats {
+    text-align: center;
+    margin-bottom: 15px;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+
+.graph-stats span {
+    margin: 0 8px;
+}
+
+.network-graph-container {
+    position: relative;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
+    min-height: 600px;
+}
+
+#networkGraphSvg {
+    display: block;
+    background: radial-gradient(circle, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+}
+
+.graph-loading,
+.graph-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(8, 18, 30, 0.92);
+    z-index: 10;
+}
+
+.graph-loading.hidden,
+.graph-empty.hidden {
+    display: none;
+}
+
+.graph-loading .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border-color);
+    border-top-color: #00d9ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.graph-loading p,
+.graph-empty p {
+    margin-top: 15px;
+    color: var(--text-secondary);
+}
+
+.graph-empty-icon {
+    font-size: 2.4em;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.node-details {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px;
+    min-width: 250px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 20;
+    animation: slideInRight 0.3s ease;
+}
+
+.node-details.hidden {
+    display: none;
+}
+
+.node-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.node-details-header strong {
+    color: var(--text-primary);
+    font-size: 1.1em;
+}
+
+.node-details-header button {
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    font-size: 1.3em;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.node-details-header button:hover {
+    color: var(--text-primary);
+}
+
+.node-details-content {
+    color: var(--text-secondary);
+}
+
+.detail-row {
+    margin-bottom: 10px;
+    font-size: 0.9em;
+}
+
+.detail-row strong {
+    display: block;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.graph-node {
+    transition: all 0.2s ease;
+}
+
+.graph-node:hover {
+    stroke-width: 4;
+    filter: brightness(1.25);
+}
+
+.graph-link {
+    transition: all 0.2s ease;
+}
+
+.graph-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    text-shadow:
+        -1px -1px 0 var(--bg-primary),
+        1px -1px 0 var(--bg-primary),
+        -1px 1px 0 var(--bg-primary),
+        1px 1px 0 var(--bg-primary);
+}
+
+@media (max-width: 768px) {
+    .network-graph-section {
+        padding: 18px;
+    }
+
+    .graph-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .network-graph-container {
+        min-height: 400px;
+    }
+
+    .graph-legend {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .node-details {
+        position: fixed;
+        top: auto;
+        bottom: 20px;
+        right: 20px;
+        left: 20px;
+        max-width: none;
     }
 }

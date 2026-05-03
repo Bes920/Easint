@@ -6,6 +6,7 @@
     <title>Investigation Dashboard — Easint</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     <!-- Theme Toggle -->
@@ -333,17 +334,88 @@
                 </div>
             </div>
 
+            <!-- Network Graph Section -->
+            <div class="network-graph-section hidden" id="networkGraphSection">
+                <div class="graph-header">
+                    <h3>🕸️ Relationship Network</h3>
+                    <div class="graph-controls">
+                        <button class="graph-control-btn" id="resetZoomBtn" title="Reset Zoom">
+                            🔄
+                        </button>
+                        <button class="graph-control-btn" id="centerGraphBtn" title="Center Graph">
+                            🎯
+                        </button>
+                        <button class="close-graph-btn" onclick="closeNetworkGraph()">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+
+                <div class="graph-legend">
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #00d9ff;"></span>
+                        <span>IP Address</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #00ff88;"></span>
+                        <span>Domain</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #ff6600;"></span>
+                        <span>Email</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #ffaa00;"></span>
+                        <span>Username</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #9966ff;"></span>
+                        <span>Organization</span>
+                    </div>
+                </div>
+
+                <div class="graph-stats" id="graphStats">
+                    <span id="nodeCount">0 nodes</span>
+                    <span>•</span>
+                    <span id="linkCount">0 connections</span>
+                </div>
+
+                <div class="network-graph-container" id="networkGraphContainer">
+                    <svg id="networkGraphSvg" width="100%" height="600"></svg>
+                    <div class="graph-loading hidden" id="graphLoading">
+                        <div class="spinner"></div>
+                        <p>Building network graph...</p>
+                    </div>
+                    <div class="graph-empty hidden" id="graphEmptyState">
+                        <div class="graph-empty-icon">🕸️</div>
+                        <p>No connections found</p>
+                    </div>
+                </div>
+
+                <div class="node-details hidden" id="nodeDetails">
+                    <div class="node-details-header">
+                        <strong id="nodeDetailsLabel"></strong>
+                        <button onclick="closeNodeDetails()">✕</button>
+                    </div>
+                    <div class="node-details-content" id="nodeDetailsContent"></div>
+                </div>
+            </div>
+
             <!-- Actions -->
             <div class="details-actions">
+                    <button class="btn btn-secondary" id="showGraphBtn" onclick="showNetworkGraph()">
+                        <span class="btn-icon">🕸️</span>
+                        <span>View Network Graph</span>
+                    </button>
                     <button class="btn btn-primary" id="analyzeInvestigationBtn" onclick="analyzeInvestigation()">
                         <span class="btn-icon">🤖</span>
                         <span id="analyzeBtnText">Analyze Investigation</span>
                     </button>
-                    <button class="btn btn-secondary" onclick="exportInvestigation()">
+                    <button class="btn btn-secondary" id="exportInvestigationBtn" onclick="exportInvestigation()">
                         <span class="btn-icon">📄</span>
                         <span>Export PDF</span>
                     </button>
-                    <button class="btn btn-danger" onclick="deleteInvestigation()">
+                    <button class="btn btn-danger" id="deleteInvestigationBtn" onclick="deleteInvestigation()">
                         <span class="btn-icon">🗑️</span>
                         <span>Delete Investigation</span>
                     </button>
