@@ -579,279 +579,464 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function displayFileUploadResults(data, container) {
         let html = '<h3>File Analysis</h3>';
-        html += `<div class="result-item"><span class="result-label">File:</span><span class="result-value">${data.filename}</span></div>`;
-        html += `<div class="result-item"><span class="result-label">Size:</span><span class="result-value">${formatBytes(data.size)}</span></div>`;
-        html += `<div class="result-item"><span class="result-label">MD5:</span><span class="result-value"><code>${data.md5}</code></span></div>`;
-        html += `<div class="result-item"><span class="result-label">SHA256:</span><span class="result-value"><code>${data.sha256}</code></span></div>`;
-        
+        html += renderResultItem('File', escapeHtml(data.filename || 'Unknown file'));
+        html += renderResultItem('Size', escapeHtml(formatBytes(data.size || 0)));
+        html += renderResultItem('MD5', renderCopyableValue(data.md5));
+        html += renderResultItem('SHA256', renderCopyableValue(data.sha256));
+
         if (data.virustotal && data.virustotal.found) {
-            const badge = data.virustotal.is_malicious ? '<span class="badge badge-danger">⚠️ Malicious</span>' : '<span class="badge badge-safe">✓ Clean</span>';
-            html += `<div class="result-item"><span class="result-label">VirusTotal:</span>${badge}</div>`;
-            html += `<div class="result-item"><span class="result-label">Detections:</span><span class="result-value">${data.virustotal.detections} / ${data.virustotal.total_scanners}</span></div>`;
+            const badge = data.virustotal.is_malicious ? '<span class="badge badge-danger">Malicious</span>' : '<span class="badge badge-safe">Clean</span>';
+            html += renderResultItem('VirusTotal', badge);
+            html += renderResultItem('Detections', escapeHtml(`${data.virustotal.detections} / ${data.virustotal.total_scanners}`));
         }
-        
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'File analyzed', message: `${data.filename || 'File'} is ready for review.` }
+        });
     }
-    
+
     function displayExifResults(data, container) {
         let html = '<h3>Metadata Extraction</h3>';
-        html += `<div class="result-item"><span class="result-label">File:</span><span class="result-value">${data.filename}</span></div>`;
-        
+        html += renderResultItem('File', escapeHtml(data.filename || 'Uploaded file'));
+
         if (data.metadata) {
             html += '<div class="metadata-grid">';
             for (const [key, value] of Object.entries(data.metadata)) {
                 if (key !== 'SourceFile') {
-                    html += `<div class="metadata-item"><span class="meta-key">${key}:</span><span class="meta-value">${value}</span></div>`;
+                    html += `<div class="metadata-item"><span class="metadata-key">${escapeHtml(key)}</span><span class="metadata-value">${escapeHtml(String(value))}</span></div>`;
                 }
             }
             html += '</div>';
         }
-        
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'Metadata extracted', message: 'File metadata has been loaded below.' }
+        });
     }
-    
+
     function displayDorkResults(data, container) {
         let html = '<h3>Google Dorks</h3>';
-        html += `<div class="result-item"><span class="result-label">Target:</span><span class="result-value">${data.target}</span></div>`;
-        html += `<div class="result-item"><span class="result-label">Type:</span><span class="result-value">${data.dork_type}</span></div>`;
-        
+        html += renderResultItem('Target', escapeHtml(data.target));
+        html += renderResultItem('Type', escapeHtml(data.dork_type));
+
         if (data.dorks && data.dorks.length) {
             html += '<div class="dork-list">';
-            data.dorks.forEach(dork => {
+            data.dorks.forEach((dork) => {
                 const encoded = encodeURIComponent(dork);
-                html += `<div class="dork-item"><code>${dork}</code><a href="${data.google_url_base}${encoded}" target="_blank" class="dork-link">Search →</a></div>`;
+                html += `<div class="dork-item"><div class="result-stack"><code class="dork-query">${escapeHtml(dork)}</code></div><div class="result-actions">${renderCopyButton(dork, 'Copy dork')}<a href="${escapeAttribute((data.google_url_base || '') + encoded)}" target="_blank" rel="noopener noreferrer" class="dork-link">Search</a></div></div>`;
             });
             html += '</div>';
         }
-        
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'Dorks generated', message: `${(data.dorks || []).length} query suggestions are ready.` }
+        });
     }
-    
+
     function displayReverseIPResults(data, container) {
         let html = '<h3>Reverse IP</h3>';
-        html += `<div class="result-item"><span class="result-label">IP:</span><span class="result-value">${data.ip}</span></div>`;
-        html += `<div class="result-item"><span class="result-label">Domains Found:</span><span class="result-value">${data.domains_found}</span></div>`;
-        
+        html += renderResultItem('IP', renderCopyableValue(data.ip));
+        html += renderResultItem('Domains Found', escapeHtml(String(data.domains_found || 0)));
+
         if (data.domains && data.domains.length > 0) {
             html += '<div class="domain-list">';
-            data.domains.forEach(d => html += `<div class="domain-item">${d}</div>`);
+            data.domains.forEach((domain) => {
+                html += `<div class="domain-item">${escapeHtml(domain)} ${renderCopyButton(domain, 'Copy')}</div>`;
+            });
             html += '</div>';
         }
-        
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'Reverse IP complete', message: `${data.domains_found || 0} domains were found.` }
+        });
     }
-    
+
     function displayEmailOSINTResults(data, container) {
         let html = '<h3>Email OSINT</h3>';
-        html += `<div class="result-item"><span class="result-label">Email:</span><span class="result-value">${data.email}</span></div>`;
-        html += `<div class="result-item"><span class="result-label">Valid:</span><span class="result-value">${data.valid_format ? '✓' : '✗'}</span></div>`;
+        html += renderResultItem('Email', renderCopyableValue(data.email));
+        html += renderResultItem('Format Check', escapeHtml(data.valid_format ? 'Valid format' : 'Invalid format'));
+
         if (data.domain) {
-            html += `<div class="result-item"><span class="result-label">Domain:</span><span class="result-value">${data.domain}</span></div>`;
-            html += `<div class="result-item"><span class="result-label">Mail Server:</span><span class="result-value">${data.email_server_exists ? '✓ Exists' : '✗ Not found'}</span></div>`;
+            html += renderResultItem('Domain', renderCopyableValue(data.domain));
+            html += renderResultItem('Mail Server', escapeHtml(data.email_server_exists ? 'Mail server detected' : 'No mail server found'));
         }
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'Email analysis ready', message: `Finished checking ${data.email || 'the supplied address'}.` }
+        });
     }
-    
+
     function displayWaybackResults(data, container) {
         let html = '<h3>Wayback Machine</h3>';
         if (data.archived) {
-            html += `<div class="result-item"><span class="result-label">Status:</span><span class="result-value"><span class="badge badge-safe">✓ Archived</span></span></div>`;
-            html += `<div class="snapshot-preview"><p>Snapshot available!</p><a href="${data.snapshot_url}" target="_blank" class="snapshot-link">View →</a></div>`;
+            html += renderResultItem('Status', '<span class="badge badge-safe">Archived</span>');
+            html += `<div class="snapshot-preview"><p>Snapshot available for review.</p><div class="result-actions"><a href="${escapeAttribute(data.snapshot_url || '#')}" target="_blank" rel="noopener noreferrer" class="snapshot-link dork-link">Open Snapshot</a>${renderCopyButton(data.snapshot_url || '', 'Copy link')}</div></div>`;
         } else {
-            html += `<div class="result-item"><span class="result-label">Status:</span><span class="result-value"><span class="badge badge-warning">Not Archived</span></span></div>`;
+            html += renderResultItem('Status', '<span class="badge badge-warning">No archive found</span>');
         }
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'Archive check complete', message: data.archived ? 'A historical snapshot was found.' : 'No historical snapshot was found.' }
+        });
     }
-    
+
     function displayMACResults(data, container) {
-        let html = '<h3>MAC Lookup</h3>';
-        html += `<div class="result-item"><span class="result-label">MAC:</span><span class="result-value">${data.mac}</span></div>`;
-        html += `<div class="result-item"><span class="result-label">Vendor:</span><span class="result-value">${data.vendor}</span></div>`;
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+        const html = [
+            '<h3>MAC Lookup</h3>',
+            renderResultItem('MAC', renderCopyableValue(data.mac)),
+            renderResultItem('Vendor', escapeHtml(data.vendor || 'Unknown vendor'))
+        ].join('');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'MAC lookup complete', message: 'Vendor details have been loaded.' }
+        });
     }
-    
+
     function displayCryptoResults(data, container) {
         let html = '<h3>Crypto Tracker</h3>';
-        if (data.demo_mode) html += `<div class="demo-message">${data.message}</div>`;
-        html += `<div class="result-item"><span class="result-label">Address:</span><span class="result-value">${data.address}</span></div>`;
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+        if (data.demo_mode) html += `<div class="demo-message">${escapeHtml(data.message || '')}</div>`;
+        html += renderResultItem('Address', renderCopyableValue(data.address));
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'Crypto lookup complete', message: 'Wallet information is now visible below.' }
+        });
     }
-    
+
     function displayIPResults(data, container) {
         let html = '<h3>IP Reputation</h3>';
-        html += `<div class="result-item"><span class="result-label">IP:</span><span class="result-value">${data.ip}</span></div>`;
-        
+        html += renderResultItem('IP', renderCopyableValue(data.ip));
+
         if (data.abuseipdb) {
-            const badge = data.abuseipdb.is_malicious ? '<span class="badge badge-danger">⚠️ Malicious</span>' : '<span class="badge badge-safe">✓ Clean</span>';
-            html += `<div class="result-item"><span class="result-label">AbuseIPDB:</span>${badge}</div>`;
-            html += `<div class="result-item"><span class="result-label">Abuse Score:</span><span class="result-value">${data.abuseipdb.abuse_score}%</span></div>`;
+            const badge = data.abuseipdb.is_malicious ? '<span class="badge badge-danger">Malicious</span>' : '<span class="badge badge-safe">Clean</span>';
+            html += renderResultItem('AbuseIPDB', badge);
+            html += renderResultItem('Abuse Score', escapeHtml(`${data.abuseipdb.abuse_score}%`));
         }
-        
+
         if (data.virustotal && data.virustotal.detections !== undefined) {
-            html += `<div class="result-item"><span class="result-label">VirusTotal:</span><span class="result-value">${data.virustotal.detections} detections</span></div>`;
+            html += renderResultItem('VirusTotal', escapeHtml(`${data.virustotal.detections} detections`));
         }
-        
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'IP check complete', message: `Finished reviewing ${data.ip || 'the IP address'}.` }
+        });
     }
-    
+
     function displayPhoneResults(data, container) {
         let html = '<h3>Phone Lookup</h3>';
-        if (data.demo_mode) html += `<div class="demo-message">${data.message}</div>`;
-        html += `<div class="result-item"><span class="result-label">Phone:</span><span class="result-value">${data.phone}</span></div>`;
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+        if (data.demo_mode) html += `<div class="demo-message">${escapeHtml(data.message || '')}</div>`;
+        html += renderResultItem('Phone', renderCopyableValue(data.phone));
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'Phone lookup complete', message: 'The number check has finished.' }
+        });
     }
-    
+
     function displayShodanResults(data, container) {
         let html = '<h3>Shodan Search</h3>';
-        if (data.demo_mode) html += `<div class="demo-message">${data.message}</div>`;
-        html += `<div class="result-item"><span class="result-label">Query:</span><span class="result-value">${data.query}</span></div>`;
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+        if (data.demo_mode) html += `<div class="demo-message">${escapeHtml(data.message || '')}</div>`;
+        html += renderResultItem('Query', renderCopyableValue(data.query));
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'Shodan query complete', message: 'Search details were returned successfully.' }
+        });
     }
-    
-    
-    // ==========================================================================
-    // DISPLAY FUNCTIONS - EXISTING TOOLS (simplified)
-    // ==========================================================================
-    
+
     function displayHashResults(data, container) {
         let html = '<h3>Hash Check</h3>';
         if (data.found === false) {
-            html += `<div class="info-box">${data.message}</div>`;
+            html += `<div class="info-box">${escapeHtml(data.message || 'No matching hash was found.')}</div>`;
         } else {
-            const badge = data.is_malicious ? '<span class="badge badge-danger">⚠️ Malicious</span>' : '<span class="badge badge-safe">✓ Clean</span>';
-            html += `<div class="result-item"><span class="result-label">Status:</span>${badge}</div>`;
-            html += `<div class="result-item"><span class="result-label">Detections:</span>${data.detections} / ${data.total_scanners}</div>`;
+            const badge = data.is_malicious ? '<span class="badge badge-danger">Malicious</span>' : '<span class="badge badge-safe">Clean</span>';
+            html += renderResultItem('Status', badge);
+            html += renderResultItem('Detections', escapeHtml(`${data.detections} / ${data.total_scanners}`));
         }
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'Hash lookup complete', message: 'Hash intelligence is ready below.' }
+        });
     }
-    
+
     function displayGeolocationResults(data, container) {
-        let html = '<h3>Geolocation</h3>';
-        html += `<div class="result-item"><span class="result-label">IP:</span>${data.ip}</div>`;
-        html += `<div class="result-item"><span class="result-label">Country:</span>${data.country}</div>`;
-        html += `<div class="result-item"><span class="result-label">City:</span>${data.city}</div>`;
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+        const html = [
+            '<h3>Geolocation</h3>',
+            renderResultItem('IP', renderCopyableValue(data.ip)),
+            renderResultItem('Country', escapeHtml(data.country || 'Unknown')),
+            renderResultItem('City', escapeHtml(data.city || 'Unknown'))
+        ].join('');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'Geolocation ready', message: 'Location details have been loaded.' }
+        });
     }
-    
+
     function displayWhoisResults(data, container) {
-        let html = '<h3>WHOIS</h3>';
         if (data.error) {
-            html += `<div class="error-message">${data.error}</div>`;
-        } else {
-            html += `<div class="result-item"><span class="result-label">Domain:</span>${data.domain}</div>`;
-            html += `<div class="result-item"><span class="result-label">Registrar:</span>${data.registrar}</div>`;
+            showError(container, data.error);
+            return;
         }
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+
+        const html = [
+            '<h3>WHOIS</h3>',
+            renderResultItem('Domain', renderCopyableValue(data.domain)),
+            renderResultItem('Registrar', escapeHtml(data.registrar || 'Unavailable'))
+        ].join('');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'WHOIS complete', message: 'Domain registration details are available.' }
+        });
     }
-    
+
     function displayEmailBreachResults(data, container) {
-        let html = '<h3>Breach Check</h3>';
-        const badge = data.breached ? '<span class="badge badge-danger">⚠️ Breached</span>' : '<span class="badge badge-safe">✓ Clean</span>';
-        html += `<div class="result-item"><span class="result-label">Status:</span>${badge}</div>`;
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+        const badge = data.breached ? '<span class="badge badge-danger">Breached</span>' : '<span class="badge badge-safe">Clean</span>';
+        const html = ['<h3>Breach Check</h3>', renderResultItem('Status', badge)].join('');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'Breach check complete', message: 'The breach status has been updated.' }
+        });
     }
-    
+
     function displayUsernameResults(data, container) {
-        let html = '<h3>Username Search</h3>';
-        html += '<div class="platform-grid">';
-        data.results.forEach(r => {
-            const cls = r.exists ? 'found' : 'not-found';
-            if (r.exists) {
-                html += `<a href="${r.url}" target="_blank" class="platform-item ${cls}"><strong>${r.platform}</strong><br><span class="status">✓ Profile Found</span></a>`;
+        let html = '<h3>Username Search</h3><div class="platform-grid">';
+        (data.results || []).forEach((result) => {
+            const cls = result.exists ? 'found' : 'not-found';
+            const platform = escapeHtml(result.platform || 'Platform');
+            if (result.exists) {
+                html += `<a href="${escapeAttribute(result.url || '#')}" target="_blank" rel="noopener noreferrer" class="platform-item ${cls}"><strong>${platform}</strong><br><span class="status">Profile Found</span></a>`;
             } else {
-                html += `<div class="platform-item ${cls}"><strong>${r.platform}</strong><br><span class="status">✗ Not Found</span></div>`;
+                html += `<div class="platform-item ${cls}"><strong>${platform}</strong><br><span class="status">Not Found</span></div>`;
             }
         });
         html += '</div>';
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'Username scan complete', message: `${(data.results || []).length} platform checks finished.` }
+        });
     }
-    
+
     function displaySubdomainResults(data, container) {
+        const subdomains = data.subdomains || [];
         let html = '<h3>Subdomains</h3>';
-        html += `<div class="result-item"><span class="result-label">Found:</span>${data.subdomains.length}</div>`;
-        if (data.subdomains.length) {
+        html += renderResultItem('Found', escapeHtml(String(subdomains.length)));
+        if (subdomains.length) {
             html += '<div class="subdomain-list">';
-            data.subdomains.forEach(s => html += `<div class="subdomain-item">${s.subdomain}</div>`);
+            subdomains.forEach((item) => {
+                const subdomain = item.subdomain || item;
+                html += `<div class="subdomain-item">${escapeHtml(subdomain)} ${renderCopyButton(subdomain, 'Copy')}</div>`;
+            });
             html += '</div>';
         }
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'Subdomain scan complete', message: `${subdomains.length} subdomains were identified.` }
+        });
     }
-    
+
     function displayDNSResults(data, container) {
         let html = '<h3>DNS Records</h3>';
-        for (const [type, records] of Object.entries(data.records)) {
-            if (records && records.length) {
-                html += `<div class="dns-record"><div class="dns-record-type">${type}</div>`;
-                records.forEach(r => html += `<div class="dns-record-value">${r}</div>`);
+        const records = data.records || {};
+        for (const [type, entries] of Object.entries(records)) {
+            if (entries && entries.length) {
+                html += `<div class="dns-record"><div class="dns-record-type">${escapeHtml(type)}</div>`;
+                entries.forEach((entry) => {
+                    html += `<div class="dns-record-value">${escapeHtml(String(entry))} ${renderCopyButton(String(entry), 'Copy')}</div>`;
+                });
                 html += '</div>';
             }
         }
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'DNS lookup complete', message: 'DNS record data is ready.' }
+        });
     }
-    
+
     function displaySSLResults(data, container) {
-        let html = '<h3>SSL Certificate</h3>';
         if (data.error) {
-            html += `<div class="error-message">${data.error}</div>`;
-        } else {
-            const badge = data.valid ? '<span class="badge badge-safe">✓ Valid</span>' : '<span class="badge badge-danger">⚠️ Invalid</span>';
-            html += `<div class="result-item"><span class="result-label">Status:</span>${badge}</div>`;
+            showError(container, data.error);
+            return;
         }
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+
+        const badge = data.valid ? '<span class="badge badge-safe">Valid</span>' : '<span class="badge badge-danger">Invalid</span>';
+        const html = ['<h3>SSL Certificate</h3>', renderResultItem('Status', badge)].join('');
+
+        renderResult(container, html, {
+            toast: { type: 'success', title: 'SSL lookup complete', message: 'Certificate status has been refreshed.' }
+        });
     }
-    
-    
-    // ==========================================================================
-    // UTILITY FUNCTIONS
-    // ✅ MODIFIED: makeRequest now includes investigation_id automatically
-    // ==========================================================================
-    
+
     async function makeRequest(endpoint, data) {
-        // ✅ MODIFIED: Automatically add investigation_id to all requests
         const requestData = {
             ...data,
             investigation_id: getCurrentInvestigationId()
         };
-        
+
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData)
         });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || 'Request failed');
+
+        const result = await parseJsonResponse(response);
+        if (!response.ok) {
+            throw new Error(normalizeErrorMessage(result.error || result.message || 'The request could not be completed.'));
+        }
+
         return result;
     }
-    
+
+    async function parseJsonResponse(response) {
+        try {
+            return await response.json();
+        } catch (error) {
+            console.error('Failed to parse JSON response:', error);
+            throw new Error('The server returned an unexpected response. Please try again.');
+        }
+    }
+
     function showLoading(container, message) {
-        container.innerHTML = `<div class="loading"></div> ${message}`;
+        setFormBusy(container, true, message);
+        container.innerHTML = `
+            <div class="loading-state-panel">
+                <div class="loading" aria-hidden="true"></div>
+                <div class="loading-copy">
+                    <span class="loading-label">${escapeHtml(message)}</span>
+                    <span class="loading-subtext">This may take a few seconds depending on the source.</span>
+                </div>
+            </div>
+        `;
         container.classList.remove('hidden');
     }
-    
+
     function showError(container, message) {
-        container.innerHTML = `<div class="error-message"><strong>Error:</strong> ${message}</div>`;
+        const normalized = normalizeErrorMessage(message);
+        setFormBusy(container, false);
+        container.innerHTML = `
+            <div class="error-message">
+                <strong class="error-title">Request could not be completed</strong>
+                <div>${escapeHtml(normalized)}</div>
+                <div class="error-help">Check the input format or try again in a moment.</div>
+            </div>
+        `;
         container.classList.remove('hidden');
+        showToast('error', 'Request failed', normalized);
     }
-    
+
+    function renderResult(container, html, options = {}) {
+        setFormBusy(container, false);
+        container.innerHTML = html;
+        container.classList.remove('hidden');
+
+        if (options.toast) {
+            showToast(options.toast.type || 'success', options.toast.title, options.toast.message);
+        }
+    }
+
+    function renderResultItem(label, valueMarkup) {
+        return `<div class="result-item"><span class="result-label">${escapeHtml(label)}</span><div class="result-actions">${valueMarkup}</div></div>`;
+    }
+
+    function renderCopyableValue(value) {
+        if (!value) {
+            return '<span class="result-value">Unavailable</span>';
+        }
+
+        return `<span class="result-value"><code class="result-copy-text">${escapeHtml(String(value))}</code></span>${renderCopyButton(String(value))}`;
+    }
+
+    function renderCopyButton(value, label = 'Copy') {
+        if (!value) {
+            return '';
+        }
+
+        return `<button type="button" class="btn-copy" data-copy-text="${escapeAttribute(String(value))}">${escapeHtml(label)}</button>`;
+    }
+
+    function ensureToastRegion() {
+        let region = document.querySelector('.toast-region');
+        if (!region) {
+            region = document.createElement('div');
+            region.className = 'toast-region';
+            region.setAttribute('aria-live', 'polite');
+            region.setAttribute('aria-atomic', 'true');
+            document.body.appendChild(region);
+        }
+        return region;
+    }
+
+    function showToast(type, title, message) {
+        const region = ensureToastRegion();
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<strong class="toast-title">${escapeHtml(title)}</strong><div class="toast-message">${escapeHtml(message)}</div>`;
+        region.appendChild(toast);
+
+        window.setTimeout(() => {
+            toast.remove();
+        }, 3200);
+    }
+
+    function setFormBusy(container, isBusy, label = 'Working...') {
+        const form = container.previousElementSibling;
+        if (!form || !form.classList.contains('tool-form')) return;
+
+        const button = form.querySelector('button[type="submit"]');
+        if (!button) return;
+
+        if (!button.dataset.defaultLabel) {
+            button.dataset.defaultLabel = button.innerHTML;
+        }
+
+        button.disabled = isBusy;
+        button.classList.toggle('is-loading', isBusy);
+        button.setAttribute('aria-busy', isBusy ? 'true' : 'false');
+        button.innerHTML = isBusy
+            ? `<span class="btn-icon">⏳</span> ${escapeHtml(label)}`
+            : button.dataset.defaultLabel;
+    }
+
+    function normalizeErrorMessage(message) {
+        const trimmed = String(message || '').trim();
+        if (!trimmed) return 'Something went wrong while talking to the server.';
+        if (trimmed.toLowerCase().includes('failed to fetch')) {
+            return 'The request could not reach the server. Check that the app is still running and try again.';
+        }
+        return trimmed;
+    }
+
+    document.addEventListener('click', async function(event) {
+        const copyButton = event.target.closest('[data-copy-text]');
+        if (!copyButton) return;
+
+        const text = copyButton.getAttribute('data-copy-text') || '';
+        try {
+            await navigator.clipboard.writeText(text);
+            const originalLabel = copyButton.textContent;
+            copyButton.textContent = 'Copied';
+            copyButton.classList.add('copied');
+            showToast('success', 'Copied to clipboard', 'The selected value is ready to paste.');
+
+            window.setTimeout(() => {
+                copyButton.textContent = originalLabel;
+                copyButton.classList.remove('copied');
+            }, 1400);
+        } catch (error) {
+            console.error('Clipboard copy failed:', error);
+            showToast('error', 'Copy failed', 'Your browser blocked clipboard access for this action.');
+        }
+    });
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function escapeAttribute(value) {
+        return escapeHtml(value).replace(/`/g, '&#96;');
+    }
+
     function formatBytes(bytes) {
         if (bytes === 0) return '0 Bytes';
         const k = 1024;
