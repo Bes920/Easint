@@ -190,6 +190,7 @@ def guide_chat():
     try:
         data = request.get_json() or {}
         user_message = (data.get('message') or '').strip()
+        chat_history = data.get('chat_history') or []
 
         if not user_message:
             return jsonify({'success': False, 'error': 'Message is required'}), 400
@@ -203,7 +204,7 @@ def guide_chat():
                 'error': 'Guide assistant not configured. Please set MISTRAL_API_KEY in .env file.'
             }), 500
 
-        ai_response = ai_service.chat(user_message=user_message, chat_history=[])
+        ai_response = ai_service.chat(user_message=user_message, chat_history=chat_history)
 
         return jsonify({
             'success': True,

@@ -195,6 +195,48 @@ html[data-theme="light"] .guide-chat-card {
     color: var(--text-primary);
 }
 
+.guide-structured {
+    display: grid;
+    gap: 0.6rem;
+}
+
+.guide-block {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.55rem 0.7rem;
+}
+
+.guide-block p {
+    margin: 0.35rem 0 0;
+}
+
+.guide-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+.guide-action-link {
+    text-decoration: none;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 0.35rem 0.7rem;
+    color: var(--text-primary);
+    background: var(--bg-light);
+    font-size: 0.9rem;
+}
+
+.guide-copy-btn {
+    width: fit-content;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-primary);
+    padding: 0.35rem 0.65rem;
+    cursor: pointer;
+}
+
 .hero-copy,
 .hero-panel,
 .journey-card,
