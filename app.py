@@ -71,6 +71,13 @@ def index():
     return render_template('home.html')
 
 
+
+
+@app.route('/learn')
+def learn_page():
+    """Legacy landing/learn page"""
+    return render_template('learn.html')
+
 @app.route('/tools')
 def tools_page():
     """Primary workspace containing all OSINT tools"""

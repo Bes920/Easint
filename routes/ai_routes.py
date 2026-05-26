@@ -177,7 +177,40 @@ def test():
         'gemini_status': gemini_status,
         'endpoints': [
             '/ai/chat',
+            '/ai/guide-chat',
             '/ai/analyze/<investigation_id>',
             '/ai/test'
         ]
     })
+
+
+@ai_bp.route('/guide-chat', methods=['POST'])
+def guide_chat():
+    """Landing assistant chat for platform/tool guidance."""
+    try:
+        data = request.get_json() or {}
+        user_message = (data.get('message') or '').strip()
+
+        if not user_message:
+            return jsonify({'success': False, 'error': 'Message is required'}), 400
+
+        try:
+            from services.mistral_guide_service import get_mistral_guide_service
+            ai_service = get_mistral_guide_service()
+        except ValueError:
+            return jsonify({
+                'success': False,
+                'error': 'Guide assistant not configured. Please set MISTRAL_API_KEY in .env file.'
+            }), 500
+
+        ai_response = ai_service.chat(user_message=user_message, chat_history=[])
+
+        return jsonify({
+            'success': True,
+            'response': ai_response,
+            'timestamp': datetime.now().isoformat()
+        })
+
+    except Exception as e:
+        print(f"❌ Guide Chat error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
