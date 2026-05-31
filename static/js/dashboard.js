@@ -306,7 +306,10 @@ async function createInvestigation(e) {
         showError('Please enter an investigation name');
         return;
     }
-    
+
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    setButtonBusy(submitButton, true, 'Creating...');
+
     try {
         const response = await fetch('/api/investigations', {
             method: 'POST',
@@ -326,6 +329,8 @@ async function createInvestigation(e) {
     } catch (error) {
         console.error('Error creating investigation:', error);
         showError('Failed to create investigation');
+    } finally {
+        setButtonBusy(submitButton, false);
     }
 }
 
@@ -355,6 +360,7 @@ async function viewInvestigation(investigationId) {
 
 function showInvestigationDetails(investigation) {
     resetAnalysisSection();
+    closeNetworkGraph();
 
     // Set basic info
     document.getElementById('detailsInvestigationName').textContent = investigation.name;
@@ -422,6 +428,7 @@ function showInvestigationDetails(investigation) {
 function closeDetailsModal() {
     document.getElementById('investigationDetailsModal').classList.add('hidden');
     resetAnalysisSection();
+    closeNetworkGraph();
     currentInvestigation = null;
 }
 
@@ -465,6 +472,9 @@ async function deleteInvestigation() {
         return;
     }
     
+    const deleteButton = document.getElementById('deleteInvestigationBtn');
+    setButtonBusy(deleteButton, true, 'Deleting...');
+
     try {
         const response = await fetch(`/api/investigations/${currentInvestigation.id}`, {
             method: 'DELETE'
@@ -480,6 +490,8 @@ async function deleteInvestigation() {
     } catch (error) {
         console.error('Error deleting investigation:', error);
         showError('Failed to delete investigation');
+    } finally {
+        setButtonBusy(deleteButton, false);
     }
 }
 
@@ -503,6 +515,9 @@ async function exportInvestigation() {
         showError('Click "Analyze Investigation" first so the PDF can include AI analysis.');
         return;
     }
+
+    const exportButton = document.getElementById('exportInvestigationBtn');
+    setButtonBusy(exportButton, true, 'Exporting...');
 
     try {
         const response = await fetch('/export-results', {
@@ -551,6 +566,8 @@ async function exportInvestigation() {
     } catch (error) {
         console.error('Error exporting investigation:', error);
         showError(error.message || 'Failed to export PDF');
+    } finally {
+        setButtonBusy(exportButton, false);
     }
 }
 
@@ -598,14 +615,63 @@ function getThreatIcon(level) {
     return icons[level] || '📊';
 }
 
+function ensureToastRegion() {
+    let region = document.querySelector('.toast-region');
+    if (!region) {
+        region = document.createElement('div');
+        region.className = 'toast-region';
+        region.setAttribute('aria-live', 'polite');
+        region.setAttribute('aria-atomic', 'true');
+        document.body.appendChild(region);
+    }
+    return region;
+}
+
+function showToast(type, title, message) {
+    const region = ensureToastRegion();
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<strong class="toast-title">${escapeHtml(title)}</strong><div class="toast-message">${escapeHtml(message)}</div>`;
+    region.appendChild(toast);
+
+    window.setTimeout(() => {
+        toast.remove();
+    }, 3200);
+}
+
+function normalizeErrorMessage(message) {
+    const trimmed = String(message || '').trim();
+    if (!trimmed) return 'Something went wrong while processing the request.';
+    if (trimmed.toLowerCase().includes('failed to fetch')) {
+        return 'The dashboard could not reach the server. Please verify the app is running and try again.';
+    }
+    return trimmed;
+}
+
+function setButtonBusy(button, isBusy, label = 'Working...') {
+    if (!button) return;
+
+    if (!button.dataset.defaultHtml) {
+        button.dataset.defaultHtml = button.innerHTML;
+    }
+
+    button.disabled = isBusy;
+    button.classList.toggle('is-loading', isBusy);
+    button.setAttribute('aria-busy', isBusy ? 'true' : 'false');
+
+    if (isBusy) {
+        button.innerHTML = `<span class="btn-icon">⏳</span><span>${escapeHtml(label)}</span>`;
+    } else {
+        button.innerHTML = button.dataset.defaultHtml;
+    }
+}
+
 function showSuccess(message) {
-    // Simple alert for now - you can replace with a toast notification
-    alert('✅ ' + message);
+    showToast('success', 'Success', message);
 }
 
 function showError(message) {
-    // Simple alert for now - you can replace with a toast notification
-    alert('❌ ' + message);
+    showToast('error', 'Action failed', normalizeErrorMessage(message));
 }
 
 // ==========================================================================
@@ -662,12 +728,13 @@ async function sendDashboardMessage() {
     if (!message) return;
     
     if (!currentInvestigation) {
-        alert('No investigation selected');
+        showError('No investigation selected');
         return;
     }
     
     input.disabled = true;
     sendBtn.disabled = true;
+    sendBtn.classList.add('is-loading');
     
     addDashboardMessage(message, 'user');
     input.value = '';
@@ -701,6 +768,7 @@ async function sendDashboardMessage() {
     } finally {
         input.disabled = false;
         sendBtn.disabled = false;
+        sendBtn.classList.remove('is-loading');
         input.focus();
     }
 }
@@ -842,13 +910,13 @@ function resetAnalysisSection() {
 
 async function analyzeInvestigation() {
     if (!currentInvestigation) {
-        alert('No investigation selected');
+        showError('No investigation selected');
         return;
     }
 
     const results = currentInvestigation.results || [];
     if (results.length === 0) {
-        alert('No results to analyze. Run some OSINT tools first.');
+        showError('No results to analyze. Run some OSINT tools first.');
         return;
     }
 
@@ -856,8 +924,7 @@ async function analyzeInvestigation() {
     elements.section.classList.remove('hidden');
 
     const originalText = elements.buttonText.textContent;
-    elements.button.disabled = true;
-    elements.buttonText.textContent = `Analyzing ${results.length} results...`;
+    setButtonBusy(elements.button, true, `Analyzing ${results.length} results...`);
 
     showAnalysisLoading(true);
 
@@ -873,6 +940,7 @@ async function analyzeInvestigation() {
             displayAnalysisResults(data.summary || {}, {
                 analyzedAt: data.analyzed_at
             });
+            showSuccess('AI analysis completed successfully.');
         } else {
             showAnalysisError(data.error || 'Analysis failed');
         }
@@ -880,7 +948,7 @@ async function analyzeInvestigation() {
         console.error('Analysis error:', error);
         showAnalysisError('Failed to analyze investigation. Please try again.');
     } finally {
-        elements.button.disabled = false;
+        setButtonBusy(elements.button, false);
         elements.buttonText.textContent = originalText;
     }
 }
@@ -983,6 +1051,7 @@ function showAnalysisLoading(show) {
 
 function showAnalysisError(errorMessage) {
     showAnalysisLoading(false);
+    showError(errorMessage);
 
     const elements = getAnalysisElements();
     const errorHtml = `<p class="error-message">❌ ${escapeHtml(errorMessage)}</p>`;
@@ -1014,4 +1083,284 @@ function hasAnalysisSummary(investigation) {
             investigation.aiSummary.actions
         )
     );
+}
+
+// ==========================================================================
+// NETWORK GRAPH VISUALIZATION
+// ==========================================================================
+
+let graphData = null;
+let graphSimulation = null;
+let graphZoomBehavior = null;
+
+/**
+ * Show the network graph for the current investigation.
+ */
+async function showNetworkGraph() {
+    if (!currentInvestigation) {
+        showError('No investigation selected');
+        return;
+    }
+
+    const results = currentInvestigation.results || [];
+    if (results.length === 0) {
+        showError('No results to visualize. Run some OSINT tools first.');
+        return;
+    }
+
+    if (typeof d3 === 'undefined') {
+        showError('D3.js failed to load. Refresh the page and try again.');
+        return;
+    }
+
+    const graphSection = document.getElementById('networkGraphSection');
+    const loading = document.getElementById('graphLoading');
+    const emptyState = document.getElementById('graphEmptyState');
+
+    closeNodeDetails();
+    graphSection.classList.remove('hidden');
+    loading.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+
+    try {
+        const response = await fetch(`/api/investigations/${currentInvestigation.id}/graph`);
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || 'Failed to generate graph');
+        }
+
+        graphData = data.graph;
+        updateGraphStats(graphData);
+
+        if (!graphData.nodes.length || !graphData.links.length) {
+            clearGraphSvg();
+            emptyState.classList.remove('hidden');
+            return;
+        }
+
+        renderNetworkGraph(graphData);
+    } catch (error) {
+        console.error('Graph error:', error);
+        showError(error.message || 'Failed to load network graph');
+        closeNetworkGraph();
+    } finally {
+        loading.classList.add('hidden');
+    }
+}
+
+/**
+ * Update the graph stats area.
+ */
+function updateGraphStats(data) {
+    const stats = data && data.stats ? data.stats : { total_nodes: 0, total_links: 0 };
+    document.getElementById('nodeCount').textContent = `${stats.total_nodes || 0} nodes`;
+    document.getElementById('linkCount').textContent = `${stats.total_links || 0} connections`;
+}
+
+/**
+ * Clear the graph SVG and stop any running simulation.
+ */
+function clearGraphSvg() {
+    if (graphSimulation) {
+        graphSimulation.stop();
+        graphSimulation = null;
+    }
+
+    d3.select('#networkGraphSvg').selectAll('*').remove();
+}
+
+/**
+ * Render the network graph using a D3 force simulation.
+ */
+function renderNetworkGraph(data) {
+    const container = document.getElementById('networkGraphContainer');
+    const svg = d3.select('#networkGraphSvg');
+    const emptyState = document.getElementById('graphEmptyState');
+    const width = Math.max(container.clientWidth, 320);
+    const height = window.innerWidth <= 768 ? 420 : 600;
+
+    emptyState.classList.add('hidden');
+    clearGraphSvg();
+
+    svg.attr('width', width).attr('height', height);
+
+    const graphGroup = svg.append('g');
+
+    graphZoomBehavior = d3.zoom()
+        .scaleExtent([0.1, 4])
+        .on('zoom', (event) => {
+            graphGroup.attr('transform', event.transform);
+        });
+
+    svg.call(graphZoomBehavior);
+
+    const colorScale = {
+        ip: '#00d9ff',
+        domain: '#00ff88',
+        email: '#ff6600',
+        username: '#ffaa00',
+        url: '#00d9ff',
+        organization: '#9966ff',
+        breach: '#ff3366',
+        platform: '#3ddc97',
+        other: '#888888'
+    };
+
+    const simulationNodes = data.nodes.map((node) => ({ ...node }));
+    const simulationLinks = data.links.map((link) => ({ ...link }));
+
+    graphSimulation = d3.forceSimulation(simulationNodes)
+        .force('link', d3.forceLink(simulationLinks).id((d) => d.id).distance(100))
+        .force('charge', d3.forceManyBody().strength(-320))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('collision', d3.forceCollide().radius((d) => d.size + 8));
+
+    const link = graphGroup.append('g')
+        .selectAll('line')
+        .data(simulationLinks)
+        .enter()
+        .append('line')
+        .attr('class', 'graph-link')
+        .attr('stroke', '#666')
+        .attr('stroke-width', 2)
+        .attr('stroke-opacity', 0.6);
+
+    const node = graphGroup.append('g')
+        .selectAll('circle')
+        .data(simulationNodes)
+        .enter()
+        .append('circle')
+        .attr('class', 'graph-node')
+        .attr('r', (d) => d.size)
+        .attr('fill', (d) => colorScale[d.type] || colorScale.other)
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 2)
+        .style('cursor', 'pointer')
+        .on('click', (event, d) => {
+            event.stopPropagation();
+            showNodeDetails(d);
+        })
+        .call(
+            d3.drag()
+                .on('start', dragStarted)
+                .on('drag', dragged)
+                .on('end', dragEnded)
+        );
+
+    const label = graphGroup.append('g')
+        .selectAll('text')
+        .data(simulationNodes)
+        .enter()
+        .append('text')
+        .attr('class', 'graph-label')
+        .attr('text-anchor', 'middle')
+        .attr('dy', -15)
+        .attr('fill', '#fff')
+        .attr('font-size', '10px')
+        .style('pointer-events', 'none')
+        .text((d) => (d.label.length > 20 ? `${d.label.substring(0, 17)}...` : d.label));
+
+    svg.on('click', () => closeNodeDetails());
+
+    graphSimulation.on('tick', () => {
+        link
+            .attr('x1', (d) => d.source.x)
+            .attr('y1', (d) => d.source.y)
+            .attr('x2', (d) => d.target.x)
+            .attr('y2', (d) => d.target.y);
+
+        node
+            .attr('cx', (d) => d.x)
+            .attr('cy', (d) => d.y);
+
+        label
+            .attr('x', (d) => d.x)
+            .attr('y', (d) => d.y);
+    });
+
+    document.getElementById('resetZoomBtn').onclick = () => {
+        svg.transition().duration(750).call(graphZoomBehavior.transform, d3.zoomIdentity);
+    };
+
+    document.getElementById('centerGraphBtn').onclick = () => {
+        graphSimulation.alpha(0.4).restart();
+        svg.transition().duration(750).call(graphZoomBehavior.transform, d3.zoomIdentity);
+    };
+}
+
+/**
+ * D3 drag start handler for graph nodes.
+ */
+function dragStarted(event, d) {
+    if (!event.active && graphSimulation) {
+        graphSimulation.alphaTarget(0.3).restart();
+    }
+    d.fx = d.x;
+    d.fy = d.y;
+}
+
+/**
+ * D3 drag handler for graph nodes.
+ */
+function dragged(event, d) {
+    d.fx = event.x;
+    d.fy = event.y;
+}
+
+/**
+ * D3 drag end handler for graph nodes.
+ */
+function dragEnded(event, d) {
+    if (!event.active && graphSimulation) {
+        graphSimulation.alphaTarget(0);
+    }
+    d.fx = null;
+    d.fy = null;
+}
+
+/**
+ * Show the node details side panel.
+ */
+function showNodeDetails(node) {
+    const panel = document.getElementById('nodeDetails');
+    const label = document.getElementById('nodeDetailsLabel');
+    const content = document.getElementById('nodeDetailsContent');
+
+    label.textContent = node.label;
+    content.innerHTML = `
+        <div class="detail-row">
+            <strong>Type:</strong> ${escapeHtml(node.type)}
+        </div>
+        <div class="detail-row">
+            <strong>Threat Level:</strong>
+            <span class="threat-badge threat-${escapeHtml(node.threat_level)}">
+                ${escapeHtml((node.threat_level || 'low').toUpperCase())}
+            </span>
+        </div>
+        <div class="detail-row">
+            <strong>Discovered By:</strong> ${escapeHtml(node.tool)}
+        </div>
+    `;
+
+    panel.classList.remove('hidden');
+}
+
+/**
+ * Close the node details panel.
+ */
+function closeNodeDetails() {
+    document.getElementById('nodeDetails').classList.add('hidden');
+}
+
+/**
+ * Close the network graph section and clean up state.
+ */
+function closeNetworkGraph() {
+    document.getElementById('networkGraphSection').classList.add('hidden');
+    document.getElementById('graphLoading').classList.add('hidden');
+    document.getElementById('graphEmptyState').classList.add('hidden');
+    closeNodeDetails();
+    clearGraphSvg();
+    graphData = null;
 }

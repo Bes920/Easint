@@ -1750,6 +1750,37 @@ def get_investigation_results(investigation_id):
             'error': str(e)
         }), 500
 
+
+@app.route('/api/investigations/<investigation_id>/graph', methods=['GET'])
+def get_investigation_graph(investigation_id):
+    """Get network graph data for an investigation."""
+    try:
+        from services.network_graph_service import NetworkGraphService
+
+        results = InvestigationService.get_investigation_results(investigation_id)
+
+        if not results:
+            return jsonify({
+                'success': False,
+                'error': 'No results found for this investigation'
+            }), 404
+
+        graph_data = NetworkGraphService.generate_graph_data(results)
+
+        return jsonify({
+            'success': True,
+            'graph': graph_data
+        })
+
+    except Exception as e:
+        print(f"❌ ERROR in get_investigation_graph: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @app.route('/api/investigations', methods=['POST'])
 def create_investigation():
     """Create a new investigation"""
