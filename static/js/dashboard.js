@@ -803,7 +803,9 @@ function addDashboardMessage(text, sender, timestamp = null) {
     
     const bubbleDiv = document.createElement('div');
     bubbleDiv.className = `message-bubble ${sender}`;
-    bubbleDiv.textContent = text;
+    bubbleDiv.innerHTML = sender === 'bot'
+        ? formatChatResponse(text)
+        : escapeHtml(text).replace(/\n/g, '<br>');
     
     messageDiv.appendChild(bubbleDiv);
     
@@ -859,6 +861,75 @@ function formatChatTimestamp(timestamp) {
         return `${hours} hour${hours > 1 ? 's' : ''} ago`;
     }
     return date.toLocaleString();
+}
+
+function formatChatResponse(text) {
+    if (!text) {
+        return '<p class="no-data">No response available</p>';
+    }
+
+    const cleanedText = String(text)
+        .replace(/\r\n/g, '\n')
+        .replace(/\t/g, '  ')
+        .trim();
+
+    const lines = cleanedText.split('\n').map((line) => line.trim()).filter(Boolean);
+    if (!lines.length) {
+        return '<p class="no-data">No response available</p>';
+    }
+
+    const parts = [];
+    let bullets = [];
+    let ordered = [];
+
+    const flushBullets = () => {
+        if (bullets.length) {
+            parts.push(`<ul>${bullets.join('')}</ul>`);
+            bullets = [];
+        }
+    };
+
+    const flushOrdered = () => {
+        if (ordered.length) {
+            parts.push(`<ol>${ordered.join('')}</ol>`);
+            ordered = [];
+        }
+    };
+
+    const inline = (line) => escapeHtml(line)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+    lines.forEach((line) => {
+        const bulletMatch = line.match(/^[-•*–—]\s+(.*)$/);
+        const orderedMatch = line.match(/^\d+\.\s+(.*)$/);
+
+        if (bulletMatch) {
+            flushOrdered();
+            bullets.push(`<li>${inline(bulletMatch[1])}</li>`);
+            return;
+        }
+
+        if (orderedMatch) {
+            flushBullets();
+            ordered.push(`<li>${inline(orderedMatch[1])}</li>`);
+            return;
+        }
+
+        flushBullets();
+        flushOrdered();
+
+        if (/^(#{1,3}\s+|[A-Z][A-Z\s]{3,}:$)/.test(line)) {
+            parts.push(`<p class="chat-heading">${inline(line.replace(/^#{1,3}\s+/, '').replace(/:$/, ''))}</p>`);
+        } else {
+            parts.push(`<p>${inline(line)}</p>`);
+        }
+    });
+
+    flushBullets();
+    flushOrdered();
+
+    return parts.join('');
 }
 
 // ==========================================================================
@@ -993,7 +1064,12 @@ function displayAnalysisResults(summary, options = {}) {
 function formatAnalysisText(text) {
     if (!text) return '<p class="no-data">No information available</p>';
 
-    const lines = text
+    const cleanedText = String(text)
+        .replace(/\r\n/g, '\n')
+        .replace(/\t/g, '  ')
+        .trim();
+
+    const lines = cleanedText
         .split('\n')
         .map((line) => line.trim())
         .filter(Boolean);
@@ -1004,6 +1080,7 @@ function formatAnalysisText(text) {
 
     const htmlParts = [];
     let listItems = [];
+    let orderedItems = [];
 
     function flushList() {
         if (listItems.length > 0) {
@@ -1012,22 +1089,65 @@ function formatAnalysisText(text) {
         }
     }
 
+    function flushOrderedList() {
+        if (orderedItems.length > 0) {
+            htmlParts.push(`<ol>${orderedItems.join('')}</ol>`);
+            orderedItems = [];
+        }
+    }
+
+    function applyInlineFormatting(line) {
+        const escaped = escapeHtml(line);
+        return escaped
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>');
+    }
+
+    function isHeading(line) {
+        return /^(#{1,3}\s+|[A-Z][A-Z\s]{3,}:$)/.test(line);
+    }
+
+    function headingLevel(line) {
+        if (/^#\s+/.test(line)) return 'h4';
+        if (/^##\s+/.test(line)) return 'h5';
+        if (/^###\s+/.test(line)) return 'h6';
+        return 'h5';
+    }
+
     lines.forEach((line) => {
-        if (/^[-•*]\s/.test(line)) {
-            listItems.push(`<li>${escapeHtml(line.substring(2).trim())}</li>`);
+        const bulletMatch = line.match(/^[-•*–—]\s+(.*)$/);
+        const orderedMatch = line.match(/^\d+\.\s+(.*)$/);
+
+        if (bulletMatch) {
+            flushOrderedList();
+            listItems.push(`<li>${applyInlineFormatting(bulletMatch[1].trim())}</li>`);
             return;
         }
 
-        if (/^\d+\.\s/.test(line)) {
-            listItems.push(`<li>${escapeHtml(line.substring(line.indexOf('.') + 1).trim())}</li>`);
+        if (orderedMatch) {
+            flushList();
+            orderedItems.push(`<li>${applyInlineFormatting(orderedMatch[1].trim())}</li>`);
             return;
         }
 
         flushList();
-        htmlParts.push(`<p>${escapeHtml(line)}</p>`);
+
+        if (isHeading(line)) {
+            flushOrderedList();
+            const headingText = line
+                .replace(/^#{1,3}\s+/, '')
+                .replace(/:$/, '')
+                .trim();
+            htmlParts.push(`<${headingLevel(line)}>${applyInlineFormatting(headingText)}</${headingLevel(line)}>`); 
+            return;
+        }
+
+        flushOrderedList();
+        htmlParts.push(`<p>${applyInlineFormatting(line)}</p>`);
     });
 
     flushList();
+    flushOrderedList();
 
     return htmlParts.join('');
 }

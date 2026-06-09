@@ -38,6 +38,12 @@ body.homepage::after {
     z-index: 1;
 }
 
+.home-header {
+    position: relative;
+    z-index: 30;
+    overflow: visible;
+}
+
 .home-header,
 .hero-panel,
 .journey-card,
@@ -79,6 +85,8 @@ body.homepage::after {
     gap: 0.85rem;
     flex-wrap: wrap;
     justify-content: flex-end;
+    position: relative;
+    z-index: 31;
 }
 
 .header-link {
@@ -96,6 +104,15 @@ body.homepage::after {
     transform: translateY(-2px);
     border-color: var(--primary-color);
     background: var(--bg-lighter);
+}
+
+.theme-switcher {
+    position: relative;
+    z-index: 40;
+}
+
+.theme-menu {
+    z-index: 9999;
 }
 
 .hero-section {
