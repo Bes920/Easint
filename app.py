@@ -1033,6 +1033,7 @@ def build_pdf_report_lines(investigation, results, analysis_summary):
         '[[DIVIDER]]',
         '',
         'AI Investigation Analysis',
+        'Note: AI can sometimes make mistakes, so this report should always be reviewed by a professional human before any action is taken.',
         f"Overall threat: {(analysis_summary.get('overall_threat') or 'unknown').upper()}",
         f"Analyzed at: {format_export_datetime(investigation.get('aiAnalyzedAt'))}",
         ''
