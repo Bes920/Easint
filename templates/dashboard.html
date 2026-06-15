@@ -8,18 +8,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
 <body>
-    <!-- Theme Toggle -->
-    <div class="theme-toggle">
-        <button class="theme-btn" id="themeToggle" title="Toggle theme">
-            <span class="theme-icon">🌙</span>
-        </button>
-        <div class="theme-menu hidden" id="themeMenu">
-            <button class="theme-option" data-theme="light">☀️ Light</button>
-            <button class="theme-option" data-theme="dark">🌙 Dark</button>
-            <button class="theme-option active" data-theme="system">💻 System</button>
-        </div>
-    </div>
-
     <div class="dashboard-container">
         <!-- Header -->
         <header class="dashboard-header">
@@ -40,6 +28,16 @@
                 </div>
             </div>
             <div class="header-right">
+                <div class="theme-switcher dashboard-theme-switcher">
+                    <button class="theme-btn" id="themeToggle" title="Toggle theme">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                    <div class="theme-menu" id="themeMenu">
+                        <button class="theme-option" data-theme="light">☀️ Light</button>
+                        <button class="theme-option" data-theme="dark">🌙 Dark</button>
+                        <button class="theme-option active" data-theme="system">💻 System</button>
+                    </div>
+                </div>
                 <button class="btn btn-primary" id="createInvestigationBtn">
                     <span class="btn-icon">➕</span>
                     <span>New Investigation</span>
@@ -352,6 +350,7 @@
         </div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html>

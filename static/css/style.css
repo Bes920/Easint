@@ -6,17 +6,23 @@
     --primary-color: #00d9ff;
     --secondary-color: #00ff88;
     --accent-color: #ff0066;
+    --accent-primary: var(--primary-color);
+    --accent-secondary: var(--secondary-color);
     
     /* Background Colors */
     --bg-primary: #0a0e27;
     --bg-secondary: #16213e;
     --bg-tertiary: #0f3460;
+    --bg-card: rgba(255, 255, 255, 0.05);
     --bg-light: rgba(255, 255, 255, 0.03);
     --bg-lighter: rgba(255, 255, 255, 0.05);
+    --surface-color: var(--bg-card);
+    --surface-hover: rgba(255, 255, 255, 0.08);
     
     /* Text Colors */
     --text-primary: #e0e0e0;
     --text-secondary: #a0a0a0;
+    --text-tertiary: #888;
     --text-muted: #888;
     
     /* Border Colors */
@@ -33,15 +39,21 @@ html[data-theme="light"] {
     --primary-color: #0066cc;
     --secondary-color: #00aa44;
     --accent-color: #ff3366;
+    --accent-primary: var(--primary-color);
+    --accent-secondary: var(--secondary-color);
     
     --bg-primary: #ffffff;
     --bg-secondary: #f5f5f5;
     --bg-tertiary: #eeeeee;
+    --bg-card: rgba(0, 0, 0, 0.03);
     --bg-light: rgba(0, 0, 0, 0.02);
     --bg-lighter: rgba(0, 0, 0, 0.05);
+    --surface-color: var(--bg-card);
+    --surface-hover: rgba(0, 0, 0, 0.06);
     
     --text-primary: #1a1a1a;
     --text-secondary: #3a3a3a;
+    --text-tertiary: #666666;
     --text-muted: #666666;
     
     --border-color: rgba(0, 0, 0, 0.15);
@@ -60,15 +72,21 @@ html[data-theme="neon"] {
     --primary-color: #ff00ff;
     --secondary-color: #00ff00;
     --accent-color: #ffff00;
+    --accent-primary: var(--primary-color);
+    --accent-secondary: var(--secondary-color);
     
     --bg-primary: #0a0a0a;
     --bg-secondary: #1a1a2e;
     --bg-tertiary: #16213e;
+    --bg-card: rgba(255, 0, 255, 0.05);
     --bg-light: rgba(255, 0, 255, 0.05);
     --bg-lighter: rgba(255, 0, 255, 0.1);
+    --surface-color: var(--bg-card);
+    --surface-hover: rgba(255, 0, 255, 0.1);
     
     --text-primary: #00ffff;
     --text-secondary: #ff00ff;
+    --text-tertiary: #888888;
     --text-muted: #888888;
     
     --border-color: rgba(255, 0, 255, 0.3);
