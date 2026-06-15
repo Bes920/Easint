@@ -69,6 +69,37 @@
     margin: 0;
 }
 
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.dashboard-theme-switcher {
+    position: relative;
+}
+
+.dashboard-theme-switcher .theme-btn {
+    min-width: 48px;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(0, 217, 255, 0.16), rgba(0, 255, 136, 0.12));
+    border-color: rgba(0, 217, 255, 0.55);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 1px rgba(0, 217, 255, 0.14), 0 12px 24px rgba(0, 0, 0, 0.18);
+}
+
+.dashboard-theme-switcher .theme-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 217, 255, 0.24), rgba(0, 255, 136, 0.18));
+}
+
+.dashboard-theme-switcher .theme-menu {
+    right: 0;
+    left: auto;
+    min-width: 170px;
+}
+
 /* ==================== STATS OVERVIEW ==================== */
 .stats-overview {
     display: grid;
@@ -711,7 +742,8 @@
 
 .btn-primary {
     background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-    color: #000;
+    color: #03111a;
+    text-shadow: none;
 }
 
 .btn-primary:hover {
@@ -743,6 +775,7 @@
 
 .btn-icon {
     font-size: 1.1em;
+    color: inherit;
 }
 
 /* ==================== FOOTER ==================== */
@@ -800,7 +833,7 @@
 /* ✅ FIX: New Investigation button - always visible */
 .header-right .btn-primary {
     background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
-    color: #000 !important;
+    color: #03111a !important;
     font-weight: 700 !important;
 }
 
@@ -808,17 +841,36 @@
 .modal-form .btn-primary,
 .form-actions .btn-primary {
     background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
-    color: #000 !important;
+    color: #03111a !important;
     font-weight: 700 !important;
 }
 
 /* ✅ FIX: Ensure all primary buttons are visible */
 .btn-primary {
-    color: #000 !important;
+    color: #03111a !important;
 }
 
 .btn-primary span {
-    color: #000 !important;
+    color: inherit !important;
+}
+
+.modal-content {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)),
+        var(--bg-card);
+    border: 1px solid rgba(0, 217, 255, 0.16);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, rgba(0, 217, 255, 0.07), rgba(0, 255, 136, 0.04));
+}
+
+.modal-form .btn-primary .btn-icon,
+.modal-form .btn-primary span,
+.form-actions .btn-primary .btn-icon,
+.form-actions .btn-primary span {
+    color: inherit !important;
 }
 
 /* ========================================================================== */
