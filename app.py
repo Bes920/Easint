@@ -71,6 +71,13 @@ def index():
     return render_template('home.html')
 
 
+
+
+@app.route('/learn')
+def learn_page():
+    """Legacy landing/learn page"""
+    return render_template('learn.html')
+
 @app.route('/tools')
 def tools_page():
     """Primary workspace containing all OSINT tools"""
@@ -1026,6 +1033,7 @@ def build_pdf_report_lines(investigation, results, analysis_summary):
         '[[DIVIDER]]',
         '',
         'AI Investigation Analysis',
+        'Note: AI can sometimes make mistakes, so this report should always be reviewed by a professional human before any action is taken.',
         f"Overall threat: {(analysis_summary.get('overall_threat') or 'unknown').upper()}",
         f"Analyzed at: {format_export_datetime(investigation.get('aiAnalyzedAt'))}",
         ''
@@ -1447,8 +1455,12 @@ def build_pdf_divider_commands(current_y, left_margin=50, width=512, color=(0.82
 
 def escape_pdf_text(text):
     """Escape text for use in a PDF string literal."""
+    sanitized = stringify_export_value(text)
+    sanitized = sanitized.replace('–', '-').replace('—', '-').replace('•', '-')
+    sanitized = sanitized.replace('’', "'").replace('“', '"').replace('”', '"')
+    sanitized = sanitized.encode('latin-1', errors='replace').decode('latin-1')
     return (
-        stringify_export_value(text)
+        sanitized
         .replace('\\', '\\\\')
         .replace('(', '\\(')
         .replace(')', '\\)')
@@ -1459,13 +1471,13 @@ def assemble_pdf(pdf_objects):
     """Assemble PDF objects into a valid PDF byte stream."""
     output = ['%PDF-1.4\n']
     offsets = [0]
-    current_offset = len(output[0].encode('latin-1'))
+    current_offset = len(output[0].encode('latin-1', errors='replace'))
 
     for index, obj in enumerate(pdf_objects, 1):
         offsets.append(current_offset)
         object_text = f'{index} 0 obj\n{obj}\nendobj\n'
         output.append(object_text)
-        current_offset += len(object_text.encode('latin-1'))
+        current_offset += len(object_text.encode('latin-1', errors='replace'))
 
     xref_offset = current_offset
     output.append(f'xref\n0 {len(pdf_objects) + 1}\n')

@@ -1291,6 +1291,17 @@
     color: var(--text-primary);
 }
 
+.ai-review-note {
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 217, 255, 0.25);
+    background: rgba(0, 217, 255, 0.08);
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
 .close-analysis-btn {
     background: none;
     border: none;

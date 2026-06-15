@@ -1,45 +1,32 @@
 """
-Gemini AI Service for EASINT Platform
-Provides AI-powered analysis and chat for OSINT investigations
-
-Location: services/gemini_ai_service.py
+Mistral AI Service for EASINT Platform
+Provides backup AI-powered analysis and chat for OSINT investigations.
 """
 import os
-from typing import Dict, List, Optional
-from google import genai
+from typing import Dict, List
+
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
-class GeminiAIService:
-    """Service for AI-powered analysis using Google Gemini"""
-    
+
+class MistralAIService:
+    """Service for AI-powered analysis using Mistral."""
+
     def __init__(self):
-        """Initialize Gemini client"""
-        api_key = os.getenv('GEMINI_API_KEY')
+        api_key = os.getenv('MISTRAL_API_KEY')
         if not api_key:
-            raise ValueError("GEMINI_API_KEY not found in environment variables")
-        
-        self.client = genai.Client(api_key=api_key)
-        self.model = "gemini-flash-latest"  # Fast, free model
-    
+            raise ValueError("MISTRAL_API_KEY not found in environment variables")
+
+        self.api_key = api_key
+        self.model = os.getenv('MISTRAL_MODEL', 'mistral-small-latest')
+        self.url = 'https://api.mistral.ai/v1/chat/completions'
+
     def chat(self, investigation_data: Dict, user_message: str, chat_history: List[Dict] = None) -> str:
-        """
-        Chat with AI about investigation results
-        
-        Args:
-            investigation_data: Investigation details and results
-            user_message: User's question
-            chat_history: Previous chat messages (optional)
-        
-        Returns:
-            AI response as string
-        """
         try:
-            # Build context from investigation
             context = self._build_investigation_context(investigation_data)
-            
-            # Build prompt
+
             system_prompt = f"""You are an expert OSINT (Open-Source Intelligence) analyst assistant for the EASINT platform.
 
 INVESTIGATION CONTEXT:
@@ -52,44 +39,30 @@ Your role:
 - Suggest next steps
 - Be concise and professional
 
-Always base your answers on the actual data provided."""
-            
-            # Add chat history if provided
-            conversation = system_prompt + "\n\n"
+Always base your answers on the actual data provided.
+Use plain ASCII only.
+Prefer short paragraphs and bullet points with "- ".
+Avoid fancy punctuation, em dashes, and long prose."""
+
+            messages = [{'role': 'system', 'content': system_prompt}]
             if chat_history:
-                for msg in chat_history[-5:]:  # Last 5 messages
-                    conversation += f"User: {msg.get('user_message', '')}\n"
-                    conversation += f"Assistant: {msg.get('bot_response', '')}\n"
-            
-            # Add current question
-            conversation += f"User: {user_message}\nAssistant:"
-            
-            # Generate response
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=conversation
-            )
-            
-            return response.text
-            
+                for msg in chat_history[-5:]:
+                    user_text = (msg.get('user_message') or '').strip()
+                    bot_text = (msg.get('bot_response') or '').strip()
+                    if user_text:
+                        messages.append({'role': 'user', 'content': user_text})
+                    if bot_text:
+                        messages.append({'role': 'assistant', 'content': bot_text})
+
+            messages.append({'role': 'user', 'content': user_message})
+
+            response = self._post_chat(messages)
+            return response
         except Exception as e:
-            print(f"❌ Chat error: {e}")
-            if self._is_auth_key_error(e):
-                raise RuntimeError(str(e))
-            return f"I apologize, but I encountered an error processing your question. Please try rephrasing it."
-    
+            print(f"❌ Mistral chat error: {e}")
+            return "I apologize, but I encountered an error processing your question. Please try rephrasing it."
+
     def analyze_result(self, tool_name: str, target: str, result_data: Dict) -> Dict:
-        """
-        Analyze a single OSINT tool result
-        
-        Args:
-            tool_name: Name of the tool used
-            target: Target that was analyzed
-            result_data: Tool output data
-        
-        Returns:
-            Dictionary with analysis, threat_level, and recommendations
-        """
         try:
             prompt = f"""Analyze this OSINT tool result and provide a security assessment.
 
@@ -113,15 +86,12 @@ FINDINGS:
 RECOMMENDATIONS:
 - [recommendation 1]
 - [recommendation 2]"""
-            
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=prompt
-            )
-            
-            analysis_text = response.text
-            
-            # Extract sections
+
+            analysis_text = self._post_chat([
+                {'role': 'system', 'content': 'You are a helpful OSINT analysis assistant.'},
+                {'role': 'user', 'content': prompt},
+            ])
+
             return {
                 'analysis': self._extract_section(analysis_text, 'ANALYSIS') or analysis_text[:500],
                 'threat_level': self._extract_threat_level(analysis_text),
@@ -129,11 +99,8 @@ RECOMMENDATIONS:
                 'recommendations': self._extract_list(analysis_text, 'RECOMMENDATIONS'),
                 'full_text': analysis_text
             }
-            
         except Exception as e:
-            print(f"❌ Analysis error: {e}")
-            if self._is_auth_key_error(e):
-                raise RuntimeError(str(e))
+            print(f"❌ Mistral analysis error: {e}")
             return {
                 'analysis': 'Analysis unavailable at this time.',
                 'threat_level': 'unknown',
@@ -141,21 +108,11 @@ RECOMMENDATIONS:
                 'recommendations': [],
                 'full_text': str(e)
             }
-    
+
     def analyze_investigation(self, investigation: Dict, results: List[Dict]) -> Dict:
-        """
-        Generate comprehensive investigation summary
-        
-        Args:
-            investigation: Investigation metadata
-            results: List of all investigation results
-        
-        Returns:
-            Dictionary with summary, overall_threat, insights, and actions
-        """
         try:
             results_summary = self._summarize_results(results)
-            
+
             prompt = f"""Generate a comprehensive OSINT investigation summary.
 
 INVESTIGATION: {investigation.get('name')}
@@ -183,14 +140,12 @@ CORRELATIONS:
 ACTIONS:
 1. [high priority]
 2. [medium priority]"""
-            
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=prompt
-            )
-            
-            summary_text = response.text
-            
+
+            summary_text = self._post_chat([
+                {'role': 'system', 'content': 'You are a helpful OSINT analysis assistant.'},
+                {'role': 'user', 'content': prompt},
+            ])
+
             return {
                 'summary': self._extract_section(summary_text, 'SUMMARY') or summary_text[:300],
                 'overall_threat': self._extract_threat_level(summary_text),
@@ -199,11 +154,8 @@ ACTIONS:
                 'actions': self._extract_section(summary_text, 'ACTIONS'),
                 'full_text': summary_text
             }
-            
         except Exception as e:
-            print(f"❌ Investigation analysis error: {e}")
-            if self._is_auth_key_error(e):
-                raise RuntimeError(str(e))
+            print(f"❌ Mistral investigation analysis error: {e}")
             return {
                 'summary': 'Investigation summary unavailable.',
                 'overall_threat': 'unknown',
@@ -212,14 +164,42 @@ ACTIONS:
                 'actions': '',
                 'full_text': str(e)
             }
-    
-    # ========== HELPER METHODS ==========
-    
+
+    def _post_chat(self, messages: List[Dict[str, str]]) -> str:
+        response = requests.post(
+            self.url,
+            headers={
+                'Authorization': f'Bearer {self.api_key}',
+                'Content-Type': 'application/json',
+            },
+            json={
+                'model': self.model,
+                'temperature': 0.2,
+                'messages': messages,
+            },
+            timeout=30,
+        )
+
+        if response.status_code >= 400:
+            raise RuntimeError(f"Mistral API error ({response.status_code}): {response.text}")
+
+        data = response.json()
+        choices = data.get('choices', [])
+        if not choices:
+            raise RuntimeError('Mistral response did not include choices')
+
+        content = choices[0].get('message', {}).get('content', '')
+        if isinstance(content, list):
+            content = '\n'.join(
+                part.get('text', '') for part in content if isinstance(part, dict)
+            )
+
+        return self._normalize_text(content or '').strip()
+
     def _build_investigation_context(self, investigation_data: Dict) -> str:
-        """Build context string from investigation data"""
         inv = investigation_data
         results = inv.get('results', [])
-        
+
         context = f"""
 Investigation: {inv.get('name')}
 Description: {inv.get('description', 'N/A')}
@@ -231,118 +211,114 @@ Results Summary:
         for i, result in enumerate(results[:10], 1):
             context += f"\n{i}. {result.get('tool_name')} - {result.get('target')}"
             context += f"\n   Threat: {result.get('threat_level', 'N/A')}"
-        
+
         return context
-    
+
     def _format_result_data(self, data: Dict, max_length: int = 1000) -> str:
-        """Format result data for AI prompt"""
         if not data:
-            return "No data available"
-        
-        formatted = ""
-        for key, value in list(data.items())[:10]:  # Limit to 10 keys
+            return 'No data available'
+
+        formatted = ''
+        for key, value in list(data.items())[:10]:
             formatted += f"{key}: {str(value)[:200]}\n"
-        
+
         return formatted[:max_length]
-    
+
     def _extract_threat_level(self, text: str) -> str:
-        """Extract threat level from AI response"""
         text_lower = text.lower()
-        
         if 'critical' in text_lower:
             return 'critical'
-        elif 'high' in text_lower:
+        if 'high' in text_lower:
             return 'high'
-        elif 'medium' in text_lower:
+        if 'medium' in text_lower:
             return 'medium'
-        elif 'low' in text_lower:
+        if 'low' in text_lower:
             return 'low'
-        elif 'safe' in text_lower:
+        if 'safe' in text_lower:
             return 'safe'
-        else:
-            return 'medium'
+        return 'medium'
 
-    def _is_auth_key_error(self, error: Exception) -> bool:
-        """Detect Gemini API key failures so the caller can fall back."""
-        error_text = str(error).lower()
-        return (
-            'api_key_invalid' in error_text
-            or 'api key expired' in error_text
-            or 'api key' in error_text and 'expired' in error_text
-        )
-    
     def _extract_section(self, text: str, section_name: str) -> str:
-        """Extract a section from formatted AI response"""
         try:
             start_marker = f"{section_name}:"
             if start_marker not in text:
                 return ""
-            
+
             start = text.index(start_marker) + len(start_marker)
             remaining = text[start:]
-            
-            next_markers = ['THREAT:', 'FINDINGS:', 'RECOMMENDATIONS:', 'SUMMARY:', 
-                          'INSIGHTS:', 'CORRELATIONS:', 'ACTIONS:']
+
+            next_markers = ['THREAT:', 'FINDINGS:', 'RECOMMENDATIONS:', 'SUMMARY:',
+                            'INSIGHTS:', 'CORRELATIONS:', 'ACTIONS:']
             end = len(remaining)
             for marker in next_markers:
                 if marker in remaining and marker != start_marker:
                     pos = remaining.index(marker)
                     if pos < end:
                         end = pos
-            
+
             return remaining[:end].strip()
-            
         except Exception:
             return ""
-    
+
     def _extract_list(self, text: str, section_name: str) -> List[str]:
-        """Extract list items from a section"""
         section = self._extract_section(text, section_name)
         if not section:
             return []
-        
+
         items = []
         for line in section.split('\n'):
             line = line.strip()
             if line and (line.startswith('-') or line.startswith('•') or line[0].isdigit()):
-                # Remove bullet points and numbering
                 clean = line.lstrip('-•0123456789. ')
                 if clean:
                     items.append(clean)
-        
+
         return items
-    
+
+    def _normalize_text(self, text: str) -> str:
+        """Normalize Mistral output for UI and PDF consumption."""
+        replacements = {
+            '\u2013': '-',
+            '\u2014': '-',
+            '\u2022': '-',
+            '\u2018': "'",
+            '\u2019': "'",
+            '\u201c': '"',
+            '\u201d': '"',
+        }
+        normalized = text
+        for source, target in replacements.items():
+            normalized = normalized.replace(source, target)
+        return normalized.encode('ascii', errors='replace').decode('ascii')
+
     def _summarize_results(self, results: List[Dict]) -> str:
-        """Create a summary of all results"""
         if not results:
             return "No results available"
-        
-        # Group by tool
+
         by_tool = {}
         for result in results:
             tool = result.get('tool_name', 'unknown')
             if tool not in by_tool:
                 by_tool[tool] = []
             by_tool[tool].append(result)
-        
+
         summary = ""
         for tool, tool_results in by_tool.items():
             threat_counts = {}
             for r in tool_results:
                 threat = r.get('threat_level', 'unknown')
                 threat_counts[threat] = threat_counts.get(threat, 0) + 1
-            
+
             summary += f"\n{tool}: {len(tool_results)} results - Threats: {dict(threat_counts)}"
-        
+
         return summary
 
 
-# Singleton instance
 _ai_service = None
 
-def get_gemini_ai_service() -> GeminiAIService:
-    """Get or create AI service instance"""
+
+def get_mistral_ai_service() -> MistralAIService:
     global _ai_service
     if _ai_service is None:
-        _ai_service = GeminiAIService()
+        _ai_service = MistralAIService()
     return _ai_service
