@@ -5,6 +5,7 @@ Enhanced with file uploads, ExifTool, Google Dorking, and advanced features
 """
 from services.results_service import ResultsService  
 from services.investigation_service import InvestigationService 
+from services.result_interpretation_service import ResultInterpretationService
 from flask import Flask, render_template, request, jsonify, send_file
 import requests
 import os
@@ -56,6 +57,28 @@ BLOCKCHAIN_API_KEY = os.getenv('BLOCKCHAIN_API_KEY', 'YOUR_API_KEY_HERE')
 # =============================================================================
 # ROUTES
 # =============================================================================
+
+def attach_ai_interpretation(tool_name, target, result_data):
+    """Add a plain-language explanation without blocking tool results on AI failures."""
+    if not isinstance(result_data, dict):
+        return result_data
+
+    try:
+        interpretation = ResultInterpretationService.build_interpretation(
+            tool_name=tool_name,
+            target=target,
+            result_data=result_data
+        )
+        if interpretation:
+            result_data['ai_interpretation'] = interpretation
+    except Exception as error:
+        print(f"⚠️ Failed to attach AI interpretation for {tool_name}: {error}")
+        result_data['ai_interpretation'] = (
+            "The tool result was collected successfully, but an automatic plain-language "
+            "interpretation could not be generated right now."
+        )
+
+    return result_data
 
 #ai_chat route is in routes/ai_routes.py for better organization
 @app.route('/ai-test')
@@ -122,6 +145,7 @@ def upload_file():
                 'virustotal': vt_result,
                 'timestamp': datetime.now().isoformat()
             }
+            result = attach_ai_interpretation('file-upload', filename, result)
             
             # ✅ AUTO-SAVE TO DATABASE
             threat_level = ResultsService.determine_threat_level(result, 'file-upload')
@@ -154,6 +178,7 @@ def check_hash():
     
     try:
         result = check_file_hash(file_hash)
+        result = attach_ai_interpretation('hash-checker', file_hash, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         threat_level = ResultsService.determine_threat_level(result, 'hash-checker')
@@ -202,6 +227,7 @@ def check_ip():
             'virustotal': virustotal_result,
             'timestamp': datetime.now().isoformat()
         }
+        result = attach_ai_interpretation('ip-checker', ip_address, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         threat_level = ResultsService.determine_threat_level(result, 'ip-checker')
@@ -252,6 +278,7 @@ def extract_exif():
             'metadata': metadata,
             'timestamp': datetime.now().isoformat()
         }
+        result = attach_ai_interpretation('exif-extraction', filename, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         ResultsService.save_tool_result(
@@ -286,6 +313,7 @@ def google_dork():
     
     try:
         result = generate_google_dorks(target, dork_type)
+        result = attach_ai_interpretation('google-dork', target, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         ResultsService.save_tool_result(
@@ -318,6 +346,7 @@ def shodan_search():
     
     try:
         result = search_shodan(query)
+        result = attach_ai_interpretation('shodan-search', query, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         ResultsService.save_tool_result(
@@ -345,6 +374,7 @@ def reverse_ip():
     
     try:
         result = reverse_ip_lookup(ip_address)
+        result = attach_ai_interpretation('reverse-ip', ip_address, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         ResultsService.save_tool_result(
@@ -372,6 +402,7 @@ def email_osint():
     
     try:
         result = comprehensive_email_osint(email)
+        result = attach_ai_interpretation('email-osint', email, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         threat_level = ResultsService.determine_threat_level(result, 'email-osint')
@@ -400,6 +431,7 @@ def wayback_machine():
     
     try:
         result = check_wayback_machine(url)
+        result = attach_ai_interpretation('wayback-machine', url, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         ResultsService.save_tool_result(
@@ -428,6 +460,7 @@ def crypto_tracker():
     
     try:
         result = track_crypto_address(address, crypto_type)
+        result = attach_ai_interpretation('crypto-tracker', address, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         ResultsService.save_tool_result(
@@ -455,6 +488,7 @@ def mac_lookup():
     
     try:
         result = lookup_mac_address(mac)
+        result = attach_ai_interpretation('mac-lookup', mac, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         ResultsService.save_tool_result(
@@ -524,6 +558,7 @@ def whois_lookup():
     
     try:
         result = perform_whois_lookup(domain)
+        result = attach_ai_interpretation('whois-lookup', domain, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         ResultsService.save_tool_result(
@@ -551,6 +586,7 @@ def email_breach():
     
     try:
         result = check_email_breach(email)
+        result = attach_ai_interpretation('email-breach', email, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         threat_level = 'high' if result.get('breached') else 'safe'
@@ -579,6 +615,7 @@ def username_search():
     
     try:
         result = search_username(username)
+        result = attach_ai_interpretation('username-search', username, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         ResultsService.save_tool_result(
@@ -606,6 +643,7 @@ def subdomain_enum():
     
     try:
         result = enumerate_subdomains(domain)
+        result = attach_ai_interpretation('subdomain-enum', domain, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         ResultsService.save_tool_result(
@@ -633,6 +671,7 @@ def dns_lookup():
     
     try:
         result = perform_dns_lookup(domain)
+        result = attach_ai_interpretation('dns-lookup', domain, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         ResultsService.save_tool_result(
@@ -660,6 +699,7 @@ def ssl_info():
     
     try:
         result = get_ssl_info(domain)
+        result = attach_ai_interpretation('ssl-info', domain, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         threat_level = 'safe' if result.get('valid') else 'medium'
@@ -688,6 +728,7 @@ def geolocate_ip():
     
     try:
         result = get_ip_geolocation(ip_address)
+        result = attach_ai_interpretation('ip-geolocation', ip_address, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         ResultsService.save_tool_result(
@@ -715,6 +756,7 @@ def phone_lookup():
     
     try:
         result = lookup_phone_number(phone)
+        result = attach_ai_interpretation('phone-lookup', phone, result)
         
         # ✅ AUTO-SAVE TO DATABASE
         ResultsService.save_tool_result(
