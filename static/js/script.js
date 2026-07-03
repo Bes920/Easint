@@ -589,6 +589,7 @@ document.addEventListener('DOMContentLoaded', function() {
             html += renderResultItem('VirusTotal', badge);
             html += renderResultItem('Detections', escapeHtml(`${data.virustotal.detections} / ${data.virustotal.total_scanners}`));
         }
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'File analyzed', message: `${data.filename || 'File'} is ready for review.` }
@@ -608,6 +609,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             html += '</div>';
         }
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'Metadata extracted', message: 'File metadata has been loaded below.' }
@@ -627,6 +629,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             html += '</div>';
         }
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'Dorks generated', message: `${(data.dorks || []).length} query suggestions are ready.` }
@@ -645,6 +648,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             html += '</div>';
         }
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'Reverse IP complete', message: `${data.domains_found || 0} domains were found.` }
@@ -660,6 +664,7 @@ document.addEventListener('DOMContentLoaded', function() {
             html += renderResultItem('Domain', renderCopyableValue(data.domain));
             html += renderResultItem('Mail Server', escapeHtml(data.email_server_exists ? 'Mail server detected' : 'No mail server found'));
         }
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'Email analysis ready', message: `Finished checking ${data.email || 'the supplied address'}.` }
@@ -674,6 +679,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             html += renderResultItem('Status', '<span class="badge badge-warning">No archive found</span>');
         }
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'Archive check complete', message: data.archived ? 'A historical snapshot was found.' : 'No historical snapshot was found.' }
@@ -681,11 +687,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function displayMACResults(data, container) {
-        const html = [
+        let html = [
             '<h3>MAC Lookup</h3>',
             renderResultItem('MAC', renderCopyableValue(data.mac)),
             renderResultItem('Vendor', escapeHtml(data.vendor || 'Unknown vendor'))
         ].join('');
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'MAC lookup complete', message: 'Vendor details have been loaded.' }
@@ -696,6 +703,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let html = '<h3>Crypto Tracker</h3>';
         if (data.demo_mode) html += `<div class="demo-message">${escapeHtml(data.message || '')}</div>`;
         html += renderResultItem('Address', renderCopyableValue(data.address));
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'Crypto lookup complete', message: 'Wallet information is now visible below.' }
@@ -715,6 +723,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.virustotal && data.virustotal.detections !== undefined) {
             html += renderResultItem('VirusTotal', escapeHtml(`${data.virustotal.detections} detections`));
         }
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'IP check complete', message: `Finished reviewing ${data.ip || 'the IP address'}.` }
@@ -725,6 +734,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let html = '<h3>Phone Lookup</h3>';
         if (data.demo_mode) html += `<div class="demo-message">${escapeHtml(data.message || '')}</div>`;
         html += renderResultItem('Phone', renderCopyableValue(data.phone));
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'Phone lookup complete', message: 'The number check has finished.' }
@@ -735,6 +745,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let html = '<h3>Shodan Search</h3>';
         if (data.demo_mode) html += `<div class="demo-message">${escapeHtml(data.message || '')}</div>`;
         html += renderResultItem('Query', renderCopyableValue(data.query));
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'Shodan query complete', message: 'Search details were returned successfully.' }
@@ -750,6 +761,7 @@ document.addEventListener('DOMContentLoaded', function() {
             html += renderResultItem('Status', badge);
             html += renderResultItem('Detections', escapeHtml(`${data.detections} / ${data.total_scanners}`));
         }
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'Hash lookup complete', message: 'Hash intelligence is ready below.' }
@@ -757,12 +769,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function displayGeolocationResults(data, container) {
-        const html = [
+        let html = [
             '<h3>Geolocation</h3>',
             renderResultItem('IP', renderCopyableValue(data.ip)),
             renderResultItem('Country', escapeHtml(data.country || 'Unknown')),
             renderResultItem('City', escapeHtml(data.city || 'Unknown'))
         ].join('');
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'Geolocation ready', message: 'Location details have been loaded.' }
@@ -775,11 +788,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const html = [
+        let html = [
             '<h3>WHOIS</h3>',
             renderResultItem('Domain', renderCopyableValue(data.domain)),
             renderResultItem('Registrar', escapeHtml(data.registrar || 'Unavailable'))
         ].join('');
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'WHOIS complete', message: 'Domain registration details are available.' }
@@ -788,7 +802,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function displayEmailBreachResults(data, container) {
         const badge = data.breached ? '<span class="badge badge-danger">Breached</span>' : '<span class="badge badge-safe">Clean</span>';
-        const html = ['<h3>Breach Check</h3>', renderResultItem('Status', badge)].join('');
+        let html = ['<h3>Breach Check</h3>', renderResultItem('Status', badge)].join('');
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'Breach check complete', message: 'The breach status has been updated.' }
@@ -807,6 +822,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         html += '</div>';
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'Username scan complete', message: `${(data.results || []).length} platform checks finished.` }
@@ -825,6 +841,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             html += '</div>';
         }
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'Subdomain scan complete', message: `${subdomains.length} subdomains were identified.` }
@@ -843,6 +860,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 html += '</div>';
             }
         }
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'DNS lookup complete', message: 'DNS record data is ready.' }
@@ -856,7 +874,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const badge = data.valid ? '<span class="badge badge-safe">Valid</span>' : '<span class="badge badge-danger">Invalid</span>';
-        const html = ['<h3>SSL Certificate</h3>', renderResultItem('Status', badge)].join('');
+        let html = ['<h3>SSL Certificate</h3>', renderResultItem('Status', badge)].join('');
+        html += renderInterpretation(data.ai_interpretation);
 
         renderResult(container, html, {
             toast: { type: 'success', title: 'SSL lookup complete', message: 'Certificate status has been refreshed.' }
@@ -932,6 +951,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderResultItem(label, valueMarkup) {
         return `<div class="result-item"><span class="result-label">${escapeHtml(label)}</span><div class="result-actions">${valueMarkup}</div></div>`;
+    }
+
+    function renderInterpretation(interpretation) {
+        if (!interpretation) {
+            return '';
+        }
+
+        const paragraphs = String(interpretation)
+            .split(/\n+/)
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .map((line) => `<p>${escapeHtml(line)}</p>`)
+            .join('');
+
+        return `
+            <div class="ai-interpretation">
+                <div class="ai-interpretation-heading">
+                    <span class="ai-interpretation-icon">AI</span>
+                    <span>What this means</span>
+                </div>
+                <div class="ai-interpretation-body">
+                    ${paragraphs}
+                </div>
+            </div>
+        `;
     }
 
     function renderCopyableValue(value) {

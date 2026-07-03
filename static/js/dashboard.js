@@ -336,6 +336,7 @@ function showInvestigationDetails(investigation) {
                         ${getThreatIcon(result.threat_level)} ${result.threat_level.toUpperCase()}
                     </span>
                 </div>
+                ${renderSavedResultInterpretation(result)}
             </div>
         `).join('');
     }
@@ -542,6 +543,23 @@ function getThreatIcon(level) {
         'safe': '✅'
     };
     return icons[level] || '📊';
+}
+
+function renderSavedResultInterpretation(result) {
+    const interpretation = result &&
+        result.result_data &&
+        result.result_data.ai_interpretation;
+
+    if (!interpretation) {
+        return '';
+    }
+
+    return `
+        <div class="saved-result-interpretation">
+            <strong>What this means</strong>
+            <p>${escapeHtml(interpretation)}</p>
+        </div>
+    `;
 }
 
 function ensureToastRegion() {

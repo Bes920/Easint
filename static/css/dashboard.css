@@ -1801,6 +1801,28 @@
     margin-bottom: 4px;
 }
 
+.saved-result-interpretation {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border: 1px solid rgba(0, 217, 255, 0.2);
+    border-left: 3px solid var(--accent-primary);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--accent-primary) 7%, var(--surface-color));
+}
+
+.saved-result-interpretation strong {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.saved-result-interpretation p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.55;
+}
+
 @keyframes slideInRight {
     from {
         transform: translateX(100%);
