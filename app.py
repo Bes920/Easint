@@ -22,6 +22,7 @@ import base64
 from io import BytesIO
 import csv
 import textwrap
+import re
 from dotenv import load_dotenv
 from routes.ai_routes import ai_bp
 # Load environment variables from .env file
@@ -1279,12 +1280,34 @@ def normalize_multiline_content(content):
     for raw_line in stringify_export_value(content).splitlines():
         line = raw_line.strip()
         if not line:
+            lines.append('')
             continue
-        if line.startswith(('- ', '* ', '• ')):
-            lines.append(line)
-        else:
-            lines.append(line)
+        lines.append(clean_markdown_export_line(line))
     return lines
+
+
+def clean_markdown_export_line(line):
+    """Strip common markdown formatting while preserving readable structure."""
+    text = stringify_export_value(line).strip()
+    if not text:
+        return ''
+
+    # Normalize headings into plain labels.
+    text = re.sub(r'^\s{0,3}#{1,6}\s*', '', text)
+
+    # Preserve list structure while dropping markdown markers.
+    list_match = re.match(r'^(?:[-*+]\s+|\d+[.)]\s+)(.+)$', text)
+    if list_match:
+        text = f"- {list_match.group(1).strip()}"
+
+    # Remove emphasis and inline code markers.
+    text = re.sub(r'(\*\*|__)(.+?)\1', r'\2', text)
+    text = re.sub(r'(\*|_)([^*_]+?)\1', r'\2', text)
+    text = text.replace('`', '')
+
+    # Clean up any spacing left behind after stripping markers.
+    text = re.sub(r'\s{2,}', ' ', text).strip()
+    return text
 
 
 def humanize_export_key(key):
